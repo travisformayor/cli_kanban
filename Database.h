@@ -30,12 +30,9 @@ public:
 private:
     string dbName;
     sqlite3* db;
-
     map<int, User*> tempUsers;
     map<int, Board*> tempBoards;
     map<int, Task*> tempTasks;
-
-    static int callback(void* notUsed, int argc, char** argv, char** azColName);
 };
 
 #endif // DATABASE_H

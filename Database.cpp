@@ -34,13 +34,6 @@ void Database::query(const string& sql) {
     }
 }
 
-int Database::callback(void* notUsed, int argc, char** argv, char** azColName) {
-    // This callback function will be used to process the result of sqlite3_exec
-    // In this minimalist implementation, we're not actually using the results, but you'd typically
-    // process the results of your query here.
-    return 0;
-}
-
 // Clear the DB
 void Database::deleteTables() {
     try {
@@ -175,8 +168,16 @@ list<Board*> Database::loadBoardData() {
 }
 
 list<Task*> Database::loadTaskData() {
+    // If boards and Users have not been loaded yet, load them
+    if (tempBoards.empty()) {
+        loadBoardData();
+    }
+    if (tempUsers.empty()) {
+        loadUserData();
+    }
+
     list<Task*> tasks;
-    string sql = "SELECT * FROM Tasks;";
+    string sql = "SELECT * FROM Tasks WHERE Active = 1;";
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
         throw runtime_error("Failed to prepare statement: " + string(sqlite3_errmsg(db)));
@@ -187,25 +188,30 @@ list<Task*> Database::loadTaskData() {
         string title = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
         string description = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
         int difficultyScore = sqlite3_column_int(stmt, 3);
-        bool active = sqlite3_column_int(stmt, 4);
-        string stageStr = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6));
-        int assignedUserId = sqlite3_column_int(stmt, 7);
+        bool active = sqlite3_column_int(stmt, 4) == 1;
+        int boardId = sqlite3_column_int(stmt, 5);
+        Board& boardRef = *tempBoards[boardId];
+        string stageStr = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7));
 
-        // load and convert time
-        string dueDate = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5));
-        tm timeStruct = {};
-        strptime(dueDate.c_str(), "%Y-%m-%d %H:%M:%S", &timeStruct); // Convert string to time structure
-        time_t dueDateTime = std::mktime(&timeStruct); // Convert structure to time_t
+        // Parse date
+        string dueDateStr = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6));
+        tm dueDateTm = {};
+        strptime(dueDateStr.c_str(), "%Y-%m-%d %H:%M:%S", &dueDateTm);
+        time_t dueDate = mktime(&dueDateTm);
 
-        Task* task = new Task(id, title);
+        int assignedUserId = sqlite3_column_int(stmt, 8);
+        User* user = tempUsers[assignedUserId];
+
+        Task* task = new Task(id, title, boardRef);
         task->setDescription(description);
         task->setDifficultyScore(difficultyScore);
         task->setActive(active);
-        task->setDueDate(dueDateTime);
+        task->setDueDate(dueDate);
         task->setStage(task->stringToStage(stageStr));
-        task->setAssignedUser(tempUsers[assignedUserId]);
-        
-        tempTasks[id] = task;
+        if(user != nullptr) {
+            task->setAssignedUser(user);
+        }
+
         tasks.push_back(task);
     }
 
