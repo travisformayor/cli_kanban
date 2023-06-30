@@ -15,15 +15,17 @@ public:
     Database(string dbName);
     ~Database();
     void query(const string& sql);
+    void deleteTables();
+    void initDb();
     void saveBoardData(Board* board);
     void saveTaskData(Task* task);
     void saveUserData(User* user);
     list<Board*> loadBoardData();
     list<Task*> loadTaskData();
     list<User*> loadUserData();
-    void deleteTask(Task* task);
-    void deleteBoard(Board* board);
-    void deleteUser(User* user, User* replacementUser);
+    void deleteTask(Task& task);
+    void deleteBoard(Board& board);
+    void deleteUser(User& user, User& replacementUser);
 
 private:
     string dbName;

@@ -37,6 +37,74 @@ int Database::callback(void* notUsed, int argc, char** argv, char** azColName) {
     return 0;
 }
 
+// Clear the DB
+void Database::deleteTables() {
+    try {
+        query("DROP TABLE IF EXISTS Boards;");
+        query("DROP TABLE IF EXISTS Users;");
+        query("DROP TABLE IF EXISTS Tasks;");
+    } catch (const std::runtime_error& e) {
+        std::cerr << "Caught exception: " << e.what() << '\n';
+        // Handle the error appropriately...
+    }
+}
+
+// Setup the DB Tables
+void Database::initDb() {
+    string sql;
+
+    // Open the SQLite database
+    int result = sqlite3_open("kanban_database.db", &db);
+    if (result) {
+        throw runtime_error(string("Can't open database: ") + sqlite3_errmsg(db));
+    } else {
+        cout << "Opened database successfully\n";
+    }
+
+    // Create the Users table
+    sql = "CREATE TABLE IF NOT EXISTS Users ("  
+          "id INTEGER PRIMARY KEY,"
+          "name TEXT NOT NULL,"
+          "current_board INTEGER,"
+          "active INTEGER NOT NULL,"
+          "FOREIGN KEY(current_board) REFERENCES Boards(id)"
+          ");";
+
+    query(sql);
+    cout << "Users table created successfully\n";
+
+    // Create the Boards table
+    sql = "CREATE TABLE IF NOT EXISTS Boards ("  
+          "id INTEGER PRIMARY KEY,"
+          "name TEXT NOT NULL,"
+          "active INTEGER NOT NULL"
+          ");";
+
+    query(sql);
+    cout << "Boards table created successfully\n";
+
+    // Create the Tasks table
+    sql = "CREATE TABLE IF NOT EXISTS Tasks ("  
+          "id INTEGER PRIMARY KEY,"
+          "title TEXT NOT NULL,"
+          "description TEXT,"
+          "assigned_user INTEGER,"
+          "stage TEXT NOT NULL,"
+          "due_date TEXT,"
+          "difficulty_score INTEGER,"
+          "active INTEGER NOT NULL,"
+          "board_id INTEGER,"
+          "FOREIGN KEY(assigned_user) REFERENCES Users(id),"
+          "FOREIGN KEY(board_id) REFERENCES Boards(id)"
+          ");";
+
+    query(sql);
+    cout << "Tasks table created successfully\n";
+
+    // Close the SQLite database
+    sqlite3_close(db);
+}
+
 // Methods to save data
 void Database::saveBoardData(Board* board) {
     stringstream sql;
@@ -157,4 +225,30 @@ list<User*> Database::loadUserData() {
 
     sqlite3_finalize(stmt);
     return users;
+}
+
+// Delete entities
+void Database::deleteTask(Task& task) {
+    string sql = "UPDATE Task SET active = 0 WHERE id = " + to_string(task.getId()) + ";";
+    query(sql);
+    task.setActive(false);
+}
+
+void Database::deleteBoard(Board& board) {
+    string sql = "UPDATE Board SET active = 0 WHERE id = " + to_string(board.getId()) + ";";
+    query(sql);
+    board.setActive(false);
+}
+
+void Database::deleteUser(User& user, User& replacementUser) {
+    // Update all the tasks assigned to this user
+    string sql = "UPDATE Task SET assignedUser = " + to_string(replacementUser.getId()) 
+               + " WHERE assignedUser = " + to_string(user.getId()) + ";";
+    query(sql);
+
+    // Update the user's active status
+    sql = "UPDATE User SET active = 0 WHERE id = " + to_string(user.getId()) + ";";
+    query(sql);
+
+    user.setActive(false);
 }
