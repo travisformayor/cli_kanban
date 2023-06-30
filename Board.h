@@ -15,8 +15,8 @@ public:
     Board(string name);
     Board(int id, string name);
     void setName(string newName);
-    void addTask(Task* task);
-    void removeTask(Task* task);
+    void addTask(Task& task);
+    void removeTask(Task& task);
     void setActive(bool active);
     bool isActive();
     int getId();

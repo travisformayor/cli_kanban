@@ -17,9 +17,9 @@ public:
     void query(const string& sql);
     void deleteTables();
     void initDb();
-    void saveBoardData(Board* board);
-    void saveTaskData(Task* task);
-    void saveUserData(User* user);
+    void saveBoardData(Board& board);
+    void saveTaskData(Task& task);
+    void saveUserData(User& user);
     list<Board*> loadBoardData();
     list<Task*> loadTaskData();
     list<User*> loadUserData();

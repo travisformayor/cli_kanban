@@ -18,8 +18,8 @@ enum class Stage {
 
 class Task {
 public:
-    Task(string title, Board* board);
-    Task(int id, string title, Board* board);
+    Task(string title, Board& board);
+    Task(int id, string title, Board& board);
     void setTitle(string newTitle);
     void setDescription(string newDesc);
     void setAssignedUser(User* user);

@@ -26,18 +26,16 @@ void Board::setName(string newName) {
     this->name = newName;
 }
 
-void Board::addTask(Task* task) {
-    if (task == nullptr) {
-        throw invalid_argument("Task can't be null.");
+void Board::addTask(Task& task) {
+    if (task.isActive()) {
+        tasks.push_back(&task);
+    } else {
+        throw invalid_argument("Task must be active");
     }
-    this->tasks.push_back(task);
 }
 
-void Board::removeTask(Task* task) {
-    if (task == nullptr) {
-        throw invalid_argument("Task can't be null.");
-    }
-    tasks.remove(task);
+void Board::removeTask(Task& task) {
+    tasks.remove(&task);
 }
 
 void Board::setActive(bool active) {

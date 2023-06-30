@@ -106,40 +106,43 @@ void Database::initDb() {
 }
 
 // Methods to save data
-void Database::saveBoardData(Board* board) {
+void Database::saveBoardData(Board& board) {
     stringstream sql;
     sql << "INSERT OR REPLACE INTO Boards VALUES("
-        << board->getId() << ", "
-        << "'" << board->getName() << "', "
-        << (board->isActive() ? 1 : 0) << ");";
+        << board.getId() << ", "
+        << "'" << board.getName() << "', "
+        << (board.isActive() ? 1 : 0) << ");";
     query(sql.str());
     // Save tasks related to this board
-    for (Task* task : board->getTasks()) {
-        saveTaskData(task);
+    for (Task* task : board.getTasks()) {
+        saveTaskData(*task);
     }
 }
 
-void Database::saveTaskData(Task* task) {
+void Database::saveTaskData(Task& task) {
     stringstream sql;
     sql << "INSERT OR REPLACE INTO Tasks VALUES("
-        << task->getId() << ", "
-        << "'" << task->getTitle() << "', "
-        << "'" << task->getDescription() << "', "
-        << task->getDifficultyScore() << ", "
-        << (task->isActive() ? 1 : 0) << ", "
-        << "'" << task->getDueDate() << "', " 
-        << "'" << task->getStage() << "', "
-        << task->getAssignedUser()->getId() << ");";
+        << task.getId() << ", "
+        << "'" << task.getTitle() << "', "
+        << "'" << task.getDescription() << "', "
+        << task.getDifficultyScore() << ", "
+        << (task.isActive() ? 1 : 0) << ", "
+        << "'" << task.getDueDate() << "', " 
+        << "'" << task.getStage() << "', "
+        << task.getAssignedUser()->getId() << ");";
     query(sql.str());
 }
 
-void Database::saveUserData(User* user) {
+void Database::saveUserData(User& user) {
+    Board* board = user.getCurrentBoard();
+    int boardId = board ? board->getId() : -1;  // -1 means user has no active board
+
     stringstream sql;
     sql << "INSERT OR REPLACE INTO Users VALUES("
-        << user->getId() << ", "
-        << "'" << user->getName() << "', "
-        << (user->isActive() ? 1 : 0) << ", "
-        << user->getCurrentBoard()->getId() << ");";
+        << user.getId() << ", "
+        << "'" << user.getName() << "', "
+        << (user.isActive() ? 1 : 0) << ", "
+        << boardId << ");";
     query(sql.str());
 }
 

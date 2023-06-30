@@ -5,17 +5,17 @@ using namespace std;
 
 static int currentTaskId = 0; // global task id counter
 
-Task::Task(string title, Board* board) : title(title), active(true) {
-    if (title.empty() || board == nullptr) {
-        throw invalid_argument("Title can't be empty and board can't be null.");
+Task::Task(string title, Board& board) : title(title), active(true) {
+    if (title.empty()) {
+        throw invalid_argument("Title can't be empty.");
     }
     this->id = ++currentTaskId;
     this->stage = Stage::Backlog;
 }
 
-Task::Task(int id, string title, Board* board) : id(id), title(title), active(true) {
-    if (id <= 0 || title.empty() || board == nullptr) {
-        throw invalid_argument("ID must be positive, title can't be empty, and board can't be null.");
+Task::Task(int id, string title, Board& board) : id(id), title(title), active(true) {
+    if (id <= 0 || title.empty()) {
+        throw invalid_argument("ID must be positive and title can't be empty.");
     }
 }
 
