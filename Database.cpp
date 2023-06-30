@@ -9,12 +9,13 @@
 
 using namespace std;
 
-// Constructor
+// Constructor 
 Database::Database(string dbName) : dbName(dbName) {
-    int rc = sqlite3_open(dbName.c_str(), &db);
-    if (rc) {
+    int resultCode = sqlite3_open(dbName.c_str(), &db);
+    if (resultCode != 0) { // 0 means success
         sqlite3_close(db);
-        throw runtime_error(sqlite3_errmsg(db));
+        string errorMsg = "Error opening database: " + string(sqlite3_errmsg(db));
+        throw runtime_error(errorMsg);
     }
 }
 
@@ -41,8 +42,7 @@ void Database::deleteTables() {
         query("DROP TABLE IF EXISTS Users;");
         query("DROP TABLE IF EXISTS Tasks;");
     } catch (const runtime_error& e) {
-        cerr << "Caught exception: " << e.what() << '\n';
-        // Handle the error appropriately...
+        cerr << "Caught exception: " << e.what() << endl;
     }
 }
 
@@ -58,13 +58,17 @@ void Database::initDb() {
         cout << "Opened database successfully\n";
     }
 
+    // Tables relationship info:
+    // - A Task belongs to one User (or none)
+    // - A User can have many Tasks (or none)
+    // - A Task belongs to one Board
+    // - A Board can have many Tasks (or none)
+
     // Create the Users table
     sql = "CREATE TABLE IF NOT EXISTS Users ("  
           "id INTEGER PRIMARY KEY,"
           "name TEXT NOT NULL,"
-          "current_board INTEGER,"
-          "active INTEGER NOT NULL,"
-          "FOREIGN KEY(current_board) REFERENCES Boards(id)"
+          "active INTEGER NOT NULL"
           ");";
 
     query(sql);
@@ -90,7 +94,7 @@ void Database::initDb() {
           "due_date TEXT,"
           "difficulty_score INTEGER,"
           "active INTEGER NOT NULL,"
-          "board_id INTEGER,"
+          "board_id INTEGER NOT NULL,"
           "FOREIGN KEY(assigned_user) REFERENCES Users(id),"
           "FOREIGN KEY(board_id) REFERENCES Boards(id)"
           ");";
@@ -118,6 +122,14 @@ void Database::saveBoardData(Board& board) {
 
 void Database::saveTaskData(Task& task) {
     stringstream sql;
+
+    string assignedUserId;
+    if (task.getAssignedUser() == nullptr) {
+        assignedUserId = "NULL";  // Set assigned_user to NULL
+    } else {
+        assignedUserId = task.getAssignedUser()->getId();
+    }
+
     sql << "INSERT OR REPLACE INTO Tasks VALUES("
         << task.getId() << ", "
         << "'" << task.getTitle() << "', "
@@ -126,20 +138,16 @@ void Database::saveTaskData(Task& task) {
         << (task.isActive() ? 1 : 0) << ", "
         << "'" << task.getDueDate() << "', " 
         << "'" << task.stageToString(task.getStage()) << "', "
-        << task.getAssignedUser()->getId() << ");";
+        << assignedUserId << ");";
     query(sql.str());
 }
 
 void Database::saveUserData(User& user) {
-    Board* board = user.getCurrentBoard();
-    int boardId = board ? board->getId() : -1;  // -1 means user has no active board
-
     stringstream sql;
     sql << "INSERT OR REPLACE INTO Users VALUES("
         << user.getId() << ", "
         << "'" << user.getName() << "', "
-        << (user.isActive() ? 1 : 0) << ", "
-        << boardId << ");";
+        << (user.isActive() ? 1 : 0) << ");";
     query(sql.str());
 }
 
@@ -231,11 +239,9 @@ list<User*> Database::loadUserData() {
         int id = sqlite3_column_int(stmt, 0);
         string name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
         bool active = sqlite3_column_int(stmt, 2);
-        int currentBoardId = sqlite3_column_int(stmt, 3);
 
         User* user = new User(id, name);
         user->setActive(active);
-        user->setCurrentBoard(tempBoards[currentBoardId]);
 
         tempUsers[id] = user;
         users.push_back(user);

@@ -73,7 +73,11 @@ string Task::getDescription() {
 }
 
 User* Task::getAssignedUser() {
-    return this->assignedUser;
+    if (this->assignedUser != nullptr) {
+        return this->assignedUser;
+    } else {
+        return nullptr;
+    }
 }
 
 Stage Task::getStage() {
