@@ -12,23 +12,20 @@ class User; // Forward declaration
 
 class Board {
 public:
-    Board(string name, User* owner);
-    Board(int id, string name, User* owner);
+    Board(string name);
+    Board(int id, string name);
     void setName(string newName);
-    void setOwner(User* newOwner);
     void addTask(Task* task);
     void removeTask(Task* task);
     void setActive(bool active);
     bool isActive();
     int getId();
     string getName();
-    User* getOwner();
     list<Task*> getTasks();
 
 private:
     int id;
     string name;
-    User* owner;
     list<Task*> tasks;
     bool active;
 };

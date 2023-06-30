@@ -43,8 +43,7 @@ void Database::saveBoardData(Board* board) {
     sql << "INSERT OR REPLACE INTO Boards VALUES("
         << board->getId() << ", "
         << "'" << board->getName() << "', "
-        << (board->isActive() ? 1 : 0) << ", "
-        << board->getOwner()->getId() << ");";
+        << (board->isActive() ? 1 : 0) << ");";
     query(sql.str());
     // Save tasks related to this board
     for (Task* task : board->getTasks()) {
@@ -89,9 +88,8 @@ list<Board*> Database::loadBoardData() {
         int id = sqlite3_column_int(stmt, 0);
         string name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
         bool active = sqlite3_column_int(stmt, 2);
-        int ownerId = sqlite3_column_int(stmt, 3);
 
-        Board* board = new Board(id, name, tempUsers[ownerId]);
+        Board* board = new Board(id, name);
         board->setActive(active);
         tempBoards[id] = board;
         boards.push_back(board);
