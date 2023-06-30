@@ -1,4 +1,5 @@
 #include "Database.h"
+#include <iostream>
 #include <stdexcept>
 #include <sstream>
 #include <map>
@@ -43,8 +44,8 @@ void Database::deleteTables() {
         query("DROP TABLE IF EXISTS Boards;");
         query("DROP TABLE IF EXISTS Users;");
         query("DROP TABLE IF EXISTS Tasks;");
-    } catch (const std::runtime_error& e) {
-        std::cerr << "Caught exception: " << e.what() << '\n';
+    } catch (const runtime_error& e) {
+        cerr << "Caught exception: " << e.what() << '\n';
         // Handle the error appropriately...
     }
 }
