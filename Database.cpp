@@ -1,8 +1,11 @@
 #include "Database.h"
+#include "Task.h"
 #include <iostream>
 #include <stdexcept>
 #include <sstream>
 #include <map>
+#include <chrono>
+#include <ctime>
 
 using namespace std;
 
@@ -129,7 +132,7 @@ void Database::saveTaskData(Task& task) {
         << task.getDifficultyScore() << ", "
         << (task.isActive() ? 1 : 0) << ", "
         << "'" << task.getDueDate() << "', " 
-        << "'" << task.getStage() << "', "
+        << "'" << task.stageToString(task.getStage()) << "', "
         << task.getAssignedUser()->getId() << ");";
     query(sql.str());
 }
@@ -185,16 +188,21 @@ list<Task*> Database::loadTaskData() {
         string description = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
         int difficultyScore = sqlite3_column_int(stmt, 3);
         bool active = sqlite3_column_int(stmt, 4);
-        string dueDate = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5));
         string stageStr = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6));
         int assignedUserId = sqlite3_column_int(stmt, 7);
-        
+
+        // load and convert time
+        string dueDate = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5));
+        tm timeStruct = {};
+        strptime(dueDate.c_str(), "%Y-%m-%d %H:%M:%S", &timeStruct); // Convert string to time structure
+        time_t dueDateTime = std::mktime(&timeStruct); // Convert structure to time_t
+
         Task* task = new Task(id, title);
         task->setDescription(description);
         task->setDifficultyScore(difficultyScore);
         task->setActive(active);
-        task->setDueDate(dueDate);
-        task->setStage(stageStr);
+        task->setDueDate(dueDateTime);
+        task->setStage(task->stringToStage(stageStr));
         task->setAssignedUser(tempUsers[assignedUserId]);
         
         tempTasks[id] = task;

@@ -35,6 +35,8 @@ public:
     Stage getStage();
     time_t getDueDate();
     int getDifficultyScore();
+    string stageToString(Stage stage);
+    Stage stringToStage(const string& stageStr);
 
 private:
     int id;
