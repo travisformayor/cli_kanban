@@ -19,7 +19,6 @@ enum class Stage {
 class Task {
 public:
     Task(string title, Board& board);
-    Task(int id, string title, Board& board);
     ~Task();
     void setId(int id);
     void setTitle(string newTitle);

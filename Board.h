@@ -13,7 +13,6 @@ class User; // Forward declaration
 class Board {
 public:
     Board(string name);
-    Board(int id, string name);
     ~Board();
     void setId(int id);
     void setName(string newName);

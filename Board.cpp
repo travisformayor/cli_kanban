@@ -10,13 +10,6 @@ Board::Board(string name) : name(name), active(true) {
     }
 }
 
-Board::Board(int id, string name) : id(id), name(name), active(true) {
-    // Only used by the load method to fetch existing boards's that already have db ids
-    if (id <= 0 || name.empty()) {
-        throw invalid_argument("ID must be positive and name can't be empty.");
-    }
-}
-
 Board::~Board() {
     // Deallocate assigned tasks list
     for (auto task : tasks) {

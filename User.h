@@ -9,7 +9,6 @@ using namespace std;
 class User {
 public:
     User(string name);
-    User(int id, string name);
     ~User();
     void setId(int id);
     void setName(string newName);

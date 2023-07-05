@@ -8,13 +8,8 @@ Task::Task(string title, Board& board) : title(title), active(true) {
         throw invalid_argument("Title can't be empty.");
     }
     this->stage = Stage::Backlog;
-}
-
-Task::Task(int id, string title, Board& board) : id(id), title(title), active(true) {
-    // Only used by the load method to fetch existing task's that already have db ids
-    if (id <= 0 || title.empty()) {
-        throw invalid_argument("ID must be positive and title can't be empty.");
-    }
+    this->dueDate = 0;
+    this->difficultyScore = 0;
 }
 
 Task::~Task() {

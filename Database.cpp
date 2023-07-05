@@ -201,7 +201,8 @@ list<Board*> Database::loadBoardData() {
         string name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
         bool active = sqlite3_column_int(stmt, 2);
 
-        Board* board = new Board(id, name);
+        Board* board = new Board(name);
+        board->setId(id);
         board->setActive(active);
         boards.push_back(board);
     }
@@ -238,7 +239,8 @@ list<Task*> Database::loadTaskData(list<Board*> boards, list<User*> users) {
         int assignedUserId = sqlite3_column_int(stmt, 8);
         User* user = User::findById(users, assignedUserId);
 
-        Task* task = new Task(id, title, *board);
+        Task* task = new Task(title, *board);
+        task->setId(id);
         task->setDescription(description);
         task->setDifficultyScore(difficultyScore);
         task->setActive(active);
@@ -268,7 +270,8 @@ list<User*> Database::loadUserData() {
         string name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
         bool active = sqlite3_column_int(stmt, 2);
 
-        User* user = new User(id, name);
+        User* user = new User(name);
+        user->setId(id);
         user->setActive(active);
         users.push_back(user);
     }
