@@ -36,7 +36,36 @@ void Task::setAssignedUser(User* user) {
 }
 
 void Task::setStage(Stage newStage) {
-    // to do: check stage requirements or throw error
+    switch (newStage) {
+        case Stage::ToDo:
+            if (this->description.empty() || this->difficultyScore == 0) {
+                throw runtime_error("Task needs description and difficulty score to enter 'To Do' stage.");
+            }
+            if (this->stage != Stage::Backlog) {
+                throw runtime_error("Cannot skip stages. Backlog before To Do.");
+            }
+            break;
+        case Stage::InProgress:
+            if (this->description.empty() || this->difficultyScore == 0 || this->assignedUser == nullptr || this->dueDate == 0) {
+                throw runtime_error("Task needs description, difficulty score, assigned user, and due date to enter 'In Progress' stage.");
+            }
+            if (this->stage != Stage::ToDo) {
+                throw runtime_error("Cannot skip stages. 'To Do' before 'In Progress'.");
+            }
+            break;
+        case Stage::Done:
+            if (this->stage != Stage::InProgress) {
+                throw runtime_error("Cannot skip stages. 'In Progress' before 'Done'.");
+            }
+            break;
+        case Stage::Archive:
+            if (this->stage != Stage::Done) {
+                throw runtime_error("Cannot skip stages. 'Done' before 'Archive', or delete the Task.");
+            }
+            break;
+    }
+
+    // if all requirements pass...
     this->stage = newStage;
 }
 
