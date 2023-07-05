@@ -18,6 +18,7 @@ public:
     int getId();
     string getName();
     Board* getCurrentBoard();
+    static User* findById(list<User*> users, int id);
 
 private:
     int id;

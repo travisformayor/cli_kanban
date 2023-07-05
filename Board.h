@@ -23,6 +23,7 @@ public:
     int getId();
     string getName();
     list<Task*> getTasks();
+    static Board* findById(list<Board*> boards, int id);
 
 private:
     int id;

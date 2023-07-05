@@ -21,8 +21,8 @@ public:
     void saveTaskData(Task& task);
     void saveUserData(User& user);
     list<Board*> loadBoardData();
-    list<Task*> loadTaskData();
     list<User*> loadUserData();
+    list<Task*> loadTaskData(list<Board*> boards, list<User*> users);
     void deleteTask(Task& task);
     void deleteBoard(Board& board);
     void deleteUser(User& user, User& replacementUser);
@@ -30,9 +30,6 @@ public:
 private:
     string dbName;
     sqlite3* db;
-    map<int, User*> tempUsers;
-    map<int, Board*> tempBoards;
-    map<int, Task*> tempTasks;
 };
 
 #endif // DATABASE_H

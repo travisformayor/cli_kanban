@@ -65,3 +65,12 @@ string Board::getName() {
 list<Task*> Board::getTasks() {
     return this->tasks;
 }
+
+Board* Board::findById(list<Board*> boards, int id) {
+    for (list<Board*>::iterator it = boards.begin(); it != boards.end(); ++it) {
+        if ((*it)->getId() == id) {
+            return *it;
+        }
+    }
+    return nullptr; // if no board with the given id was found
+}

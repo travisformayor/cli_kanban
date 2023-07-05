@@ -55,3 +55,12 @@ string User::getName() {
 Board* User::getCurrentBoard() {
     return this->currentBoard;
 }
+
+User* User::findById(list<User*> users, int id) {
+    for (list<User*>::iterator it = users.begin(); it != users.end(); ++it) {
+        if ((*it)->getId() == id) {
+            return *it;
+        }
+    }
+    return nullptr; // if no user with the given id was found
+}

@@ -187,7 +187,6 @@ list<Board*> Database::loadBoardData() {
 
         Board* board = new Board(id, name);
         board->setActive(active);
-        tempBoards[id] = board;
         boards.push_back(board);
     }
 
@@ -195,18 +194,11 @@ list<Board*> Database::loadBoardData() {
     return boards;
 }
 
-list<Task*> Database::loadTaskData() {
-    // If boards and Users have not been loaded yet, load them
-    if (tempBoards.empty()) {
-        loadBoardData();
-    }
-    if (tempUsers.empty()) {
-        loadUserData();
-    }
-
+list<Task*> Database::loadTaskData(list<Board*> boards, list<User*> users) {
     list<Task*> tasks;
     string sql = "SELECT * FROM Tasks WHERE Active = 1;";
     sqlite3_stmt* stmt;
+    
     if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
         throw runtime_error("Failed to prepare statement: " + string(sqlite3_errmsg(db)));
     }
@@ -218,7 +210,7 @@ list<Task*> Database::loadTaskData() {
         int difficultyScore = sqlite3_column_int(stmt, 3);
         bool active = sqlite3_column_int(stmt, 4) == 1;
         int boardId = sqlite3_column_int(stmt, 5);
-        Board& boardRef = *tempBoards[boardId];
+        Board* board = Board::findById(boards, boardId);
         string stageStr = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7));
 
         // Parse date
@@ -228,9 +220,9 @@ list<Task*> Database::loadTaskData() {
         time_t dueDate = mktime(&dueDateTm);
 
         int assignedUserId = sqlite3_column_int(stmt, 8);
-        User* user = tempUsers[assignedUserId];
+        User* user = User::findById(users, assignedUserId);
 
-        Task* task = new Task(id, title, boardRef);
+        Task* task = new Task(id, title, *board);
         task->setDescription(description);
         task->setDifficultyScore(difficultyScore);
         task->setActive(active);
@@ -262,8 +254,6 @@ list<User*> Database::loadUserData() {
 
         User* user = new User(id, name);
         user->setActive(active);
-
-        tempUsers[id] = user;
         users.push_back(user);
     }
 
