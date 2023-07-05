@@ -19,7 +19,7 @@ Board::Board(int id, string name) : id(id), name(name), active(true) {
 
 Board::~Board() {
     // Deallocate assigned tasks list
-    for(auto task : tasks) {
+    for (auto task : tasks) {
         delete task;
         task = nullptr;
     }
@@ -39,7 +39,8 @@ void Board::setName(string newName) {
 void Board::addTask(Task& task) {
     if (task.isActive()) {
         tasks.push_back(&task);
-    } else {
+    }
+    else {
         throw invalid_argument("Task must be active");
     }
 }

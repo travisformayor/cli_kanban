@@ -79,7 +79,8 @@ string Task::getDescription() {
 User* Task::getAssignedUser() {
     if (this->assignedUser != nullptr) {
         return this->assignedUser;
-    } else {
+    }
+    else {
         return nullptr;
     }
 }
@@ -99,18 +100,18 @@ int Task::getDifficultyScore() {
 // helper convert methods for dealing with Stages as strings
 string Task::stageToString(Stage stage) {
     switch (stage) {
-        case Stage::Backlog:
-            return "Backlog";
-        case Stage::ToDo:
-            return "ToDo";
-        case Stage::InProgress:
-            return "InProgress";
-        case Stage::Done:
-            return "Done";
-        case Stage::Archive:
-            return "Archive";
-        default:
-            throw runtime_error("Invalid stage");
+    case Stage::Backlog:
+        return "Backlog";
+    case Stage::ToDo:
+        return "ToDo";
+    case Stage::InProgress:
+        return "InProgress";
+    case Stage::Done:
+        return "Done";
+    case Stage::Archive:
+        return "Archive";
+    default:
+        throw runtime_error("Invalid stage");
     }
 }
 

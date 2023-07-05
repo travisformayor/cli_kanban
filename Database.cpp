@@ -33,7 +33,8 @@ void Database::createTables() {
     int result = sqlite3_open("kanban_database.db", &db);
     if (result) {
         throw runtime_error(string("Can't open database: ") + sqlite3_errmsg(db));
-    } else {
+    }
+    else {
         cout << "Opened database successfully\n";
     }
 
@@ -44,39 +45,39 @@ void Database::createTables() {
     // - A Board can have many Tasks (or none)
 
     // Create the Users table
-    sql = "CREATE TABLE IF NOT EXISTS Users ("  
-          "id INTEGER PRIMARY KEY,"
-          "name TEXT NOT NULL,"
-          "active INTEGER NOT NULL"
-          ");";
+    sql = "CREATE TABLE IF NOT EXISTS Users ("
+        "id INTEGER PRIMARY KEY,"
+        "name TEXT NOT NULL,"
+        "active INTEGER NOT NULL"
+        ");";
 
     executeSQL(sql, {});
     cout << "Users table created successfully\n";
 
     // Create the Boards table
-    sql = "CREATE TABLE IF NOT EXISTS Boards ("  
-          "id INTEGER PRIMARY KEY,"
-          "name TEXT NOT NULL,"
-          "active INTEGER NOT NULL"
-          ");";
+    sql = "CREATE TABLE IF NOT EXISTS Boards ("
+        "id INTEGER PRIMARY KEY,"
+        "name TEXT NOT NULL,"
+        "active INTEGER NOT NULL"
+        ");";
 
     executeSQL(sql, {});
     cout << "Boards table created successfully\n";
 
     // Create the Tasks table
-    sql = "CREATE TABLE IF NOT EXISTS Tasks ("  
-          "id INTEGER PRIMARY KEY,"
-          "title TEXT NOT NULL,"
-          "description TEXT,"
-          "assigned_user INTEGER,"
-          "stage TEXT NOT NULL,"
-          "due_date TEXT,"
-          "difficulty_score INTEGER,"
-          "active INTEGER NOT NULL,"
-          "board_id INTEGER NOT NULL,"
-          "FOREIGN KEY(assigned_user) REFERENCES Users(id),"
-          "FOREIGN KEY(board_id) REFERENCES Boards(id)"
-          ");";
+    sql = "CREATE TABLE IF NOT EXISTS Tasks ("
+        "id INTEGER PRIMARY KEY,"
+        "title TEXT NOT NULL,"
+        "description TEXT,"
+        "assigned_user INTEGER,"
+        "stage TEXT NOT NULL,"
+        "due_date TEXT,"
+        "difficulty_score INTEGER,"
+        "active INTEGER NOT NULL,"
+        "board_id INTEGER NOT NULL,"
+        "FOREIGN KEY(assigned_user) REFERENCES Users(id),"
+        "FOREIGN KEY(board_id) REFERENCES Boards(id)"
+        ");";
 
     executeSQL(sql, {});
     cout << "Tasks table created successfully\n";
@@ -91,7 +92,8 @@ void Database::deleteTables() {
         executeSQL("DROP TABLE IF EXISTS Boards;", {});
         executeSQL("DROP TABLE IF EXISTS Users;", {});
         executeSQL("DROP TABLE IF EXISTS Tasks;", {});
-    } catch (const runtime_error& e) {
+    }
+    catch (const runtime_error& e) {
         cerr << "Caught exception: " << e.what() << endl;
     }
 }
@@ -108,14 +110,18 @@ void Database::executeSQL(const string& sql, const list<variant<int, string, boo
     for (const auto& param : params) {
         if (holds_alternative<int>(param)) {
             sqlite3_bind_int(stmt, index, get<int>(param));
-        } else if (holds_alternative<string>(param)) {
+        }
+        else if (holds_alternative<string>(param)) {
             sqlite3_bind_text(stmt, index, get<string>(param).c_str(), -1, SQLITE_STATIC);
-        } else if (holds_alternative<bool>(param)) {
+        }
+        else if (holds_alternative<bool>(param)) {
             sqlite3_bind_int(stmt, index, get<bool>(param) ? 1 : 0);  // Convert boolean to int
-        } else if (holds_alternative<optional<int>>(param)) {
+        }
+        else if (holds_alternative<optional<int>>(param)) {
             if (get<optional<int>>(param).has_value()) {
                 sqlite3_bind_int(stmt, index, get<optional<int>>(param).value());
-            } else {
+            }
+            else {
                 sqlite3_bind_null(stmt, index);
             }
         }
@@ -208,7 +214,7 @@ list<Task*> Database::loadTaskData(list<Board*> boards, list<User*> users) {
     list<Task*> tasks;
     string sql = "SELECT * FROM Tasks WHERE Active = 1;";
     sqlite3_stmt* stmt;
-    
+
     if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
         throw runtime_error("Failed to prepare statement: " + string(sqlite3_errmsg(db)));
     }
@@ -238,7 +244,7 @@ list<Task*> Database::loadTaskData(list<Board*> boards, list<User*> users) {
         task->setActive(active);
         task->setDueDate(dueDate);
         task->setStage(task->stringToStage(stageStr));
-        if(user != nullptr) {
+        if (user != nullptr) {
             task->setAssignedUser(user);
         }
 
