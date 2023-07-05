@@ -3,17 +3,17 @@
 
 using namespace std;
 
-static int currentTaskId = 0; // global task id counter
-
 Task::Task(string title, Board& board) : title(title), active(true) {
     if (title.empty()) {
         throw invalid_argument("Title can't be empty.");
     }
-    this->id = ++currentTaskId;
     this->stage = Stage::Backlog;
+
+    // to do: save to db and get id
 }
 
 Task::Task(int id, string title, Board& board) : id(id), title(title), active(true) {
+    // Only used by the load method to fetch existing task's that already have db ids
     if (id <= 0 || title.empty()) {
         throw invalid_argument("ID must be positive and title can't be empty.");
     }
@@ -35,13 +35,11 @@ void Task::setDescription(string newDesc) {
 }
 
 void Task::setAssignedUser(User* user) {
-    if (user == nullptr) {
-        throw invalid_argument("User can't be null.");
-    }
     this->assignedUser = user;
 }
 
 void Task::setStage(Stage newStage) {
+    // to do: check stage requirements or throw error
     this->stage = newStage;
 }
 

@@ -4,16 +4,16 @@
 
 using namespace std;
 
-static int currentBoardId = 0; // global board id counter
-
 Board::Board(string name) : name(name), active(true) {
     if (name.empty()) {
         throw invalid_argument("Name can't be empty.");
     }
-    this->id = ++currentBoardId;
+
+    // to do: Save board to DB and get id
 }
 
 Board::Board(int id, string name) : id(id), name(name), active(true) {
+    // Only used by the load method to fetch existing boards's that already have db ids
     if (id <= 0 || name.empty()) {
         throw invalid_argument("ID must be positive and name can't be empty.");
     }

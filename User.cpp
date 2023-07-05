@@ -3,16 +3,16 @@
 
 using namespace std;
 
-static int currentUserID = 0; // global user id counter
-
 User::User(string name) : name(name), active(true) {
     if (name.empty()) {
         throw invalid_argument("Name can't be empty.");
     }
-    this->id = ++currentUserID;
+    
+    // to do: save to db and get id
 }
 
 User::User(int id, string name) : id(id), name(name), active(true) {
+    // Only used by the load method to fetch existing users's that already have db ids
     if (id <= 0 || name.empty()) {
         throw invalid_argument("ID must be positive and name can't be empty.");
     }
