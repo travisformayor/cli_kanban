@@ -14,9 +14,9 @@ class Database {
 public:
     Database(string dbName);
     ~Database();
-    void query(const string& sql);
     void createTables();
     void deleteTables();
+    void executeSQL(const string& sql, const list<variant<int, string, bool, optional<int>>>& params);
     void saveBoardData(Board& board);
     void saveTaskData(Task& task);
     void saveUserData(User& user);

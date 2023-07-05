@@ -1,6 +1,7 @@
 #include "Database.h"
 #include "Task.h"
 #include <iostream>
+#include <variant>
 #include <stdexcept>
 #include <sstream>
 #include <map>
@@ -22,17 +23,6 @@ Database::Database(string dbName) : dbName(dbName) {
 // Destructor
 Database::~Database() {
     sqlite3_close(db);
-}
-
-// Query to access records in the db
-void Database::query(const string& sql) {
-    char* zErrMsg = 0;
-    int rc = sqlite3_exec(db, sql.c_str(), NULL, NULL, &zErrMsg);
-    if (rc != SQLITE_OK) {
-        string errorMsg = string("SQL error: ") + zErrMsg;
-        sqlite3_free(zErrMsg);
-        throw runtime_error(errorMsg);
-    }
 }
 
 // Setup the DB Tables
@@ -60,7 +50,7 @@ void Database::createTables() {
           "active INTEGER NOT NULL"
           ");";
 
-    query(sql);
+    executeSQL(sql, {});
     cout << "Users table created successfully\n";
 
     // Create the Boards table
@@ -70,7 +60,7 @@ void Database::createTables() {
           "active INTEGER NOT NULL"
           ");";
 
-    query(sql);
+    executeSQL(sql, {});
     cout << "Boards table created successfully\n";
 
     // Create the Tasks table
@@ -88,7 +78,7 @@ void Database::createTables() {
           "FOREIGN KEY(board_id) REFERENCES Boards(id)"
           ");";
 
-    query(sql);
+    executeSQL(sql, {});
     cout << "Tasks table created successfully\n";
 
     // Close the SQLite database
@@ -98,22 +88,57 @@ void Database::createTables() {
 // Clear the DB.
 void Database::deleteTables() {
     try {
-        query("DROP TABLE IF EXISTS Boards;");
-        query("DROP TABLE IF EXISTS Users;");
-        query("DROP TABLE IF EXISTS Tasks;");
+        executeSQL("DROP TABLE IF EXISTS Boards;", {});
+        executeSQL("DROP TABLE IF EXISTS Users;", {});
+        executeSQL("DROP TABLE IF EXISTS Tasks;", {});
     } catch (const runtime_error& e) {
         cerr << "Caught exception: " << e.what() << endl;
     }
 }
 
-// Methods to save data
+// helper method to safely execute sql queries
+void Database::executeSQL(const string& sql, const list<variant<int, string, bool, optional<int>>>& params) {
+    sqlite3_stmt* stmt;
+
+    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
+        throw runtime_error("Failed to prepare statement: " + string(sqlite3_errmsg(db)));
+    }
+
+    int index = 1;
+    for (const auto& param : params) {
+        if (holds_alternative<int>(param)) {
+            sqlite3_bind_int(stmt, index, get<int>(param));
+        } else if (holds_alternative<string>(param)) {
+            sqlite3_bind_text(stmt, index, get<string>(param).c_str(), -1, SQLITE_STATIC);
+        } else if (holds_alternative<bool>(param)) {
+            sqlite3_bind_int(stmt, index, get<bool>(param) ? 1 : 0);  // Convert boolean to int
+        } else if (holds_alternative<optional<int>>(param)) {
+            if (get<optional<int>>(param).has_value()) {
+                sqlite3_bind_int(stmt, index, get<optional<int>>(param).value());
+            } else {
+                sqlite3_bind_null(stmt, index);
+            }
+        }
+        ++index;
+    }
+
+    if (sqlite3_step(stmt) != SQLITE_DONE) {
+        throw runtime_error("Failed to execute statement: " + string(sqlite3_errmsg(db)));
+    }
+
+    sqlite3_finalize(stmt);
+}
+
+// methods to save data
 void Database::saveBoardData(Board& board) {
-    stringstream sql;
-    sql << "INSERT OR REPLACE INTO Boards VALUES("
-        << board.getId() << ", "
-        << "'" << board.getName() << "', "
-        << (board.isActive() ? 1 : 0) << ");";
-    query(sql.str());
+    string sql = "INSERT OR REPLACE INTO Boards(id, name, active) VALUES(?, ?, ?)";
+    list<variant<int, string, bool, optional<int>>> params = {
+        board.getId(),
+        board.getName(),
+        board.isActive() ? 1 : 0
+    };
+    executeSQL(sql, params);
+
     // Save tasks related to this board
     for (Task* task : board.getTasks()) {
         saveTaskData(*task);
@@ -121,34 +146,29 @@ void Database::saveBoardData(Board& board) {
 }
 
 void Database::saveTaskData(Task& task) {
-    stringstream sql;
+    string sql = "INSERT OR REPLACE INTO Tasks(id, title, description, difficulty_score, active, due_date, stage, assigned_user) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
+    list<variant<int, string, bool, optional<int>>> params = {
+        task.getId(),
+        task.getTitle(),
+        task.getDescription(),
+        task.getDifficultyScore(),
+        task.isActive(),
+        task.getDueDate(),
+        task.stageToString(task.getStage()),
+        (task.getAssignedUser() == nullptr) ? optional<int>{} : task.getAssignedUser()->getId()
+    };
 
-    string assignedUserId;
-    if (task.getAssignedUser() == nullptr) {
-        assignedUserId = "NULL";  // Set assigned_user to NULL
-    } else {
-        assignedUserId = task.getAssignedUser()->getId();
-    }
-
-    sql << "INSERT OR REPLACE INTO Tasks VALUES("
-        << task.getId() << ", "
-        << "'" << task.getTitle() << "', "
-        << "'" << task.getDescription() << "', "
-        << task.getDifficultyScore() << ", "
-        << (task.isActive() ? 1 : 0) << ", "
-        << "'" << task.getDueDate() << "', " 
-        << "'" << task.stageToString(task.getStage()) << "', "
-        << assignedUserId << ");";
-    query(sql.str());
+    executeSQL(sql, params);
 }
 
 void Database::saveUserData(User& user) {
-    stringstream sql;
-    sql << "INSERT OR REPLACE INTO Users VALUES("
-        << user.getId() << ", "
-        << "'" << user.getName() << "', "
-        << (user.isActive() ? 1 : 0) << ");";
-    query(sql.str());
+    string sql = "INSERT OR REPLACE INTO Users(id, name, active) VALUES(?, ?, ?)";
+    list<variant<int, string, bool, optional<int>>> params = {
+        user.getId(),
+        user.getName(),
+        user.isActive() ? 1 : 0
+    };
+    executeSQL(sql, params);
 }
 
 // Methods to load data
@@ -251,28 +271,45 @@ list<User*> Database::loadUserData() {
     return users;
 }
 
-// Delete entities
+// delete entities
 void Database::deleteTask(Task& task) {
-    string sql = "UPDATE Task SET active = 0 WHERE id = " + to_string(task.getId()) + ";";
-    query(sql);
+    string sql = "UPDATE Tasks SET active = ? WHERE id = ?";
+    list<variant<int, string, bool, optional<int>>> params = {
+        0,  // Active
+        task.getId()
+    };
+    executeSQL(sql, params);
+
     task.setActive(false);
 }
 
 void Database::deleteBoard(Board& board) {
-    string sql = "UPDATE Board SET active = 0 WHERE id = " + to_string(board.getId()) + ";";
-    query(sql);
+    string sql = "UPDATE Boards SET active = ? WHERE id = ?";
+    list<variant<int, string, bool, optional<int>>> params = {
+        0,  // Active
+        board.getId()
+    };
+    executeSQL(sql, params);
+
     board.setActive(false);
 }
 
 void Database::deleteUser(User& user, User& replacementUser) {
     // Update all the tasks assigned to this user
-    string sql = "UPDATE Task SET assignedUser = " + to_string(replacementUser.getId()) 
-               + " WHERE assignedUser = " + to_string(user.getId()) + ";";
-    query(sql);
+    string sql = "UPDATE Tasks SET assigned_user = ? WHERE assigned_user = ?";
+    list<variant<int, string, bool, optional<int>>> params = {
+        replacementUser.getId(),
+        user.getId()
+    };
+    executeSQL(sql, params);
 
     // Update the user's active status
-    sql = "UPDATE User SET active = 0 WHERE id = " + to_string(user.getId()) + ";";
-    query(sql);
+    sql = "UPDATE Users SET active = ? WHERE id = ?";
+    params = {
+        0,  // Active
+        user.getId()
+    };
+    executeSQL(sql, params);
 
     user.setActive(false);
 }
