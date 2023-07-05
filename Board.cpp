@@ -8,8 +8,6 @@ Board::Board(string name) : name(name), active(true) {
     if (name.empty()) {
         throw invalid_argument("Name can't be empty.");
     }
-
-    // to do: Save board to DB and get id
 }
 
 Board::Board(int id, string name) : id(id), name(name), active(true) {
@@ -25,6 +23,10 @@ Board::~Board() {
         delete task;
         task = nullptr;
     }
+}
+
+void Board::setId(int id) {
+    this->id = id;
 }
 
 void Board::setName(string newName) {

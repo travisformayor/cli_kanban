@@ -139,9 +139,9 @@ void Database::saveBoardData(Board& board) {
     };
     executeSQL(sql, params);
 
-    // Save tasks related to this board
-    for (Task* task : board.getTasks()) {
-        saveTaskData(*task);
+    // If this was a new record, get the db id and include it
+    if (board.getId() == 0) {
+        board.setId(sqlite3_last_insert_rowid(db));
     }
 }
 
@@ -159,6 +159,11 @@ void Database::saveTaskData(Task& task) {
     };
 
     executeSQL(sql, params);
+
+    // If this was a new record, get the db id and include it
+    if (task.getId() == 0) {
+        task.setId(sqlite3_last_insert_rowid(db));
+    }
 }
 
 void Database::saveUserData(User& user) {
@@ -169,6 +174,11 @@ void Database::saveUserData(User& user) {
         user.isActive() ? 1 : 0
     };
     executeSQL(sql, params);
+
+    // If this was a new record, get the db id and include it
+    if (user.getId() == 0) {
+        user.setId(sqlite3_last_insert_rowid(db));
+    }
 }
 
 // Methods to load data

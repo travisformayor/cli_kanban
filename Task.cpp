@@ -8,8 +8,6 @@ Task::Task(string title, Board& board) : title(title), active(true) {
         throw invalid_argument("Title can't be empty.");
     }
     this->stage = Stage::Backlog;
-
-    // to do: save to db and get id
 }
 
 Task::Task(int id, string title, Board& board) : id(id), title(title), active(true) {
@@ -21,6 +19,10 @@ Task::Task(int id, string title, Board& board) : id(id), title(title), active(tr
 
 Task::~Task() {
     // Nothing to deallocate
+}
+
+void Task::setId(int id) {
+    this->id = id;
 }
 
 void Task::setTitle(string newTitle) {

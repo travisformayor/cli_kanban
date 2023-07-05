@@ -11,6 +11,7 @@ public:
     User(string name);
     User(int id, string name);
     ~User();
+    void setId(int id);
     void setName(string newName);
     void setCurrentBoard(Board* board);
     void setActive(bool active);

@@ -7,8 +7,6 @@ User::User(string name) : name(name), active(true) {
     if (name.empty()) {
         throw invalid_argument("Name can't be empty.");
     }
-    
-    // to do: save to db and get id
 }
 
 User::User(int id, string name) : id(id), name(name), active(true) {
@@ -20,6 +18,10 @@ User::User(int id, string name) : id(id), name(name), active(true) {
 
 User::~User() {
     currentBoard = nullptr;
+}
+
+void User::setId(int id) {
+    this->id = id;
 }
 
 void User::setName(string newName) {
