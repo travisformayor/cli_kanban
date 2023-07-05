@@ -19,6 +19,10 @@ Task::Task(int id, string title, Board& board) : id(id), title(title), active(tr
     }
 }
 
+Task::~Task() {
+    // Nothing to deallocate
+}
+
 void Task::setTitle(string newTitle) {
     if (newTitle.empty()) {
         throw invalid_argument("Title can't be empty.");

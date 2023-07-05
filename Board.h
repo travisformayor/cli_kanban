@@ -14,6 +14,7 @@ class Board {
 public:
     Board(string name);
     Board(int id, string name);
+    ~Board();
     void setName(string newName);
     void addTask(Task& task);
     void removeTask(Task& task);

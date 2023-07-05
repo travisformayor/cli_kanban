@@ -10,6 +10,7 @@ class User {
 public:
     User(string name);
     User(int id, string name);
+    ~User();
     void setName(string newName);
     void setCurrentBoard(Board* board);
     void setActive(bool active);

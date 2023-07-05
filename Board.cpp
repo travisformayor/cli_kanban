@@ -19,6 +19,14 @@ Board::Board(int id, string name) : id(id), name(name), active(true) {
     }
 }
 
+Board::~Board() {
+    // Deallocate assigned tasks list
+    for(auto task : tasks) {
+        delete task;
+        task = nullptr;
+    }
+}
+
 void Board::setName(string newName) {
     if (newName.empty()) {
         throw invalid_argument("Name can't be empty.");

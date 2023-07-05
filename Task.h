@@ -20,6 +20,7 @@ class Task {
 public:
     Task(string title, Board& board);
     Task(int id, string title, Board& board);
+    ~Task();
     void setTitle(string newTitle);
     void setDescription(string newDesc);
     void setAssignedUser(User* user);

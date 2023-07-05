@@ -18,6 +18,10 @@ User::User(int id, string name) : id(id), name(name), active(true) {
     }
 }
 
+User::~User() {
+    currentBoard = nullptr;
+}
+
 void User::setName(string newName) {
     if (newName.empty()) {
         throw invalid_argument("New name can't be empty.");
