@@ -15,8 +15,8 @@ public:
     Database(string dbName);
     ~Database();
     void query(const string& sql);
+    void createTables();
     void deleteTables();
-    void initDb();
     void saveBoardData(Board& board);
     void saveTaskData(Task& task);
     void saveUserData(User& user);

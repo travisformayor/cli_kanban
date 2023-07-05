@@ -35,19 +35,8 @@ void Database::query(const string& sql) {
     }
 }
 
-// Clear the DB
-void Database::deleteTables() {
-    try {
-        query("DROP TABLE IF EXISTS Boards;");
-        query("DROP TABLE IF EXISTS Users;");
-        query("DROP TABLE IF EXISTS Tasks;");
-    } catch (const runtime_error& e) {
-        cerr << "Caught exception: " << e.what() << endl;
-    }
-}
-
 // Setup the DB Tables
-void Database::initDb() {
+void Database::createTables() {
     string sql;
 
     // Open the SQLite database
@@ -104,6 +93,17 @@ void Database::initDb() {
 
     // Close the SQLite database
     sqlite3_close(db);
+}
+
+// Clear the DB.
+void Database::deleteTables() {
+    try {
+        query("DROP TABLE IF EXISTS Boards;");
+        query("DROP TABLE IF EXISTS Users;");
+        query("DROP TABLE IF EXISTS Tasks;");
+    } catch (const runtime_error& e) {
+        cerr << "Caught exception: " << e.what() << endl;
+    }
 }
 
 // Methods to save data
