@@ -2,9 +2,8 @@
 #include <sqlite3.h> 
 #include <stdexcept>
 #include <iostream>
-#include <variant>
-#include <iomanip>
 #include <sstream>
+#include <iomanip>
 #include <ctime>
 
 using namespace std;
@@ -150,6 +149,21 @@ void Database::saveBoardData(Board& board) {
     }
 }
 
+void Database::saveUserData(User& user) {
+    string sql = "INSERT OR REPLACE INTO Users(id, name, active) VALUES(?, ?, ?)";
+    list<variant<int, string, bool, optional<int>>> params = {
+        user.getId(),
+        user.getName(),
+        user.isActive() ? 1 : 0
+    };
+    executeSQL(sql, params);
+
+    // If this was a new record, get the db id and include it
+    if (user.getId() == 0) {
+        user.setId(sqlite3_last_insert_rowid(db));
+    }
+}
+
 void Database::saveTaskData(Task& task) {
     string sql = "INSERT OR REPLACE INTO Tasks(id, title, description, difficulty_score, active, due_date, stage, assigned_user) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
     list<variant<int, string, bool, optional<int>>> params = {
@@ -168,21 +182,6 @@ void Database::saveTaskData(Task& task) {
     // If this was a new record, get the db id and include it
     if (task.getId() == 0) {
         task.setId(sqlite3_last_insert_rowid(db));
-    }
-}
-
-void Database::saveUserData(User& user) {
-    string sql = "INSERT OR REPLACE INTO Users(id, name, active) VALUES(?, ?, ?)";
-    list<variant<int, string, bool, optional<int>>> params = {
-        user.getId(),
-        user.getName(),
-        user.isActive() ? 1 : 0
-    };
-    executeSQL(sql, params);
-
-    // If this was a new record, get the db id and include it
-    if (user.getId() == 0) {
-        user.setId(sqlite3_last_insert_rowid(db));
     }
 }
 
@@ -208,6 +207,29 @@ list<Board*> Database::loadBoardData() {
 
     sqlite3_finalize(stmt);
     return boards;
+}
+
+list<User*> Database::loadUserData() {
+    list<User*> users;
+    string sql = "SELECT * FROM Users;";
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
+        throw runtime_error("Failed to prepare statement: " + string(sqlite3_errmsg(db)));
+    }
+
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        int id = sqlite3_column_int(stmt, 0);
+        string name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+        bool active = sqlite3_column_int(stmt, 2);
+
+        User* user = new User(name);
+        user->setId(id);
+        user->setActive(active);
+        users.push_back(user);
+    }
+
+    sqlite3_finalize(stmt);
+    return users;
 }
 
 list<Task*> Database::loadTaskData(list<Board*> boards, list<User*> users) {
@@ -262,41 +284,7 @@ list<Task*> Database::loadTaskData(list<Board*> boards, list<User*> users) {
     return tasks;
 }
 
-list<User*> Database::loadUserData() {
-    list<User*> users;
-    string sql = "SELECT * FROM Users;";
-    sqlite3_stmt* stmt;
-    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
-        throw runtime_error("Failed to prepare statement: " + string(sqlite3_errmsg(db)));
-    }
-
-    while (sqlite3_step(stmt) == SQLITE_ROW) {
-        int id = sqlite3_column_int(stmt, 0);
-        string name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-        bool active = sqlite3_column_int(stmt, 2);
-
-        User* user = new User(name);
-        user->setId(id);
-        user->setActive(active);
-        users.push_back(user);
-    }
-
-    sqlite3_finalize(stmt);
-    return users;
-}
-
 // delete entities
-void Database::deleteTask(Task& task) {
-    string sql = "UPDATE Tasks SET active = ? WHERE id = ?";
-    list<variant<int, string, bool, optional<int>>> params = {
-        0,  // Active
-        task.getId()
-    };
-    executeSQL(sql, params);
-
-    task.setActive(false);
-}
-
 void Database::deleteBoard(Board& board) {
     string sql = "UPDATE Boards SET active = ? WHERE id = ?";
     list<variant<int, string, bool, optional<int>>> params = {
@@ -326,4 +314,15 @@ void Database::deleteUser(User& user, User& replacementUser) {
     executeSQL(sql, params);
 
     user.setActive(false);
+}
+
+void Database::deleteTask(Task& task) {
+    string sql = "UPDATE Tasks SET active = ? WHERE id = ?";
+    list<variant<int, string, bool, optional<int>>> params = {
+        0,  // Active
+        task.getId()
+    };
+    executeSQL(sql, params);
+
+    task.setActive(false);
 }
