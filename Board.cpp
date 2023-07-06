@@ -1,4 +1,5 @@
 #include "Board.h"
+#include <stdexcept>
 
 using namespace std;
 
