@@ -1,0 +1,88 @@
+@startuml classUML
+
+Task "*" -- "1" User : assignedUser
+Task "*" -- "1" Board : tasks
+Task "*" -- "1" Database
+Board "*" -- "1" Database
+User "*" -- "1" Database
+
+class Task {
+  -id: int
+  -title: string
+  -description: string
+  -assignedUser: User
+  -stage: Stage
+  -dueDate: Date
+  -difficultyScore: int
+  -active: bool
+  +Task(title: string)
+  +setTitle(newTitle: string): void
+  +setDescription(newDesc: string): void
+  +setAssignedUser(user: User): void
+  +setStage(newStage: Stage): void
+  +setDueDate(newDueDate: Date): void
+  +setDifficultyScore(score: int): void
+  +setActive(active: bool): void
+  +getId(): int
+  +getTitle(): string
+  +getDescription(): string
+  +getAssignedUser(): User
+  +getStage(): Stage
+  +getDueDate(): Date
+  +getDifficultyScore(): int
+}
+
+enum Stage {
+  "Backlog"
+  "To Do"
+  "In Progress"
+  "Done"
+  "Archive"
+}
+
+class User {
+  -id: int
+  -name: string
+  -currentBoard: Board
+  -active: bool
+  +User(name: string)
+  +setName(newName: string): void
+  +setActive(active: bool): void
+  +setCurrentBoard(board: Board): void
+  +getId(): int
+  +getName(): string
+  +getCurrentBoard(): Board
+}
+
+class Board {
+  -id: int
+  -name: string
+  -tasks: List<Task>
+  -active: bool
+  +Board(name: string)
+  +setName(newName: string): void
+  +addTask(task: Task): void
+  +removeTask(task: Task): void
+  +setActive(active: bool): void
+  +getId(): int
+  +getName(): string
+  +getTasks(): List<Task>
+}
+
+class Database {
+  -dbName: string
+  -db: sqlite3*
+  +Database(dbName: string)
+  +query(sql: string): void
+  +saveBoardData(board: Board): void
+  +saveTaskData(task: Task): void
+  +saveUserData(user: User): void
+  +loadBoardData(): void
+  +loadTaskData(): void
+  +loadUserData(): void
+  +deleteTask(task: Task): void
+  +deleteBoard(board: Board): void
+  +deleteUser(user: User, replacementUser: User): void
+}
+
+@enduml
