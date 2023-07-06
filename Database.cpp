@@ -1,10 +1,10 @@
 #include "Database.h"
 #include <sqlite3.h> 
+#include <stdexcept>
 #include <iostream>
 #include <variant>
-#include <stdexcept>
+#include <iomanip>
 #include <sstream>
-#include <chrono>
 #include <ctime>
 
 using namespace std;
@@ -220,24 +220,30 @@ list<Task*> Database::loadTaskData(list<Board*> boards, list<User*> users) {
     }
 
     while (sqlite3_step(stmt) == SQLITE_ROW) {
+        // get id
         int id = sqlite3_column_int(stmt, 0);
-        string title = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-        string description = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
+        // Parse title and description as string or empty string
+        const char* titleRaw = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+        string title = titleRaw ? titleRaw : "";
+        const char* descriptionRaw = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
+        string description = descriptionRaw ? descriptionRaw : "";
+        // get attributes
         int difficultyScore = sqlite3_column_int(stmt, 3);
         bool active = sqlite3_column_int(stmt, 4) == 1;
         int boardId = sqlite3_column_int(stmt, 5);
         Board* board = Board::findById(boards, boardId);
         string stageStr = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7));
-
-        // Parse date
-        string dueDateStr = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6));
-        tm dueDateTm = {};
-        strptime(dueDateStr.c_str(), "%Y-%m-%d %H:%M:%S", &dueDateTm);
-        time_t dueDate = mktime(&dueDateTm);
-
+        // parse assigned user
         int assignedUserId = sqlite3_column_int(stmt, 8);
         User* user = User::findById(users, assignedUserId);
+        // Parse date
+        string dueDateStr = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6));
+        istringstream ss(dueDateStr);
+        tm dueDateTm = {};
+        ss >> get_time(&dueDateTm, "%Y-%m-%d %H:%M:%S");
+        time_t dueDate = mktime(&dueDateTm);
 
+        // create task object, save fetched info
         Task* task = new Task(title, *board);
         task->setId(id);
         task->setDescription(description);
