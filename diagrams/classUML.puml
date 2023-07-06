@@ -5,84 +5,101 @@ Task "*" -- "1" Board : tasks
 Task "*" -- "1" Database
 Board "*" -- "1" Database
 User "*" -- "1" Database
+User "1" -- "1" Board : currentBoard
 
 class Task {
   -id: int
   -title: string
   -description: string
-  -assignedUser: User
+  -assignedUser: User*
   -stage: Stage
-  -dueDate: Date
+  -dueDate: time_t
   -difficultyScore: int
   -active: bool
-  +Task(title: string)
+  +Task(title: string, board: Board&)
+  +~Task()
+  +setId(id: int): void
   +setTitle(newTitle: string): void
   +setDescription(newDesc: string): void
-  +setAssignedUser(user: User): void
+  +setAssignedUser(user: User*): void
   +setStage(newStage: Stage): void
-  +setDueDate(newDueDate: Date): void
+  +setDueDate(newDueDate: time_t): void
   +setDifficultyScore(score: int): void
   +setActive(active: bool): void
+  +isActive(): bool
   +getId(): int
   +getTitle(): string
   +getDescription(): string
-  +getAssignedUser(): User
+  +getAssignedUser(): User*
   +getStage(): Stage
-  +getDueDate(): Date
+  +getDueDate(): time_t
   +getDifficultyScore(): int
+  +stageToString(stage: Stage): string
+  +stringToStage(stageStr: string): Stage
 }
 
 enum Stage {
-  "Backlog"
-  "To Do"
-  "In Progress"
-  "Done"
-  "Archive"
+  Backlog
+  ToDo
+  InProgress
+  Done
+  Archive
 }
 
 class User {
   -id: int
   -name: string
-  -currentBoard: Board
+  -currentBoard: Board*
   -active: bool
   +User(name: string)
+  +~User()
+  +setId(id: int): void
   +setName(newName: string): void
+  +setCurrentBoard(board: Board*): void
   +setActive(active: bool): void
-  +setCurrentBoard(board: Board): void
+  +isActive(): bool
   +getId(): int
   +getName(): string
-  +getCurrentBoard(): Board
+  +getCurrentBoard(): Board*
+  +findById(users: list<User*>, id: int): User*
 }
 
 class Board {
   -id: int
   -name: string
-  -tasks: List<Task>
+  -tasks: list<Task*>
   -active: bool
   +Board(name: string)
+  +~Board()
+  +setId(id: int): void
   +setName(newName: string): void
-  +addTask(task: Task): void
-  +removeTask(task: Task): void
+  +addTask(task: Task&): void
+  +removeTask(task: Task&): void
   +setActive(active: bool): void
+  +isActive(): bool
   +getId(): int
   +getName(): string
-  +getTasks(): List<Task>
+  +getTasks(): list<Task*>
+  +findById(boards: list<Board*>, id: int): Board*
 }
 
 class Database {
   -dbName: string
   -db: sqlite3*
   +Database(dbName: string)
-  +query(sql: string): void
-  +saveBoardData(board: Board): void
-  +saveTaskData(task: Task): void
-  +saveUserData(user: User): void
-  +loadBoardData(): void
-  +loadTaskData(): void
-  +loadUserData(): void
-  +deleteTask(task: Task): void
-  +deleteBoard(board: Board): void
-  +deleteUser(user: User, replacementUser: User): void
+  +~Database()
+  +createTables(): void
+  +deleteTables(): void
+  +executeSQL(sql: string, params: list<variant<int, string, bool, optional<int>>>): void
+  +saveBoardData(board: Board&): void
+  +saveTaskData(task: Task&): void
+  +saveUserData(user: User&): void
+  +loadBoardData(): list<Board*>
+  +loadUserData(): list<User*>
+  +loadTaskData(boards: list<Board*>, users: list<User*>): list<Task*>
+  +deleteTask(task: Task&): void
+  +deleteBoard(board: Board& board): void
+  +deleteUser(user: User&, replacementUser: User&): void
 }
 
 @enduml
