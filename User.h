@@ -1,9 +1,11 @@
 #ifndef USER_H
 #define USER_H
 
+#include "Board.h"
 #include <string>
 #include <list>
-#include "Board.h"
+
+class Board;
 
 using namespace std;
 

@@ -1,11 +1,13 @@
 #ifndef BOARD_H
 #define BOARD_H
 
+#include "Task.h"
 #include <string>
 #include <list>
-#include "Task.h"
 
 using namespace std;
+
+class Task;
 
 class Board {
 public:

@@ -1,14 +1,17 @@
 #ifndef DATABASE_H
 #define DATABASE_H
 
-#include <sqlite3.h> 
-#include <string>
-#include <list>
 #include "Board.h"
 #include "Task.h"
 #include "User.h"
+#include <string>
+#include <list>
 
 using namespace std;
+
+class Board;
+class User;
+class Task;
 
 class Database {
 public:

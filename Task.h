@@ -1,12 +1,14 @@
 #ifndef TASK_H
 #define TASK_H
 
-#include <string>
-#include <ctime>
 #include "User.h"
 #include "Board.h"
+#include <string>
 
 using namespace std;
+
+class User;
+class Board;
 
 enum class Stage {
     Backlog,
