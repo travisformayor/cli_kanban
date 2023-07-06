@@ -3,12 +3,10 @@
 
 #include <string>
 #include <list>
-#include <stdexcept>
 
 using namespace std;
 
-class Task; // Forward declaration
-class User; // Forward declaration
+// class Task; // forward declaration
 
 class Board {
 public:

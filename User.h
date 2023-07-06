@@ -2,7 +2,8 @@
 #define USER_H
 
 #include <string>
-#include "Board.h"
+#include <list>
+// #include "Board.h"
 
 using namespace std;
 

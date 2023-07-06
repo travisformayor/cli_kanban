@@ -1,9 +1,9 @@
 #ifndef DATABASE_H
 #define DATABASE_H
 
-#include <string>
-#include <map>
 #include <sqlite3.h> 
+#include <string>
+#include <list>
 #include "Board.h"
 #include "Task.h"
 #include "User.h"
