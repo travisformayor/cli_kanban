@@ -4,6 +4,7 @@
 #include "Board.h"
 #include "User.h"
 #include "Task.h"
+#include <sqlite3.h>
 #include <string>
 #include <list>
 #include <variant>
