@@ -43,7 +43,7 @@ void Database::createTables() {
 
     // Create the Users table
     sql = "CREATE TABLE IF NOT EXISTS Users ("
-        "id INTEGER PRIMARY KEY,"
+        "id INTEGER PRIMARY KEY AUTOINCREMENT,"
         "name TEXT NOT NULL,"
         "active INTEGER NOT NULL"
         ");";
@@ -53,7 +53,7 @@ void Database::createTables() {
 
     // Create the Boards table
     sql = "CREATE TABLE IF NOT EXISTS Boards ("
-        "id INTEGER PRIMARY KEY,"
+        "id INTEGER PRIMARY KEY AUTOINCREMENT,"
         "name TEXT NOT NULL,"
         "active INTEGER NOT NULL"
         ");";
@@ -63,7 +63,7 @@ void Database::createTables() {
 
     // Create the Tasks table
     sql = "CREATE TABLE IF NOT EXISTS Tasks ("
-        "id INTEGER PRIMARY KEY,"
+        "id INTEGER PRIMARY KEY AUTOINCREMENT,"
         "title TEXT NOT NULL,"
         "description TEXT,"
         "assigned_user INTEGER,"
