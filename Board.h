@@ -3,10 +3,9 @@
 
 #include <string>
 #include <list>
+#include "Task.h"
 
 using namespace std;
-
-// class Task; // forward declaration
 
 class Board {
 public:

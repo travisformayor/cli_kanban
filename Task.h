@@ -3,8 +3,8 @@
 
 #include <string>
 #include <ctime>
-// #include "User.h"
-// #include "Board.h"
+#include "User.h"
+#include "Board.h"
 
 using namespace std;
 
