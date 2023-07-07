@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <sstream>
 #include <iomanip>
+#include <time.h>
 
 using namespace std;
 
@@ -158,9 +159,10 @@ Stage Task::stringToStage(const string& stageStr) {
 }
 
 string Task::datetimeToString(time_t dueDate) {
-    tm * ptm = localtime(&dueDate);
+    tm ptm;
+    localtime_s(&ptm, &dueDate);
     stringstream buffer;
-    buffer << put_time(ptm,"%Y-%m-%d %H:%M:%S"); // Format time
+    buffer << put_time(&ptm, "%Y-%m-%d %H:%M:%S");
     string dueDateString = buffer.str();
 
     return dueDateString;
