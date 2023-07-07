@@ -24,7 +24,6 @@ public:
     void deleteTables();
     int executeQuery(const string& sql, const map<string, variant<int, string>>& dataMap);
     string queryString(const string& tableName, const map<string, variant<int, string>>& dataMap);
-    // void executeSQL(const string& sql, const list<variant<int, string, bool, optional<int>>>& params);
     void saveBoardData(Board& board);
     void saveUserData(User& user);
     void saveTaskData(Task& task);
