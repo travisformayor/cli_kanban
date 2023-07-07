@@ -7,6 +7,7 @@ Board::Board(string name) : name(name), active(true) {
     if (name.empty()) {
         throw invalid_argument("Name can't be empty.");
     }
+    this->id = 0;
 }
 
 Board::~Board() {

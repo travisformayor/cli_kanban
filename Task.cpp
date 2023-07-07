@@ -8,6 +8,7 @@ Task::Task(string title, Board& board) : title(title), active(true) {
     if (title.empty()) {
         throw invalid_argument("Title can't be empty.");
     }
+    this->id = 0;
     this->stage = Stage::Backlog;
     this->dueDate = 0;
     this->difficultyScore = 0;
