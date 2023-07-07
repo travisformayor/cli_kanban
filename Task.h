@@ -38,8 +38,10 @@ public:
     Stage getStage();
     time_t getDueDate();
     int getDifficultyScore();
-    string stageToString(Stage stage);
-    Stage stringToStage(const string& stageStr);
+    static string stageToString(Stage stage);
+    static Stage stringToStage(const string& stageStr);
+    static string datetimeToString(time_t dueDate);
+    static time_t stringToDatetime(string dueDateStr);
 
 private:
     int id;

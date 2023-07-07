@@ -1,6 +1,7 @@
 #include "Task.h"
 #include <stdexcept>
-#include <ctime>
+#include <sstream>
+#include <iomanip>
 
 using namespace std;
 
@@ -154,4 +155,22 @@ Stage Task::stringToStage(const string& stageStr) {
         return Stage::Archive;
     else
         throw runtime_error("Invalid stage string: " + stageStr);
+}
+
+string Task::datetimeToString(time_t dueDate) {
+    tm * ptm = localtime(&dueDate);
+    stringstream buffer;
+    buffer << put_time(ptm,"%Y-%m-%d %H:%M:%S"); // Format time
+    string dueDateString = buffer.str();
+
+    return dueDateString;
+}
+
+time_t Task::stringToDatetime(string dueDateStr) {
+    istringstream ss(dueDateStr);
+    tm dueDateTm = {};
+    ss >> get_time(&dueDateTm, "%Y-%m-%d %H:%M:%S");
+    time_t dueDate = mktime(&dueDateTm);
+
+    return dueDate;
 }
