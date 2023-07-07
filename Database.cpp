@@ -48,7 +48,7 @@ void Database::createTables() {
         "active INTEGER NOT NULL"
         ");";
 
-    executeSQL(sql, {});
+    executeQuery(sql, {});
     cout << "Users table created successfully\n";
 
     // Create the Boards table
@@ -58,7 +58,7 @@ void Database::createTables() {
         "active INTEGER NOT NULL"
         ");";
 
-    executeSQL(sql, {});
+    executeQuery(sql, {});
     cout << "Boards table created successfully\n";
 
     // Create the Tasks table
@@ -76,7 +76,7 @@ void Database::createTables() {
         "FOREIGN KEY(board_id) REFERENCES Boards(id)"
         ");";
 
-    executeSQL(sql, {});
+    executeQuery(sql, {});
     cout << "Tasks table created successfully\n";
 
     // Close the SQLite database
@@ -86,9 +86,9 @@ void Database::createTables() {
 // Clear the DB.
 void Database::deleteTables() {
     try {
-        executeSQL("DROP TABLE IF EXISTS Boards;", {});
-        executeSQL("DROP TABLE IF EXISTS Users;", {});
-        executeSQL("DROP TABLE IF EXISTS Tasks;", {});
+        executeQuery("DROP TABLE IF EXISTS Boards;", {});
+        executeQuery("DROP TABLE IF EXISTS Users;", {});
+        executeQuery("DROP TABLE IF EXISTS Tasks;", {});
     }
     catch (const runtime_error& e) {
         cerr << "Caught exception: " << e.what() << endl;
@@ -96,92 +96,191 @@ void Database::deleteTables() {
 }
 
 // helper method to safely execute sql queries
-void Database::executeSQL(const string& sql, const list<variant<int, string, bool, optional<int>>>& params) {
+int Database::executeQuery(const string& sql, const map<string, variant<int, string>>& dataMap) {
     sqlite3_stmt* stmt;
 
+    // prepare the db action
     if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
         throw runtime_error("Failed to prepare statement: " + string(sqlite3_errmsg(db)));
     }
 
+    // bind values to sql datatype
     int index = 1;
-    for (const auto& param : params) {
-        if (holds_alternative<int>(param)) {
-            sqlite3_bind_int(stmt, index, get<int>(param));
+    for (const auto& param : dataMap) {
+        if (holds_alternative<int>(param.second)) {
+            sqlite3_bind_int(stmt, index, get<int>(param.second));
         }
-        else if (holds_alternative<string>(param)) {
-            sqlite3_bind_text(stmt, index, get<string>(param).c_str(), -1, SQLITE_STATIC);
+        else if (holds_alternative<string>(param.second)) {
+            sqlite3_bind_text(stmt, index, get<string>(param.second).c_str(), -1, SQLITE_STATIC);
         }
-        else if (holds_alternative<bool>(param)) {
-            sqlite3_bind_int(stmt, index, get<bool>(param) ? 1 : 0);  // Convert boolean to int
-        }
-        else if (holds_alternative<optional<int>>(param)) {
-            if (get<optional<int>>(param).has_value()) {
-                sqlite3_bind_int(stmt, index, get<optional<int>>(param).value());
-            }
-            else {
-                sqlite3_bind_null(stmt, index);
-            }
-        }
-        ++index;
+        index++;
     }
 
     if (sqlite3_step(stmt) != SQLITE_DONE) {
         throw runtime_error("Failed to execute statement: " + string(sqlite3_errmsg(db)));
     }
-
     sqlite3_finalize(stmt);
+
+    // return record db id
+    return static_cast<int>(sqlite3_last_insert_rowid(db));
+}
+
+// helper method to construct the sql query string
+string Database::queryString(const string& tableName, const map<string, variant<int, string>>& dataMap) {
+    list<string> columns;
+    for (const auto& pair : dataMap) {
+        columns.push_back(pair.first);
+    }
+
+    bool hasId = (!columns.empty() && columns.front() == "id");
+    string query = hasId ? "REPLACE INTO " : "INSERT INTO ";
+    query += tableName + "(";
+
+    // Add column names
+    for (auto i = columns.begin(); i != columns.end(); ++i) {
+        query += *i;
+        if (next(i) != columns.end()) {
+            query += ", ";
+        }
+    }
+
+    // Add placeholder values
+    query += ") VALUES(";
+    for (auto i = columns.begin(); i != columns.end(); ++i) {
+        query += "?";
+        if (next(i) != columns.end()) {
+            query += ", ";
+        }
+    }
+    query += ")";
+
+    return query;
 }
 
 // methods to save data
 void Database::saveBoardData(Board& board) {
-    string sql = "INSERT OR REPLACE INTO Boards(id, name, active) VALUES(?, ?, ?)";
-    list<variant<int, string, bool, optional<int>>> params = {
-        board.getId(),
-        board.getName(),
-        board.isActive() ? 1 : 0
+    string tableName = "Boards";
+    map<string, variant<int, string>> dataMap = {
+        { "id", board.getId() },
+        { "name", board.getName() },
+        { "active", board.isActive() ? 1 : 0 }
     };
-    executeSQL(sql, params);
 
-    // If this was a new record, get the db id and include it
-    if (board.getId() == 0) {
-        board.setId(static_cast<int>(sqlite3_last_insert_rowid(db)));
+    // remove missing values
+    if (get<int>(dataMap["id"]) == 0) {
+        dataMap.erase("id"); // object is new, let db add id
+    }
+    // create sql statement and execute
+    string sql = queryString(tableName, dataMap);
+    int returnId = executeQuery(sql, dataMap);
+
+    // If new record, fetch and save db id
+    if (get<int>(dataMap["id"]) == 0) {
+        board.setId(returnId);
     }
 }
 
 void Database::saveUserData(User& user) {
-    string sql = "INSERT OR REPLACE INTO Users(id, name, active) VALUES(?, ?, ?)";
-    list<variant<int, string, bool, optional<int>>> params = {
-        user.getId(),
-        user.getName(),
-        user.isActive() ? 1 : 0
+    string tableName = "Users";
+    map<string, variant<int, string>> dataMap = {
+        { "id", user.getId() },
+        { "name", user.getName() },
+        { "active", user.isActive() ? 1 : 0 }
     };
-    executeSQL(sql, params);
 
-    // If this was a new record, get the db id and include it
-    if (user.getId() == 0) {
-        user.setId(static_cast<int>(sqlite3_last_insert_rowid(db)));
+    // remove missing values
+    if (get<int>(dataMap["id"]) == 0) {
+        dataMap.erase("id"); // object is new, let db add id
+    }
+    // create sql statement and execute
+    string sql = queryString(tableName, dataMap);
+    int returnId = executeQuery(sql, dataMap);
+
+    // If new record, fetch and save db id
+    if (get<int>(dataMap["id"]) == 0) {
+        user.setId(returnId);
     }
 }
 
 void Database::saveTaskData(Task& task) {
-    string sql = "INSERT OR REPLACE INTO Tasks(id, title, description, difficulty_score, active, due_date, stage, assigned_user) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
-    list<variant<int, string, bool, optional<int>>> params = {
-        task.getId(),
-        task.getTitle(),
-        task.getDescription(),
-        task.getDifficultyScore(),
-        task.isActive(),
-        task.getDueDate(),
-        task.stageToString(task.getStage()),
-        (task.getAssignedUser() == nullptr) ? optional<int>{} : optional<int>{task.getAssignedUser()->getId()}
+    string tableName = "Tasks";
+    map<string, variant<int, string>> dataMap = {
+        { "id", variant<int, string>{task.getId()} },
+        { "title", variant<int, string>{task.getTitle()} },
+        { "description", variant<int, string>{task.getDescription()} },
+        { "difficulty_score", variant<int, string>{task.getDifficultyScore()} },
+        { "active", variant<int, string>{task.isActive() ? 1 : 0} },
+        { "due_date", variant<int, string>{Task::datetimeToString(task.getDueDate())} },
+        { "stage", variant<int, string>{task.stageToString(task.getStage())} },
+        { "assigned_user", variant<int, string>{(task.getAssignedUser() != nullptr) ? task.getAssignedUser()->getId() : 0} }
     };
 
-    executeSQL(sql, params);
-
-    // If this was a new record, get the db id and include it
-    if (task.getId() == 0) {
-        task.setId(static_cast<int>(sqlite3_last_insert_rowid(db)));
+    // remove missing values
+    if (get<int>(dataMap["id"]) == 0) {
+        dataMap.erase("id"); // object is new, let db add id
     }
+    if (get<int>(dataMap["assigned_user"]) == 0) {
+        dataMap.erase("assigned_user"); // no assigned user
+    }
+    // create sql statement and execute
+    string sql = queryString(tableName, dataMap);
+    int returnId = executeQuery(sql, dataMap);
+
+    // If new record, fetch and save db id
+    if (get<int>(dataMap["id"]) == 0) {
+        task.setId(returnId);
+    }
+}
+
+// delete entities
+void Database::deleteBoard(Board& board) {
+    string sql = "UPDATE Boards SET active = ? WHERE id = ?";
+
+    map<string, variant<int, string>> dataMap = {
+        { "active", variant<int, string>{0} },
+        { "id", variant<int, string>{board.getId()} }
+    };
+
+    executeQuery(sql, dataMap);
+
+    board.setActive(false);
+}
+
+void Database::deleteUser(User& user, User& replacementUser) {
+    // Update all the tasks assigned to this user
+    string sql = "UPDATE Tasks SET assigned_user = ? WHERE assigned_user = ?";
+
+    map<string, variant<int, string>> dataMap = {
+        { "assigned_user", variant<int, string>{replacementUser.getId()} },
+        { "id", variant<int, string>{user.getId()} }
+    };
+
+    executeQuery(sql, dataMap);
+
+    // Update the user's active status
+    sql = "UPDATE Users SET active = ? WHERE id = ?";
+    
+    dataMap = {
+        { "active", variant<int, string>{0} },
+        { "id", variant<int, string>{user.getId()} }
+    };
+
+    executeQuery(sql, dataMap);
+
+    user.setActive(false);
+}
+
+void Database::deleteTask(Task& task) {
+    string sql = "UPDATE Tasks SET active = ? WHERE id = ?";
+
+    map<string, variant<int, string>> dataMap = {
+        { "active", variant<int, string>{0} },
+        { "id", variant<int, string>{task.getId()} }
+    };
+
+    executeQuery(sql, dataMap);
+
+    task.setActive(false);
 }
 
 // Methods to load data
@@ -257,13 +356,9 @@ list<Task*> Database::loadTaskData(list<Board*> boards, list<User*> users) {
         // parse assigned user
         int assignedUserId = sqlite3_column_int(stmt, 8);
         User* user = User::findById(users, assignedUserId);
-        // Parse date
-        string dueDateStr = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6));
-        istringstream ss(dueDateStr);
-        tm dueDateTm = {};
-        ss >> get_time(&dueDateTm, "%Y-%m-%d %H:%M:%S");
-        time_t dueDate = mktime(&dueDateTm);
-
+        // parse date
+        time_t dueDate = Task::stringToDatetime(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6)));
+    
         // create task object, save fetched info
         Task* task = new Task(title, *board);
         task->setId(id);
@@ -281,47 +376,4 @@ list<Task*> Database::loadTaskData(list<Board*> boards, list<User*> users) {
 
     sqlite3_finalize(stmt);
     return tasks;
-}
-
-// delete entities
-void Database::deleteBoard(Board& board) {
-    string sql = "UPDATE Boards SET active = ? WHERE id = ?";
-    list<variant<int, string, bool, optional<int>>> params = {
-        0,  // Active
-        board.getId()
-    };
-    executeSQL(sql, params);
-
-    board.setActive(false);
-}
-
-void Database::deleteUser(User& user, User& replacementUser) {
-    // Update all the tasks assigned to this user
-    string sql = "UPDATE Tasks SET assigned_user = ? WHERE assigned_user = ?";
-    list<variant<int, string, bool, optional<int>>> params = {
-        replacementUser.getId(),
-        user.getId()
-    };
-    executeSQL(sql, params);
-
-    // Update the user's active status
-    sql = "UPDATE Users SET active = ? WHERE id = ?";
-    params = {
-        0,  // Active
-        user.getId()
-    };
-    executeSQL(sql, params);
-
-    user.setActive(false);
-}
-
-void Database::deleteTask(Task& task) {
-    string sql = "UPDATE Tasks SET active = ? WHERE id = ?";
-    list<variant<int, string, bool, optional<int>>> params = {
-        0,  // Active
-        task.getId()
-    };
-    executeSQL(sql, params);
-
-    task.setActive(false);
 }
