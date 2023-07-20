@@ -1,0 +1,26 @@
+@startuml activityDiagram
+
+start
+:User is created or loaded;
+:User creates or opens a Board;
+:User creates or opens a Task;
+
+:User moves Task to In Progress;
+if (Task has assigned user, description, and difficulty?) then (yes)
+  :Task moves to In Progress;
+else (no)
+  :Error message;
+  :User sets user, description, and/or difficulty for Task;
+  :User moves Task to In Progress;
+endif
+
+:User moves Task to Done;
+
+if (User finished) then (User deletes Board)
+  :Board deleted;
+else (User closes Board)
+  :User exits Board;
+endif
+stop
+
+@enduml

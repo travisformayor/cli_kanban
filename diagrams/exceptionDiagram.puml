@@ -1,0 +1,44 @@
+@startuml exceptionDiagram
+
+start
+:User inputs data;
+
+if (Is data valid?) then (Yes)
+  :Process data;
+else (No)
+  :Throw Exception;
+
+  if (Is it a null input?) then (Yes)
+    :Inform user: "Empty input. Provide value.";
+  else (No)
+  endif
+
+  if (Does user not exist?) then (Yes)
+    :Inform user: "User does not exist.";
+  else (No)
+  endif
+
+  if (Can the task stage not be updated?) then (Yes)
+    :Inform user: "Stage requirements not met.";
+  else (No)
+    :Inform user: "Unknown exception." and terminate;
+    stop
+  endif
+
+  :Request new data;
+  :Process data;
+endif
+
+:Save or Read data to DB;
+if (Error accessing DB?) then (Yes)
+  :Throw Exception;
+  :Inform user: "Database error." and terminate;
+  stop
+else (No)
+  :Save or Read data;
+endif
+
+:Continue normal execution;
+stop
+
+@enduml
