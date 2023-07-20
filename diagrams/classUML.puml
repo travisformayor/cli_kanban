@@ -36,6 +36,8 @@ class Task {
   +getDifficultyScore(): int
   +stageToString(stage: Stage): string
   +stringToStage(stageStr: string): Stage
+  +datetimeToString(dueDate: time_t): string
+  +stringToDatetime(dueDateStr: string): time_t
 }
 
 enum Stage {
@@ -90,7 +92,8 @@ class Database {
   +~Database()
   +createTables(): void
   +deleteTables(): void
-  +executeSQL(sql: string, params: list<variant<int, string, bool, optional<int>>>): void
+  +executeQuery(sql: string, dataMap: map<string, variant<int, string>>): int
+  +queryString(tableName: string, dataMap: map<string, variant<int, string>>): string
   +saveBoardData(board: Board&): void
   +saveTaskData(task: Task&): void
   +saveUserData(user: User&): void
