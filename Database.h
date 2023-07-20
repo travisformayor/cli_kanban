@@ -31,7 +31,7 @@ public:
     list<User*> loadUserData();
     list<Task*> loadTaskData(list<Board*> boards, list<User*> users);
     void deleteBoard(Board& board);
-    void deleteUser(User& user, User& replacementUser);
+    void deleteUser(User& user);
     void deleteTask(Task& task);
 
 private:

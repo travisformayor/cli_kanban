@@ -95,7 +95,7 @@ class Database {
   +loadTaskData(boards: list<Board*>, users: list<User*>): list<Task*>
   +deleteTask(task: Task&): void
   +deleteBoard(board: Board& board): void
-  +deleteUser(user: User&, replacementUser: User&): void
+  +deleteUser(user: User&): void
 }
 
 @enduml

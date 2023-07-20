@@ -243,13 +243,13 @@ void Database::deleteBoard(Board& board) {
     board.setActive(false);
 }
 
-void Database::deleteUser(User& user, User& replacementUser) {
-    // Update all the tasks assigned to this user
-    string sql = "UPDATE Tasks SET assigned_user = ? WHERE assigned_user = ?";
+void Database::deleteUser(User& user) {
+    // Delete all the tasks assigned to this user
+    string sql = "UPDATE Tasks SET active = ? WHERE assigned_user = ?";
 
     map<string, variant<int, string>> dataMap = {
-        { "assigned_user", variant<int, string>{replacementUser.getId()} },
-        { "id", variant<int, string>{user.getId()} }
+        { "active", variant<int, string>{0} },
+        { "assigned_user", variant<int, string>{user.getId()} }
     };
 
     executeQuery(sql, dataMap);
