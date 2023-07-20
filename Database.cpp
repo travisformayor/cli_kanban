@@ -2,8 +2,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
-#include <iomanip>
-#include <ctime>
+// #include <iomanip>
 
 using namespace std;
 
@@ -68,7 +67,6 @@ void Database::createTables() {
         "description TEXT,"
         "assigned_user INTEGER,"
         "stage TEXT NOT NULL,"
-        "due_date TEXT,"
         "difficulty_score INTEGER,"
         "active INTEGER NOT NULL,"
         "board_id INTEGER NOT NULL,"
@@ -210,7 +208,6 @@ void Database::saveTaskData(Task& task) {
         { "description", variant<int, string>{task.getDescription()} },
         { "difficulty_score", variant<int, string>{task.getDifficultyScore()} },
         { "active", variant<int, string>{task.isActive() ? 1 : 0} },
-        { "due_date", variant<int, string>{Task::datetimeToString(task.getDueDate())} },
         { "stage", variant<int, string>{task.stageToString(task.getStage())} },
         { "assigned_user", variant<int, string>{(task.getAssignedUser() != nullptr) ? task.getAssignedUser()->getId() : 0} }
     };
@@ -356,8 +353,6 @@ list<Task*> Database::loadTaskData(list<Board*> boards, list<User*> users) {
         // parse assigned user
         int assignedUserId = sqlite3_column_int(stmt, 8);
         User* user = User::findById(users, assignedUserId);
-        // parse date
-        time_t dueDate = Task::stringToDatetime(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6)));
     
         // create task object, save fetched info
         Task* task = new Task(title, *board);
@@ -365,7 +360,6 @@ list<Task*> Database::loadTaskData(list<Board*> boards, list<User*> users) {
         task->setDescription(description);
         task->setDifficultyScore(difficultyScore);
         task->setActive(active);
-        task->setDueDate(dueDate);
         task->setStage(task->stringToStage(stageStr));
         if (user != nullptr) {
             task->setAssignedUser(user);

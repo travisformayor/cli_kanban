@@ -13,7 +13,6 @@ class Task {
   -description: string
   -assignedUser: User*
   -stage: Stage
-  -dueDate: time_t
   -difficultyScore: int
   -active: bool
   +Task(title: string, board: Board&)
@@ -23,7 +22,6 @@ class Task {
   +setDescription(newDesc: string): void
   +setAssignedUser(user: User*): void
   +setStage(newStage: Stage): void
-  +setDueDate(newDueDate: time_t): void
   +setDifficultyScore(score: int): void
   +setActive(active: bool): void
   +isActive(): bool
@@ -32,20 +30,15 @@ class Task {
   +getDescription(): string
   +getAssignedUser(): User*
   +getStage(): Stage
-  +getDueDate(): time_t
   +getDifficultyScore(): int
   +stageToString(stage: Stage): string
   +stringToStage(stageStr: string): Stage
-  +datetimeToString(dueDate: time_t): string
-  +stringToDatetime(dueDateStr: string): time_t
 }
 
 enum Stage {
-  Backlog
   ToDo
   InProgress
   Done
-  Archive
 }
 
 class User {

@@ -1,8 +1,7 @@
 #include "Task.h"
 #include <stdexcept>
 #include <sstream>
-#include <iomanip>
-#include <time.h>
+// #include <iomanip>
 
 using namespace std;
 
@@ -11,8 +10,7 @@ Task::Task(string title, Board& board) : title(title), active(true) {
         throw invalid_argument("Title can't be empty.");
     }
     this->id = 0;
-    this->stage = Stage::Backlog;
-    this->dueDate = 0;
+    this->stage = Stage::ToDo;
     this->difficultyScore = 0;
 }
 
@@ -42,39 +40,21 @@ void Task::setAssignedUser(User* user) {
 void Task::setStage(Stage newStage) {
     switch (newStage) {
         case Stage::ToDo:
-            if (this->description.empty() || this->difficultyScore == 0) {
-                throw runtime_error("Task needs description and difficulty score to enter 'To Do' stage.");
-            }
-            if (this->stage != Stage::Backlog) {
-                throw runtime_error("Cannot skip stages. Backlog before To Do.");
-            }
             break;
         case Stage::InProgress:
-            if (this->description.empty() || this->difficultyScore == 0 || this->assignedUser == nullptr || this->dueDate == 0) {
-                throw runtime_error("Task needs description, difficulty score, assigned user, and due date to enter 'In Progress' stage.");
-            }
-            if (this->stage != Stage::ToDo) {
-                throw runtime_error("Cannot skip stages. 'To Do' before 'In Progress'.");
+            if (this->description.empty() || this->difficultyScore == 0 || this->assignedUser == nullptr) {
+                throw runtime_error("Task needs assigned user, description, difficulty for 'In Progress' stage.");
             }
             break;
         case Stage::Done:
             if (this->stage != Stage::InProgress) {
-                throw runtime_error("Cannot skip stages. 'In Progress' before 'Done'.");
-            }
-            break;
-        case Stage::Archive:
-            if (this->stage != Stage::Done) {
-                throw runtime_error("Cannot skip stages. 'Done' before 'Archive', or delete the Task.");
+                throw runtime_error("Cannot skip 'In Progress' stage.");
             }
             break;
     }
 
     // if all requirements pass...
     this->stage = newStage;
-}
-
-void Task::setDueDate(time_t newDueDate) {
-    this->dueDate = newDueDate;
 }
 
 void Task::setDifficultyScore(int score) {
@@ -117,10 +97,6 @@ Stage Task::getStage() {
     return this->stage;
 }
 
-time_t Task::getDueDate() {
-    return this->dueDate;
-}
-
 int Task::getDifficultyScore() {
     return this->difficultyScore;
 }
@@ -128,51 +104,24 @@ int Task::getDifficultyScore() {
 // helper convert methods for dealing with Stages as strings
 string Task::stageToString(Stage stage) {
     switch (stage) {
-    case Stage::Backlog:
-        return "Backlog";
     case Stage::ToDo:
         return "ToDo";
     case Stage::InProgress:
         return "InProgress";
     case Stage::Done:
         return "Done";
-    case Stage::Archive:
-        return "Archive";
     default:
         throw runtime_error("Invalid stage");
     }
 }
 
 Stage Task::stringToStage(const string& stageStr) {
-    if (stageStr == "Backlog")
-        return Stage::Backlog;
-    else if (stageStr == "ToDo")
+    if (stageStr == "ToDo")
         return Stage::ToDo;
     else if (stageStr == "InProgress")
         return Stage::InProgress;
     else if (stageStr == "Done")
         return Stage::Done;
-    else if (stageStr == "Archive")
-        return Stage::Archive;
     else
         throw runtime_error("Invalid stage string: " + stageStr);
-}
-
-string Task::datetimeToString(time_t dueDate) {
-    tm ptm;
-    localtime_s(&ptm, &dueDate);
-    stringstream buffer;
-    buffer << put_time(&ptm, "%Y-%m-%d %H:%M:%S");
-    string dueDateString = buffer.str();
-
-    return dueDateString;
-}
-
-time_t Task::stringToDatetime(string dueDateStr) {
-    istringstream ss(dueDateStr);
-    tm dueDateTm = {};
-    ss >> get_time(&dueDateTm, "%Y-%m-%d %H:%M:%S");
-    time_t dueDate = mktime(&dueDateTm);
-
-    return dueDate;
 }
