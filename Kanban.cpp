@@ -2,6 +2,7 @@
 #include <windows.h>
 #include <map>
 #include <list>
+#include <conio.h>
 #include "Database.h"
 #include "Board.h"
 
@@ -81,39 +82,47 @@ int main() {
 
         // Listen for keyboard commands
         while (true) {
-            // Up arrow
-            if (GetAsyncKeyState(VK_UP) & 0x8000) {
-                selectedIndex = static_cast<int>((selectedIndex - 1 + boardNames.size()) % boardNames.size());
-                displayScreen("Boards", boardNames, selectedIndex);
-            }
-            // Down arrow
-            else if (GetAsyncKeyState(VK_DOWN) & 0x8000) {
-                selectedIndex = static_cast<int>((selectedIndex + 1) % boardNames.size());
-                displayScreen("Boards", boardNames, selectedIndex);
-            }
-            // 'n' key - create new board
-            else if (GetAsyncKeyState('n') & 0x8000) {
-                string newBoardName = getUserInput();
-                Board* newBoard = new Board(newBoardName);
-                db.saveBoardData(*newBoard);
-                boards = db.loadBoardData(); // reload the boards
-                boardNames.clear();
-                for (Board* board : boards) {
-                    boardNames.push_back(board->getName());
+            if (_kbhit()) {
+                int ch = _getch();
+
+                // if arrow key
+                if (ch == 0 || ch == 224) {
+                    ch = _getch();
+                    switch (ch) {
+                    case 72: // up arrow key
+                        selectedIndex = static_cast<int>((selectedIndex - 1 + boardNames.size()) % boardNames.size());
+                        displayScreen("Boards", boardNames, selectedIndex);
+                        break;
+                    case 80: // down arrow key
+                        selectedIndex = static_cast<int>((selectedIndex + 1) % boardNames.size());
+                        displayScreen("Boards", boardNames, selectedIndex);
+                        break;
+                    }
                 }
-                displayScreen("Boards", boardNames, selectedIndex);
-            }
-            // 'd' key - delete selected board
-            else if (GetAsyncKeyState('d') & 0x8000) {
-                auto it = boards.begin();
-                advance(it, selectedIndex);
-                db.deleteBoard(**it);
-                boards = db.loadBoardData(); // reload the list of boards
-                boardNames.clear();
-                for (Board* board : boards) {
-                    boardNames.push_back(board->getName());
+                // 'n' pressed
+                else if (ch == 'n' || ch == 'N') {
+                    string newBoardName = getUserInput();
+                    Board* newBoard = new Board(newBoardName);
+                    db.saveBoardData(*newBoard);
+                    boards = db.loadBoardData();
+                    boardNames.clear();
+                    for (Board* board : boards) {
+                        boardNames.push_back(board->getName());
+                    }
+                    displayScreen("Boards", boardNames, selectedIndex);
                 }
-                displayScreen("Boards", boardNames, selectedIndex);
+                // 'd' pressed
+                else if (ch == 'd' || ch == 'D') {
+                    auto it = boards.begin();
+                    advance(it, selectedIndex);
+                    db.deleteBoard(**it);
+                    boards = db.loadBoardData();
+                    boardNames.clear();
+                    for (Board* board : boards) {
+                        boardNames.push_back(board->getName());
+                    }
+                    displayScreen("Boards", boardNames, selectedIndex);
+                }
             }
         }
     }
