@@ -1,8 +1,8 @@
 #include <iostream>
 #include <windows.h>
+#include <conio.h>
 #include <map>
 #include <list>
-#include <conio.h>
 #include "Database.h"
 #include "Board.h"
 
@@ -12,17 +12,17 @@ const WORD TEXT_WHITE = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN
 const WORD TEXT_GREEN = FOREGROUND_INTENSITY | FOREGROUND_GREEN;
 
 map<string, string> screenMenus = {
-    {"Boards", "| up/down: Navigate | enter: Select | c: Create Board | d: Delete Board | b: Back | esc: Quit |"},
+    {"Boards", "    | up/down: Navigate | enter: Select | c: Create Board | d: Delete Board | esc: Quit |   "},
     {"Board", "| up/down: Navigate | enter: Select | c: Create Task | d: Delete Task | b: Back | esc: Quit | "},
-    {"Task", "Edit | t: Title | d: Description | s: Stage | r: Rated Difficulty | b: Back/Save"}
+    {"Task", " Select to Edit | t: Title | d: Description | s: Stage | r: Rated Difficulty | b: Back/Save "}
 };
 
 void topMenu(const string& currentScreen) {
-    cout << "======================================== Kanban Board =========================================\n";
+    cout << "======================================= Kanban Board =======================================\n";
     cout << screenMenus[currentScreen] << "\n";
-    cout << "=============================== (Press key to make selection) =================================\n";
+    cout << "============================== (Press key to make selection) ===============================\n";
     cout << "\n";
-    cout << "                                        | " << currentScreen << " |\n";
+    cout << "                                       | " << currentScreen << " |\n";
     cout << "\n";
 }
 
@@ -44,7 +44,7 @@ void displayList(const list<string>& items, int selectedIndex) {
             setTextColor(TEXT_WHITE); // regular item color
         }
         // print the item
-        cout << item << endl;
+        cout << "    - " << item << endl;
         index++;
     }
     setTextColor(TEXT_WHITE); // Reset color to white
@@ -128,6 +128,10 @@ int main() {
                         selectedIndex = max(0, static_cast<int>(boardNames.size()) - 1);
                     }
                     displayScreen("Boards", boardNames, selectedIndex);
+                }
+                // 'esc' pressed
+                else if (ch == 27) {
+                    exit(0);
                 }
             }
         }
