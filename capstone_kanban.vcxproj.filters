@@ -24,9 +24,6 @@
     <ClCompile Include="Task.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="User.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Kanban.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -39,9 +36,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Task.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="User.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

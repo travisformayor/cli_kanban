@@ -13,11 +13,6 @@ else (No)
   else (No)
   endif
 
-  if (Does user not exist?) then (Yes)
-    :Inform user: "User does not exist.";
-  else (No)
-  endif
-
   if (Can the task stage not be updated?) then (Yes)
     :Inform user: "Stage requirements not met.";
   else (No)

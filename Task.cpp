@@ -1,7 +1,6 @@
 #include "Task.h"
 #include <stdexcept>
 #include <sstream>
-// #include <iomanip>
 
 using namespace std;
 
@@ -33,17 +32,13 @@ void Task::setDescription(string newDesc) {
     this->description = newDesc;
 }
 
-void Task::setAssignedUser(User* user) {
-    this->assignedUser = user;
-}
-
 void Task::setStage(Stage newStage) {
     switch (newStage) {
         case Stage::ToDo:
             break;
         case Stage::InProgress:
-            if (this->description.empty() || this->difficultyScore == 0 || this->assignedUser == nullptr) {
-                throw runtime_error("Task needs assigned user, description, difficulty for 'In Progress' stage.");
+            if (this->description.empty() || this->difficultyScore == 0) {
+                throw runtime_error("Task needs description and difficulty for 'In Progress' stage.");
             }
             break;
         case Stage::Done:
@@ -82,15 +77,6 @@ string Task::getTitle() {
 
 string Task::getDescription() {
     return this->description;
-}
-
-User* Task::getAssignedUser() {
-    if (this->assignedUser != nullptr) {
-        return this->assignedUser;
-    }
-    else {
-        return nullptr;
-    }
 }
 
 Stage Task::getStage() {

@@ -2,7 +2,6 @@
 #define DATABASE_H
 
 #include "Board.h"
-#include "User.h"
 #include "Task.h"
 #include <sqlite3.h>
 #include <string>
@@ -13,7 +12,6 @@
 using namespace std;
 
 class Board;
-class User;
 class Task;
 
 class Database {
@@ -25,13 +23,10 @@ public:
     int executeQuery(const string& sql, const map<string, variant<int, string>>& dataMap);
     string queryString(const string& tableName, const map<string, variant<int, string>>& dataMap);
     void saveBoardData(Board& board);
-    void saveUserData(User& user);
     void saveTaskData(Task& task);
     list<Board*> loadBoardData();
-    list<User*> loadUserData();
-    list<Task*> loadTaskData(list<Board*> boards, list<User*> users);
+    list<Task*> loadTaskData(list<Board*> boards);
     void deleteBoard(Board& board);
-    void deleteUser(User& user);
     void deleteTask(Task& task);
 
 private:

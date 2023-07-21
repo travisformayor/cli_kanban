@@ -5,11 +5,6 @@ participant "Task" as T
 participant "Board" as B
 participant "Database" as DB
 
-User -> DB: loadUserData()
-activate DB
-DB --> User: userData
-deactivate DB
-
 User -> DB: loadBoardData()
 activate DB
 DB --> User: boardData
@@ -49,12 +44,12 @@ deactivate B
 'change to In Progress
 User -> T: setStage("In Progress")
 activate T
-alt Task has assigned user, description, and difficulty
+alt Task has description and difficulty
   T -> DB: saveTaskData()
   activate DB
   DB --> T: confirm
   deactivate DB
-else Task missing assigned user, description, or difficulty
+else Task missing description or difficulty
   T --> User: error() 
   deactivate T
   User -> T: setDescription()
@@ -65,13 +60,6 @@ else Task missing assigned user, description, or difficulty
   deactivate DB
   deactivate T
   User -> T: setDifficulty()
-  activate T
-  T -> DB: saveTaskData()
-  activate DB
-  DB --> T: confirm
-  deactivate DB
-  deactivate T
-  User -> T: setAssignedUser()
   activate T
   T -> DB: saveTaskData()
   activate DB
@@ -102,10 +90,5 @@ activate DB
 DB --> B: confirm
 deactivate DB
 deactivate B
-
-User -> DB: saveUserData()
-activate DB
-DB --> User: confirm
-deactivate DB
 
 @enduml

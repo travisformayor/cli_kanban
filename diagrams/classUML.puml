@@ -1,17 +1,19 @@
 @startuml classUML
 
-Task "*" -- "1" User : assignedUser
 Task "*" -- "1" Board : tasks
 Task "*" -- "1" Database
 Board "*" -- "1" Database
-User "*" -- "1" Database
-User "1" -- "1" Board : currentBoard
+
+enum Stage {
+  ToDo
+  InProgress
+  Done
+}
 
 class Task {
   -id: int
   -title: string
   -description: string
-  -assignedUser: User*
   -stage: Stage
   -difficultyScore: int
   -active: bool
@@ -20,7 +22,6 @@ class Task {
   +setId(id: int): void
   +setTitle(newTitle: string): void
   +setDescription(newDesc: string): void
-  +setAssignedUser(user: User*): void
   +setStage(newStage: Stage): void
   +setDifficultyScore(score: int): void
   +setActive(active: bool): void
@@ -28,35 +29,10 @@ class Task {
   +getId(): int
   +getTitle(): string
   +getDescription(): string
-  +getAssignedUser(): User*
   +getStage(): Stage
   +getDifficultyScore(): int
   +stageToString(stage: Stage): string
   +stringToStage(stageStr: string): Stage
-}
-
-enum Stage {
-  ToDo
-  InProgress
-  Done
-}
-
-class User {
-  -id: int
-  -name: string
-  -currentBoard: Board*
-  -active: bool
-  +User(name: string)
-  +~User()
-  +setId(id: int): void
-  +setName(newName: string): void
-  +setCurrentBoard(board: Board*): void
-  +setActive(active: bool): void
-  +isActive(): bool
-  +getId(): int
-  +getName(): string
-  +getCurrentBoard(): Board*
-  +findById(users: list<User*>, id: int): User*
 }
 
 class Board {
@@ -89,13 +65,10 @@ class Database {
   +queryString(tableName: string, dataMap: map<string, variant<int, string>>): string
   +saveBoardData(board: Board&): void
   +saveTaskData(task: Task&): void
-  +saveUserData(user: User&): void
   +loadBoardData(): list<Board*>
-  +loadUserData(): list<User*>
-  +loadTaskData(boards: list<Board*>, users: list<User*>): list<Task*>
+  +loadTaskData(boards: list<Board*>): list<Task*>
   +deleteTask(task: Task&): void
   +deleteBoard(board: Board& board): void
-  +deleteUser(user: User&): void
 }
 
 @enduml

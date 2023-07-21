@@ -2,7 +2,6 @@
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
-// #include <iomanip>
 
 using namespace std;
 
@@ -35,20 +34,8 @@ void Database::createTables() {
     }
 
     // Tables relationship info:
-    // - A Task belongs to one User (or none)
-    // - A User can have many Tasks (or none)
-    // - A Task belongs to one Board
     // - A Board can have many Tasks (or none)
-
-    // Create the Users table
-    sql = "CREATE TABLE IF NOT EXISTS Users ("
-        "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-        "name TEXT NOT NULL,"
-        "active INTEGER NOT NULL"
-        ");";
-
-    executeQuery(sql, {});
-    cout << "Users table created successfully\n";
+    // - A Task belongs to one Board
 
     // Create the Boards table
     sql = "CREATE TABLE IF NOT EXISTS Boards ("
@@ -65,12 +52,10 @@ void Database::createTables() {
         "id INTEGER PRIMARY KEY AUTOINCREMENT,"
         "title TEXT NOT NULL,"
         "description TEXT,"
-        "assigned_user INTEGER,"
         "stage TEXT NOT NULL,"
         "difficulty_score INTEGER,"
         "active INTEGER NOT NULL,"
         "board_id INTEGER NOT NULL,"
-        "FOREIGN KEY(assigned_user) REFERENCES Users(id),"
         "FOREIGN KEY(board_id) REFERENCES Boards(id)"
         ");";
 
@@ -85,7 +70,6 @@ void Database::createTables() {
 void Database::deleteTables() {
     try {
         executeQuery("DROP TABLE IF EXISTS Boards;", {});
-        executeQuery("DROP TABLE IF EXISTS Users;", {});
         executeQuery("DROP TABLE IF EXISTS Tasks;", {});
     }
     catch (const runtime_error& e) {
@@ -178,28 +162,6 @@ void Database::saveBoardData(Board& board) {
     }
 }
 
-void Database::saveUserData(User& user) {
-    string tableName = "Users";
-    map<string, variant<int, string>> dataMap = {
-        { "id", user.getId() },
-        { "name", user.getName() },
-        { "active", user.isActive() ? 1 : 0 }
-    };
-
-    // remove missing values
-    if (get<int>(dataMap["id"]) == 0) {
-        dataMap.erase("id"); // object is new, let db add id
-    }
-    // create sql statement and execute
-    string sql = queryString(tableName, dataMap);
-    int returnId = executeQuery(sql, dataMap);
-
-    // If new record, fetch and save db id
-    if (get<int>(dataMap["id"]) == 0) {
-        user.setId(returnId);
-    }
-}
-
 void Database::saveTaskData(Task& task) {
     string tableName = "Tasks";
     map<string, variant<int, string>> dataMap = {
@@ -208,17 +170,14 @@ void Database::saveTaskData(Task& task) {
         { "description", variant<int, string>{task.getDescription()} },
         { "difficulty_score", variant<int, string>{task.getDifficultyScore()} },
         { "active", variant<int, string>{task.isActive() ? 1 : 0} },
-        { "stage", variant<int, string>{task.stageToString(task.getStage())} },
-        { "assigned_user", variant<int, string>{(task.getAssignedUser() != nullptr) ? task.getAssignedUser()->getId() : 0} }
+        { "stage", variant<int, string>{task.stageToString(task.getStage())} }
     };
 
     // remove missing values
     if (get<int>(dataMap["id"]) == 0) {
         dataMap.erase("id"); // object is new, let db add id
     }
-    if (get<int>(dataMap["assigned_user"]) == 0) {
-        dataMap.erase("assigned_user"); // no assigned user
-    }
+
     // create sql statement and execute
     string sql = queryString(tableName, dataMap);
     int returnId = executeQuery(sql, dataMap);
@@ -241,30 +200,6 @@ void Database::deleteBoard(Board& board) {
     executeQuery(sql, dataMap);
 
     board.setActive(false);
-}
-
-void Database::deleteUser(User& user) {
-    // Delete all the tasks assigned to this user
-    string sql = "UPDATE Tasks SET active = ? WHERE assigned_user = ?";
-
-    map<string, variant<int, string>> dataMap = {
-        { "active", variant<int, string>{0} },
-        { "assigned_user", variant<int, string>{user.getId()} }
-    };
-
-    executeQuery(sql, dataMap);
-
-    // Update the user's active status
-    sql = "UPDATE Users SET active = ? WHERE id = ?";
-    
-    dataMap = {
-        { "active", variant<int, string>{0} },
-        { "id", variant<int, string>{user.getId()} }
-    };
-
-    executeQuery(sql, dataMap);
-
-    user.setActive(false);
 }
 
 void Database::deleteTask(Task& task) {
@@ -304,30 +239,7 @@ list<Board*> Database::loadBoardData() {
     return boards;
 }
 
-list<User*> Database::loadUserData() {
-    list<User*> users;
-    string sql = "SELECT * FROM Users;";
-    sqlite3_stmt* stmt;
-    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
-        throw runtime_error("Failed to prepare statement: " + string(sqlite3_errmsg(db)));
-    }
-
-    while (sqlite3_step(stmt) == SQLITE_ROW) {
-        int id = sqlite3_column_int(stmt, 0);
-        string name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-        bool active = sqlite3_column_int(stmt, 2);
-
-        User* user = new User(name);
-        user->setId(id);
-        user->setActive(active);
-        users.push_back(user);
-    }
-
-    sqlite3_finalize(stmt);
-    return users;
-}
-
-list<Task*> Database::loadTaskData(list<Board*> boards, list<User*> users) {
+list<Task*> Database::loadTaskData(list<Board*> boards) {
     list<Task*> tasks;
     string sql = "SELECT * FROM Tasks WHERE Active = 1;";
     sqlite3_stmt* stmt;
@@ -350,9 +262,6 @@ list<Task*> Database::loadTaskData(list<Board*> boards, list<User*> users) {
         int boardId = sqlite3_column_int(stmt, 5);
         Board* board = Board::findById(boards, boardId);
         string stageStr = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7));
-        // parse assigned user
-        int assignedUserId = sqlite3_column_int(stmt, 8);
-        User* user = User::findById(users, assignedUserId);
     
         // create task object, save fetched info
         Task* task = new Task(title, *board);
@@ -361,9 +270,6 @@ list<Task*> Database::loadTaskData(list<Board*> boards, list<User*> users) {
         task->setDifficultyScore(difficultyScore);
         task->setActive(active);
         task->setStage(task->stringToStage(stageStr));
-        if (user != nullptr) {
-            task->setAssignedUser(user);
-        }
 
         tasks.push_back(task);
     }
