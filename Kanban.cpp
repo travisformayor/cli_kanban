@@ -12,8 +12,8 @@ const WORD TEXT_WHITE = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN
 const WORD TEXT_GREEN = FOREGROUND_INTENSITY | FOREGROUND_GREEN;
 
 map<string, string> screenMenus = {
-    {"Boards", "| up/down: Navigate | enter: Select | n: New Board | d: Delete Board | b: Back | esc: Quit |"},
-    {"Board", "| up/down: Navigate | enter: Select Task | d: Delete Task | b: Back | esc: Quit | "},
+    {"Boards", "| up/down: Navigate | enter: Select | c: Create Board | d: Delete Board | b: Back | esc: Quit |"},
+    {"Board", "| up/down: Navigate | enter: Select | c: Create Task | d: Delete Task | b: Back | esc: Quit | "},
     {"Task", "Edit | t: Title | d: Description | s: Stage | r: Rated Difficulty | b: Back/Save"}
 };
 
@@ -86,7 +86,7 @@ int main() {
                 int ch = _getch();
 
                 // if arrow key
-                if (ch == 0 || ch == 224) {
+                if (ch == 224) {
                     ch = _getch();
                     switch (ch) {
                     case 72: // up arrow key
@@ -99,8 +99,8 @@ int main() {
                         break;
                     }
                 }
-                // 'n' pressed
-                else if (ch == 'n' || ch == 'N') {
+                // 'c' pressed
+                else if (ch == 'c' || ch == 'C') {
                     string newBoardName = getUserInput();
                     Board* newBoard = new Board(newBoardName);
                     db.saveBoardData(*newBoard);
@@ -116,10 +116,15 @@ int main() {
                     auto it = boards.begin();
                     advance(it, selectedIndex);
                     db.deleteBoard(**it);
-                    boards = db.loadBoardData();
+                    delete* it; // delete the memory occupied by the board
+                    boards.erase(it); // remove the pointer from the list
                     boardNames.clear();
                     for (Board* board : boards) {
                         boardNames.push_back(board->getName());
+                    }
+                    // Adjust the selected index if we're at the end of the list
+                    if (selectedIndex >= static_cast<int>(boardNames.size())) {
+                        selectedIndex = max(0, static_cast<int>(boardNames.size()) - 1);
                     }
                     displayScreen("Boards", boardNames, selectedIndex);
                 }
@@ -128,7 +133,7 @@ int main() {
     }
     catch (runtime_error& e) {
         cerr << "An error occurred: " << e.what() << endl;
-        return 1; // return non-zero on error
+        return 1; // return 1 for error
     }
 
     return 0;
