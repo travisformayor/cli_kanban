@@ -8,11 +8,14 @@ using namespace std;
 // Constructor 
 Database::Database(string dbName) : dbName(dbName) {
     int resultCode = sqlite3_open(dbName.c_str(), &db);
-    if (resultCode != SQLITE_OK) { // 0 means success
+    if (resultCode != SQLITE_OK) {
         sqlite3_close(db);
         string errorMsg = "Error opening database: " + string(sqlite3_errmsg(db));
         throw runtime_error(errorMsg);
     }
+
+    // Setup tables if not already created
+    createTables();
 }
 
 // Destructor
@@ -23,15 +26,6 @@ Database::~Database() {
 // Setup the DB Tables
 void Database::createTables() {
     string sql;
-
-    // Open the SQLite database
-    int result = sqlite3_open("kanban_database.db", &db);
-    if (result) {
-        throw runtime_error(string("Can't open database: ") + sqlite3_errmsg(db));
-    }
-    else {
-        cout << "Opened database successfully\n";
-    }
 
     // Tables relationship info:
     // - A Board can have many Tasks (or none)
