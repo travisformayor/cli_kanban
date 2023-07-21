@@ -210,7 +210,7 @@ void Database::deleteTask(Task& task) {
 // Methods to load data
 list<Board*> Database::loadBoardData() {
     list<Board*> boards;
-    string sql = "SELECT * FROM Boards;";
+    string sql = "SELECT * FROM Boards WHERE Active = 1;";
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
         throw runtime_error("Error preparing load board statement: " + string(sqlite3_errmsg(db)));
