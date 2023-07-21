@@ -136,22 +136,25 @@ string Database::queryString(const string& tableName, const map<string, variant<
 // methods to save data
 void Database::saveBoardData(Board& board) {
     string tableName = "Boards";
+
+    // remove missing values
+    bool isNew = (board.getId() == 0);
+
     map<string, variant<int, string>> dataMap = {
-        { "id", board.getId() },
         { "name", board.getName() },
         { "active", board.isActive() ? 1 : 0 }
     };
 
-    // remove missing values
-    if (get<int>(dataMap["id"]) == 0) {
-        dataMap.erase("id"); // object is new, let db add id
+    if (!isNew) {
+        dataMap.insert({"id", board.getId()});
     }
+
     // create sql statement and execute
     string sql = queryString(tableName, dataMap);
     int returnId = executeQuery(sql, dataMap);
 
     // If new record, fetch and save db id
-    if (get<int>(dataMap["id"]) == 0) {
+    if (isNew) {
         board.setId(returnId);
     }
 }
