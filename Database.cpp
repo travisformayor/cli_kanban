@@ -77,7 +77,7 @@ int Database::executeQuery(const string& sql, const map<string, variant<int, str
 
     // prepare the db action
     if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
-        throw runtime_error("Failed to prepare statement: " + string(sqlite3_errmsg(db)));
+        throw runtime_error("Error preparing query statement: " + string(sqlite3_errmsg(db)));
     }
 
     // bind values to sql datatype
@@ -218,7 +218,7 @@ list<Board*> Database::loadBoardData() {
     string sql = "SELECT * FROM Boards;";
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
-        throw runtime_error("Failed to prepare statement: " + string(sqlite3_errmsg(db)));
+        throw runtime_error("Error preparing load board statement: " + string(sqlite3_errmsg(db)));
     }
 
     while (sqlite3_step(stmt) == SQLITE_ROW) {
@@ -242,7 +242,7 @@ list<Task*> Database::loadTaskData(list<Board*> boards) {
     sqlite3_stmt* stmt;
 
     if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
-        throw runtime_error("Failed to prepare statement: " + string(sqlite3_errmsg(db)));
+        throw runtime_error("Error preparing load task statement: " + string(sqlite3_errmsg(db)));
     }
 
     while (sqlite3_step(stmt) == SQLITE_ROW) {
