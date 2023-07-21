@@ -4,7 +4,7 @@
 
 using namespace std;
 
-Task::Task(string title, Board& board) : title(title), active(true) {
+Task::Task(string title, Board& board) : title(title) {
     if (title.empty()) {
         throw invalid_argument("Title can't be empty.");
     }
@@ -57,14 +57,6 @@ void Task::setDifficultyScore(int score) {
         throw invalid_argument("Score must be between 1 and 5.");
     }
     this->difficultyScore = score;
-}
-
-void Task::setActive(bool active) {
-    this->active = active;
-}
-
-bool Task::isActive() {
-    return this->active;
 }
 
 int Task::getId() {

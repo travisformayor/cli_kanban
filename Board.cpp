@@ -3,7 +3,7 @@
 
 using namespace std;
 
-Board::Board(string name) : name(name), active(true) {
+Board::Board(string name) : name(name) {
     if (name.empty()) {
         throw invalid_argument("Name can't be empty.");
     }
@@ -30,24 +30,11 @@ void Board::setName(string newName) {
 }
 
 void Board::addTask(Task& task) {
-    if (task.isActive()) {
-        tasks.push_back(&task);
-    }
-    else {
-        throw invalid_argument("Task must be active");
-    }
+    tasks.push_back(&task);
 }
 
 void Board::removeTask(Task& task) {
     tasks.remove(&task);
-}
-
-void Board::setActive(bool active) {
-    this->active = active;
-}
-
-bool Board::isActive() {
-    return this->active;
 }
 
 int Board::getId() {

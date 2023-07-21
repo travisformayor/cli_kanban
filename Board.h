@@ -17,8 +17,6 @@ public:
     void setName(string newName);
     void addTask(Task& task);
     void removeTask(Task& task);
-    void setActive(bool active);
-    bool isActive();
     int getId();
     string getName();
     list<Task*> getTasks();
@@ -28,7 +26,6 @@ private:
     int id;
     string name;
     list<Task*> tasks;
-    bool active;
 };
 
 #endif // BOARD_H

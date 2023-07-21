@@ -35,7 +35,6 @@ void Database::createTables() {
     sql = "CREATE TABLE IF NOT EXISTS Boards ("
         "id INTEGER PRIMARY KEY AUTOINCREMENT,"
         "name TEXT NOT NULL,"
-        "active INTEGER NOT NULL"
         ");";
 
     executeQuery(sql, {});
@@ -47,7 +46,6 @@ void Database::createTables() {
         "description TEXT,"
         "stage TEXT NOT NULL,"
         "difficulty_score INTEGER,"
-        "active INTEGER NOT NULL,"
         "board_id INTEGER NOT NULL,"
         "FOREIGN KEY(board_id) REFERENCES Boards(id)"
         ");";
@@ -135,13 +133,12 @@ void Database::saveBoardData(Board& board) {
 
     map<string, variant<int, string>> dataMap = {
         { "name", board.getName() },
-        { "active", board.isActive() ? 1 : 0 }
     };
 
     // include id only if not new
     bool isNew = (board.getId() == 0);
     if (!isNew) {
-        dataMap.insert({"id", board.getId()});
+        dataMap.insert({ "id", board.getId() });
     }
 
     // create sql statement and execute
@@ -160,14 +157,14 @@ void Database::saveTaskData(Task& task) {
         { "title", variant<int, string>{task.getTitle()} },
         { "description", variant<int, string>{task.getDescription()} },
         { "difficulty_score", variant<int, string>{task.getDifficultyScore()} },
-        { "active", variant<int, string>{task.isActive() ? 1 : 0} },
         { "stage", variant<int, string>{task.stageToString(task.getStage())} }
+        // to do: add boardId
     };
 
     // include id only if not new
     bool isNew = (task.getId() == 0);
     if (!isNew) {
-        dataMap.insert({"id", task.getId()});
+        dataMap.insert({ "id", task.getId() });
     }
 
     // create sql statement and execute
@@ -180,37 +177,32 @@ void Database::saveTaskData(Task& task) {
     }
 }
 
-// delete entities
+// Delete Board
 void Database::deleteBoard(Board& board) {
-    string sql = "UPDATE Boards SET active = ? WHERE id = ?";
+    string sql = "DELETE FROM Boards WHERE id = ?";
 
     map<string, variant<int, string>> dataMap = {
-        { "active", variant<int, string>{0} },
         { "id", variant<int, string>{board.getId()} }
     };
 
     executeQuery(sql, dataMap);
-
-    board.setActive(false);
 }
 
+// Delete Task
 void Database::deleteTask(Task& task) {
-    string sql = "UPDATE Tasks SET active = ? WHERE id = ?";
+    string sql = "DELETE FROM Tasks WHERE id = ?";
 
     map<string, variant<int, string>> dataMap = {
-        { "active", variant<int, string>{0} },
         { "id", variant<int, string>{task.getId()} }
     };
 
     executeQuery(sql, dataMap);
-
-    task.setActive(false);
 }
 
-// Methods to load data
+// Load Boards
 list<Board*> Database::loadBoardData() {
     list<Board*> boards;
-    string sql = "SELECT * FROM Boards WHERE Active = 1;";
+    string sql = "SELECT * FROM Boards;";
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
         throw runtime_error("Error preparing load board statement: " + string(sqlite3_errmsg(db)));
@@ -219,11 +211,9 @@ list<Board*> Database::loadBoardData() {
     while (sqlite3_step(stmt) == SQLITE_ROW) {
         int id = sqlite3_column_int(stmt, 0);
         string name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-        bool active = sqlite3_column_int(stmt, 2);
 
         Board* board = new Board(name);
         board->setId(id);
-        board->setActive(active);
         boards.push_back(board);
     }
 
@@ -231,9 +221,10 @@ list<Board*> Database::loadBoardData() {
     return boards;
 }
 
+// Load Tasks
 list<Task*> Database::loadTaskData(list<Board*> boards) {
     list<Task*> tasks;
-    string sql = "SELECT * FROM Tasks WHERE Active = 1;";
+    string sql = "SELECT * FROM Tasks;";
     sqlite3_stmt* stmt;
 
     if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
@@ -250,17 +241,15 @@ list<Task*> Database::loadTaskData(list<Board*> boards) {
         string description = descriptionRaw ? descriptionRaw : "";
         // get attributes
         int difficultyScore = sqlite3_column_int(stmt, 3);
-        bool active = sqlite3_column_int(stmt, 4) == 1;
         int boardId = sqlite3_column_int(stmt, 5);
         Board* board = Board::findById(boards, boardId);
         string stageStr = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7));
-    
+
         // create task object, save fetched info
         Task* task = new Task(title, *board);
         task->setId(id);
         task->setDescription(description);
         task->setDifficultyScore(difficultyScore);
-        task->setActive(active);
         task->setStage(task->stringToStage(stageStr));
 
         tasks.push_back(task);

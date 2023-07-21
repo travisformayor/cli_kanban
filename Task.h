@@ -23,8 +23,6 @@ public:
     void setDescription(string newDesc);
     void setStage(Stage newStage);
     void setDifficultyScore(int score);
-    void setActive(bool active);
-    bool isActive();
     int getId();
     string getTitle();
     string getDescription();
@@ -39,7 +37,6 @@ private:
     string description;
     Stage stage;
     int difficultyScore;
-    bool active;
 };
 
 #endif // TASK_H

@@ -16,7 +16,6 @@ class Task {
   -description: string
   -stage: Stage
   -difficultyScore: int
-  -active: bool
   +Task(title: string, board: Board&)
   +~Task()
   +setId(id: int): void
@@ -24,8 +23,6 @@ class Task {
   +setDescription(newDesc: string): void
   +setStage(newStage: Stage): void
   +setDifficultyScore(score: int): void
-  +setActive(active: bool): void
-  +isActive(): bool
   +getId(): int
   +getTitle(): string
   +getDescription(): string
@@ -39,15 +36,12 @@ class Board {
   -id: int
   -name: string
   -tasks: list<Task*>
-  -active: bool
   +Board(name: string)
   +~Board()
   +setId(id: int): void
   +setName(newName: string): void
   +addTask(task: Task&): void
   +removeTask(task: Task&): void
-  +setActive(active: bool): void
-  +isActive(): bool
   +getId(): int
   +getName(): string
   +getTasks(): list<Task*>
