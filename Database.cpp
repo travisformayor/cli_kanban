@@ -39,7 +39,6 @@ void Database::createTables() {
         ");";
 
     executeQuery(sql, {});
-    cout << "Boards table created successfully\n";
 
     // Create the Tasks table
     sql = "CREATE TABLE IF NOT EXISTS Tasks ("
@@ -54,10 +53,6 @@ void Database::createTables() {
         ");";
 
     executeQuery(sql, {});
-    cout << "Tasks table created successfully\n";
-
-    // Close the SQLite database
-    sqlite3_close(db);
 }
 
 // Clear the DB.
