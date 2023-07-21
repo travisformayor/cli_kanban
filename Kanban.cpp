@@ -69,7 +69,7 @@ int main() {
         int selectedIndex = 0;
 
         // Open DB
-        Database db("kanban.db");
+        Database db("kanban_db.db");
         // Load existing Boards
         list<Board*> boards = db.loadBoardData();
         list<string> boardNames;
