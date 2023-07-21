@@ -8,7 +8,7 @@ using namespace std;
 // Constructor 
 Database::Database(string dbName) : dbName(dbName) {
     int resultCode = sqlite3_open(dbName.c_str(), &db);
-    if (resultCode != 0) { // 0 means success
+    if (resultCode != SQLITE_OK) { // 0 means success
         sqlite3_close(db);
         string errorMsg = "Error opening database: " + string(sqlite3_errmsg(db));
         throw runtime_error(errorMsg);
