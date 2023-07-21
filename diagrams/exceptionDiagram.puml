@@ -1,5 +1,7 @@
 @startuml exceptionDiagram
 
+title Exception Diagram
+
 start
 :User inputs data;
 

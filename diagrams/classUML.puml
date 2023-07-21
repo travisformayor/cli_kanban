@@ -1,5 +1,7 @@
 @startuml classUML
 
+title Class UML Diagram
+
 Task "*" -- "1" Board : tasks
 Task "*" -- "1" Database
 Board "*" -- "1" Database

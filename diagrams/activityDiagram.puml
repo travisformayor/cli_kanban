@@ -1,5 +1,7 @@
 @startuml activityDiagram
 
+title Activity Diagram
+
 start
 :User creates or opens a Board;
 :User creates or opens a Task;

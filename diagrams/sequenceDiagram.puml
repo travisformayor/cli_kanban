@@ -1,5 +1,7 @@
 @startuml sequenceDiagram
 
+title Sequence Diagram
+
 actor User
 participant "Task" as T
 participant "Board" as B
