@@ -137,14 +137,14 @@ string Database::queryString(const string& tableName, const map<string, variant<
 void Database::saveBoardData(Board& board) {
     string tableName = "Boards";
 
-    // remove missing values
-    bool isNew = (board.getId() == 0);
 
     map<string, variant<int, string>> dataMap = {
         { "name", board.getName() },
         { "active", board.isActive() ? 1 : 0 }
     };
 
+    // include id only if not new
+    bool isNew = (board.getId() == 0);
     if (!isNew) {
         dataMap.insert({"id", board.getId()});
     }
@@ -153,7 +153,7 @@ void Database::saveBoardData(Board& board) {
     string sql = queryString(tableName, dataMap);
     int returnId = executeQuery(sql, dataMap);
 
-    // If new record, fetch and save db id
+    // If new record, fetch the created db id
     if (isNew) {
         board.setId(returnId);
     }
@@ -162,7 +162,6 @@ void Database::saveBoardData(Board& board) {
 void Database::saveTaskData(Task& task) {
     string tableName = "Tasks";
     map<string, variant<int, string>> dataMap = {
-        { "id", variant<int, string>{task.getId()} },
         { "title", variant<int, string>{task.getTitle()} },
         { "description", variant<int, string>{task.getDescription()} },
         { "difficulty_score", variant<int, string>{task.getDifficultyScore()} },
@@ -170,17 +169,18 @@ void Database::saveTaskData(Task& task) {
         { "stage", variant<int, string>{task.stageToString(task.getStage())} }
     };
 
-    // remove missing values
-    if (get<int>(dataMap["id"]) == 0) {
-        dataMap.erase("id"); // object is new, let db add id
+    // include id only if not new
+    bool isNew = (task.getId() == 0);
+    if (!isNew) {
+        dataMap.insert({"id", task.getId()});
     }
 
     // create sql statement and execute
     string sql = queryString(tableName, dataMap);
     int returnId = executeQuery(sql, dataMap);
 
-    // If new record, fetch and save db id
-    if (get<int>(dataMap["id"]) == 0) {
+    // If new record, fetch the created db id
+    if (isNew) {
         task.setId(returnId);
     }
 }
