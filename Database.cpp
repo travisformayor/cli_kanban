@@ -34,7 +34,7 @@ void Database::createTables() {
     // Create the Boards table
     sql = "CREATE TABLE IF NOT EXISTS Boards ("
         "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-        "name TEXT NOT NULL,"
+        "name TEXT NOT NULL"
         ");";
 
     executeQuery(sql, {});
