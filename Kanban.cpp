@@ -18,11 +18,11 @@ map<string, string> screenMenus = {
 };
 
 void topMenu(const string& currentScreen) {
-    cout << "======================================= Kanban Board =======================================\n";
+    cout << "======================================== Kanban Board ========================================\n";
     cout << screenMenus[currentScreen] << "\n";
-    cout << "============================== (Press key to make selection) ===============================\n";
+    cout << "=============================== (Press key to make selection) ================================\n";
     cout << "\n";
-    cout << "                                       | " << currentScreen << " |\n";
+    cout << "                                        | " << currentScreen << " |\n";
     cout << "\n";
 }
 
