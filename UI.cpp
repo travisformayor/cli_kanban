@@ -39,14 +39,14 @@ void UI::displayList(const list<string>& items, int& selectedIndex) {
     setTextColor(TEXT_WHITE); // Reset color to white
 }
 
-void UI::addBoard(Database* db, list<Board*>& boards) {
+void UI::addBoard(Database& db, list<Board*>& boards) {
     string newBoardName = getUserInput("Enter a name for the new board: ");
     Board* newBoard = new Board(newBoardName);
     db->saveBoardData(*newBoard);
     boards = db->loadBoardData();
 }
 
-void UI::removeBoard(Database* db, list<Board*>& boards, int& selectedIndex) {
+void UI::removeBoard(Database& db, list<Board*>& boards, int& selectedIndex) {
     // find the selected board
     auto it = boards.begin();
     advance(it, selectedIndex);
@@ -57,7 +57,7 @@ void UI::removeBoard(Database* db, list<Board*>& boards, int& selectedIndex) {
     selectedIndex = max(0, static_cast<int>(boards.size()) - 1);
 }
 
-void UI::addTask(Database* db, list<Task*>& tasks) {
+void UI::addTask(Database& db, list<Task*>& tasks) {
     string newTaskName = getUserInput("Enter a name for the new task: ");
     Task* newTask = new Task(newTaskName);
     board->addTask(newTask);
@@ -65,7 +65,7 @@ void UI::addTask(Database* db, list<Task*>& tasks) {
     // to do: do i need to reload the tasks from the db and save them to the task list here?
 }
 
-void UI::removeTask(Database* db, list<Task*>& tasks, int& selectedIndex) {
+void UI::removeTask(Database& db, list<Task*>& tasks, int& selectedIndex) {
     // find the selected task
     auto it = tasks.begin();
     advance(it, selectedIndex);
@@ -83,7 +83,7 @@ string UI::getUserInput(const string& prompt) {
     return input;
 }
 
-void UI::navControls(string& screen, int& selectedIndex, Database* db, variant<list<Board*>, list<Task*>>& items) {
+void UI::navControls(string& screen, int& selectedIndex, Database& db, variant<list<Board*>, list<Task*>>& items) {
     // Controls for Boards List and Board View
     // Listen for keyboard commands
     while (true) {
@@ -148,7 +148,7 @@ void UI::navControls(string& screen, int& selectedIndex, Database* db, variant<l
     }
 }
 
-void UI::taskEditControls(string& screen, int& selectedIndex, Database* db, Task* task) {
+void UI::taskEditControls(string& screen, int& selectedIndex, Database& db, Task* task) {
     // Controls for Task Edit View
     // Listen for keyboard commands
     while (true) {
