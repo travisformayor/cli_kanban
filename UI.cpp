@@ -289,13 +289,15 @@ void UI::changeScreen(string command) {
         ui.setSelectIndex(0);
     }
     else if (this->currScreen == "Board View") {
-        ui.loadSelectedBoard();
+        ui.getSelectedBoard();
         ui.setSelectIndex(0);
     }
     else if (this->currScreen == "Task View") {
         ui.getSelectedTask();
         ui.setSelectIndex(0);
     }
+
+    // 3. while loops, display refreshes in main()
 }
 
 void UI::editTaskDescription() {

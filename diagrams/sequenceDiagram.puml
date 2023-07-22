@@ -87,7 +87,7 @@ deactivate T
 
 User -> B: deleteBoard()
 activate B
-B -> DB: deleteBoardData()
+B -> DB: deleteBoard()
 activate DB
 DB --> B: confirm
 deactivate DB
