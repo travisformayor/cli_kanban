@@ -25,7 +25,7 @@ public:
     void saveBoardData(Board& board);
     void saveTaskData(Task& task);
     list<Board*> loadBoardData();
-    list<Task*> loadTaskData(list<Board*> boards);
+    list<Task*> loadTaskData(Board& board);
     void deleteBoard(Board& board);
     void deleteTask(Task& task);
 

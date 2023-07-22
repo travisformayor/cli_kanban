@@ -130,7 +130,6 @@ string Database::queryString(const string& tableName, const map<string, variant<
 void Database::saveBoardData(Board& board) {
     string tableName = "Boards";
 
-
     map<string, variant<int, string>> dataMap = {
         { "name", board.getName() },
     };
@@ -222,14 +221,17 @@ list<Board*> Database::loadBoardData() {
 }
 
 // Load Tasks
-list<Task*> Database::loadTaskData(list<Board*> boards) {
+list<Task*> Database::loadTaskData(Board& board) {
     list<Task*> tasks;
-    string sql = "SELECT * FROM Tasks;";
+    string sql = "SELECT * FROM Tasks WHERE board_id = ?;";
     sqlite3_stmt* stmt;
 
     if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
         throw runtime_error("Error preparing load task statement: " + string(sqlite3_errmsg(db)));
     }
+
+    // Bind ? to board id
+    sqlite3_bind_int(stmt, 1, board.getId());
 
     while (sqlite3_step(stmt) == SQLITE_ROW) {
         // get id
@@ -240,13 +242,11 @@ list<Task*> Database::loadTaskData(list<Board*> boards) {
         const char* descriptionRaw = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
         string description = descriptionRaw ? descriptionRaw : "";
         // get attributes
-        int difficultyScore = sqlite3_column_int(stmt, 3);
-        int boardId = sqlite3_column_int(stmt, 5);
-        Board* board = Board::findById(boards, boardId);
-        string stageStr = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7));
+        string stageStr = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
+        int difficultyScore = sqlite3_column_int(stmt, 4);
 
         // create task object, save fetched info
-        Task* task = new Task(title, *board);
+        Task* task = new Task(title, board);
         task->setId(id);
         task->setDescription(description);
         task->setDifficultyScore(difficultyScore);
