@@ -19,14 +19,14 @@ public:
     void setTextColor(WORD color);
     void setSelectIndex(int index);
     void loadBoards();
-    void loadSelectedBoard();
+    void getSelectedBoard();
     void getSelectedTask();
     void displayScreen();
     void displayTitles(list<string>& titles);
     void displayTaskCard(string taskDetails);
     void addNewBoard();
-    void removeSelectedBoard();
     void addNewTask();
+    void removeSelectedBoard();
     void removeSelectedTask();
     string getUserInput(const string& prompt);
     void keyboardListen();

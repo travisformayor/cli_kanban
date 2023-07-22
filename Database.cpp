@@ -201,7 +201,7 @@ void Database::deleteTask(Task& task) {
 // Load Boards
 list<Board*> Database::loadBoardData() {
     list<Board*> boards;
-    string sql = "SELECT * FROM Boards;";
+    string sql = "SELECT * FROM Boards ORDER BY title, id;";
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
         throw runtime_error("Error preparing load board statement: " + string(sqlite3_errmsg(db)));
@@ -223,7 +223,12 @@ list<Board*> Database::loadBoardData() {
 // Load Tasks
 list<Task*> Database::loadTaskData(Board& board) {
     list<Task*> tasks;
-    string sql = "SELECT * FROM Tasks WHERE board_id = ?;";
+    string sql = "SELECT * FROM Tasks WHERE board_id = ? "
+        "ORDER BY CASE "
+        "WHEN stage = 'To Do' THEN 1 "
+        "WHEN stage = 'In Progress' THEN 2 "
+        "WHEN stage = 'Done' THEN 3 "
+        "END, id;";
     sqlite3_stmt* stmt;
 
     if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {

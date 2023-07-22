@@ -39,12 +39,12 @@ void UI::loadBoards() {
     this->loadedBoards = db.loadBoardData();
 }
 
-void UI::loadSelectedBoard() {
+void UI::getSelectedBoard() {
     // find selected board
-    Board* ptr = this->loadedBoards.begin();
-    advance(ptr, this->selectedIndex);
-    // save selected board
-    this->selectedBoard = *ptr;
+    Board* boardPtr = this->loadedBoards.begin();
+    advance(boardPtr, this->selectedIndex);
+    // mark board as selected
+    this->selectedBoard = *boardPtr;
     // load all tasks for selected board
     this->loadedTasks.clear();
     this->loadedTasks = db.loadTaskData(this->selectedBoard);
@@ -52,11 +52,10 @@ void UI::loadSelectedBoard() {
 
 void UI::getSelectedTask() {
     // find selected task
-    // to do: sorting the order of the tasks may break this. sort at db level
-    Task* ptr = this->loadedTasks.begin();
-    advance(ptr, this->selectedIndex);
-    // save selected task
-    this->selectedTask = *ptr;
+    Task* taskPtr = this->loadedTasks.begin();
+    advance(taskPtr, this->selectedIndex);
+    // mark task as selected
+    this->selectedTask = *taskPtr;
 }
 
 void UI::displayScreen() {
@@ -110,43 +109,50 @@ void UI::displayTaskCard(string taskDetails) {
 
 void UI::addNewBoard() {
     string newBoardTitle = getUserInput("Enter a title for the new board: ");
-    Board* newBoard = new Board(newBoardTitle);
-    this->db->saveBoardData(*newBoard);
+    Board newBoard = new Board(newBoardTitle);
+    // save board to db
+    this->db->saveBoardData(newBoard);
+    // reload list of boards
+    this->loadedBoards.clear();
     this->loadedBoards = this->db->loadBoardData();
-}
-
-void UI::removeSelectedBoard() {
-    // find the selected board
-    Board* ptr = this->loadedBoards.begin();
-    advance(ptr, this->selectedIndex);
-    // delete board
-    this->db->deleteBoard(*ptr);
-    delete* ptr; // delete the memory occupied by the board
-    this->loadedBoards.erase(it); // remove the pointer from the list
-    // Adjust selected index if at end of list
-    this->selectedIndex = max(0, static_cast<int>(this->loadedBoards.size()) - 1);
 }
 
 void UI::addNewTask() {
     string newTaskTitle = getUserInput("Enter a title for the new task: ");
-    Task* newTask = new Task(newTaskTitle);
-    // add task to board and save
-    this->db->saveTaskData(this->selectedBoard, *newTask);
+    Task newTask = new Task(newTaskTitle);
+    // add task to board and save to db
+    this->db->saveTaskData(this->selectedBoard, newTask);
     // reload tasks for selected board
     this->loadedTasks.clear();
-    this->loadedTasks = db.loadTaskData(this->selectedBoard);
+    this->loadedTasks = this->db.loadTaskData(this->selectedBoard);
+}
+
+void UI::removeSelectedBoard() {
+    // find the selected board
+    Board* boardPtr = this->loadedBoards.begin();
+    advance(boardPtr, this->selectedIndex);
+    // delete board and deallocate memory for pointer
+    this->db->deleteBoard(*boardPtr);
+    delete* boardPtr;
+    // reload list of boards
+    this->loadedBoards.clear();
+    this->loadedBoards = this->db->loadBoardData();
+    // Adjust selected index if at end of list
+    this->selectedIndex = max(0, static_cast<int>(this->loadedBoards.size()) - 1);
 }
 
 void UI::removeSelectedTask() {
     // find the selected task
-    Task* ptr = this->loadedTasks.begin();
-    advance(ptr, this->selectedIndex);
-    // delete task
-    this->db->deleteTask(*ptr);
-    delete* it; // delete the memory occupied by the task
-    this->loadedTasks.erase(ptr); // remove the pointer from the list
+    Task* taskPtr = this->loadedTasks.begin();
+    advance(taskPtr, this->selectedIndex);
+    // delete task and deallocate memory for pointer
+    this->db->deleteTask(*taskPtr);
+    delete* taskPtr;
+    // reload tasks for selected board
+    this->loadedTasks.clear();
+    this->loadedTasks = this->db.loadTaskData(this->selectedBoard);
     // Adjust selected index if at end of list
-    this->selectedIndex = max(0, static_cast<int>(tasks.size()) - 1);
+    this->selectedIndex = max(0, static_cast<int>(this->loadedTasks.size()) - 1);
 }
 
 string UI::getUserInput(const string& prompt) {
@@ -158,8 +164,12 @@ string UI::getUserInput(const string& prompt) {
     // to do: catch and exceptions around user input
 }
 
-// to do sort: for sort just throw some order by clauses in the sql, dont do the sort in UI 
-// to do search: just highlight some where clauses as search?
+// to do sort: 
+// - sort at db level: stage then id for tasks, title then id for boards
+// - show how clears and reloads from db every time there is a change to the list of tasks or boards
+// - show advance() command, now keeping everything sorted correctly lets this simple selection method work
+// to do search: 
+// - where clause in db searches for only tasks associated with the selected board. relationship key needed for this to work
 
 void UI::keyboardListen() {
     bool keyPressed = false;
