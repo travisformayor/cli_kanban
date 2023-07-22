@@ -178,13 +178,23 @@ void Database::saveTaskData(Task& task) {
 
 // Delete Board
 void Database::deleteBoard(Board& board) {
-    string sql = "DELETE FROM Boards WHERE id = ?";
+    // Delete all tasks associated with board
+    string sqlTasks = "DELETE FROM Tasks WHERE board_id = ?";
 
-    map<string, variant<int, string>> dataMap = {
+    map<string, variant<int, string>> dataMapTasks = {
+        { "board_id", variant<int, string>{board.getId()} }
+    };
+
+    executeQuery(sqlTasks, dataMapTasks);
+
+    // Delete the board
+    string sqlBoard = "DELETE FROM Boards WHERE id = ?";
+
+    map<string, variant<int, string>> dataMapBoards = {
         { "id", variant<int, string>{board.getId()} }
     };
 
-    executeQuery(sql, dataMap);
+    executeQuery(sqlBoard, dataMapBoards);
 }
 
 // Delete Task
