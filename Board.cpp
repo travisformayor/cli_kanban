@@ -3,9 +3,9 @@
 
 using namespace std;
 
-Board::Board(string name) : name(name) {
-    if (name.empty()) {
-        throw invalid_argument("Name can't be empty.");
+Board::Board(string title) : title(title) {
+    if (title.empty()) {
+        throw invalid_argument("Title can't be empty.");
     }
     this->id = 0;
 }
@@ -22,11 +22,11 @@ void Board::setId(int id) {
     this->id = id;
 }
 
-void Board::setName(string newName) {
-    if (newName.empty()) {
-        throw invalid_argument("Name can't be empty.");
+void Board::setTitle(string newTitle) {
+    if (newTitle.empty()) {
+        throw invalid_argument("Title can't be empty.");
     }
-    this->name = newName;
+    this->title = newTitle;
 }
 
 void Board::addTask(Task& task) {
@@ -41,8 +41,8 @@ int Board::getId() {
     return this->id;
 }
 
-string Board::getName() {
-    return this->name;
+string Board::getTitle() {
+    return this->title;
 }
 
 list<Task*> Board::getTasks() {

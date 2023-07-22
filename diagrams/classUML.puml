@@ -36,16 +36,16 @@ class Task {
 
 class Board {
   -id: int
-  -name: string
+  -title: string
   -tasks: list<Task*>
-  +Board(name: string)
+  +Board(title: string)
   +~Board()
   +setId(id: int): void
-  +setName(newName: string): void
+  +setTitle(newTitle: string): void
   +addTask(task: Task&): void
   +removeTask(task: Task&): void
   +getId(): int
-  +getName(): string
+  +getTitle(): string
   +getTasks(): list<Task*>
   +findById(boards: list<Board*>, id: int): Board*
 }

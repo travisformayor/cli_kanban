@@ -34,7 +34,7 @@ void Database::createTables() {
     // Create the Boards table
     sql = "CREATE TABLE IF NOT EXISTS Boards ("
         "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-        "name TEXT NOT NULL"
+        "title TEXT NOT NULL"
         ");";
 
     executeQuery(sql, {});
@@ -131,7 +131,7 @@ void Database::saveBoardData(Board& board) {
     string tableName = "Boards";
 
     map<string, variant<int, string>> dataMap = {
-        { "name", board.getName() },
+        { "title", board.getTitle() },
     };
 
     // include id only if not new
@@ -209,9 +209,9 @@ list<Board*> Database::loadBoardData() {
 
     while (sqlite3_step(stmt) == SQLITE_ROW) {
         int id = sqlite3_column_int(stmt, 0);
-        string name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+        string title = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
 
-        Board* board = new Board(name);
+        Board* board = new Board(title);
         board->setId(id);
         boards.push_back(board);
     }

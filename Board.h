@@ -11,20 +11,20 @@ class Task;
 
 class Board {
 public:
-    Board(string name);
+    Board(string title);
     ~Board();
     void setId(int id);
-    void setName(string newName);
+    void setTitle(string newTitle);
     void addTask(Task& task);
     void removeTask(Task& task);
     int getId();
-    string getName();
+    string getTitle();
     list<Task*> getTasks();
     static Board* findById(list<Board*> boards, int id);
 
 private:
     int id;
-    string name;
+    string title;
     list<Task*> tasks;
 };
 
