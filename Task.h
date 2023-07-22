@@ -22,12 +22,12 @@ public:
     void setTitle(string newTitle);
     void setDescription(string newDesc);
     void setStage(Stage newStage);
-    void setDifficultyScore(int score);
+    void setDifficultyRating(int rating);
     int getId();
     string getTitle();
     string getDescription();
     Stage getStage();
-    int getDifficultyScore();
+    int getDifficultyRating();
     string getTaskCard();
     list<Task*> searchTasks(list<Task*> tasks, const string& query);
     void sortTasks(list<Task*>& tasks, const string& sortType);
@@ -39,7 +39,7 @@ private:
     string title;
     string description;
     Stage stage;
-    int difficultyScore;
+    int difficultyRating;
 };
 
 #endif // TASK_H

@@ -45,7 +45,7 @@ void Database::createTables() {
         "title TEXT NOT NULL,"
         "description TEXT,"
         "stage TEXT NOT NULL,"
-        "difficulty_score INTEGER,"
+        "difficulty_rating INTEGER,"
         "board_id INTEGER NOT NULL,"
         "FOREIGN KEY(board_id) REFERENCES Boards(id)"
         ");";
@@ -155,7 +155,7 @@ void Database::saveTaskData(Task& task) {
     map<string, variant<int, string>> dataMap = {
         { "title", variant<int, string>{task.getTitle()} },
         { "description", variant<int, string>{task.getDescription()} },
-        { "difficulty_score", variant<int, string>{task.getDifficultyScore()} },
+        { "difficulty_rating", variant<int, string>{task.getDifficultyRating()} },
         { "stage", variant<int, string>{task.stageToString(task.getStage())} }
         // to do: add boardId
     };
@@ -243,13 +243,13 @@ list<Task*> Database::loadTaskData(Board& board) {
         string description = descriptionRaw ? descriptionRaw : "";
         // get attributes
         string stageStr = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
-        int difficultyScore = sqlite3_column_int(stmt, 4);
+        int difficultyRating = sqlite3_column_int(stmt, 4);
 
         // create task object, save fetched info
         Task* task = new Task(title, board);
         task->setId(id);
         task->setDescription(description);
-        task->setDifficultyScore(difficultyScore);
+        task->setDifficultyRating(difficultyRating);
         task->setStage(task->stringToStage(stageStr));
 
         tasks.push_back(task);

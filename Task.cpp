@@ -10,7 +10,7 @@ Task::Task(string title, Board& board) : title(title) {
     }
     this->id = 0;
     this->stage = Stage::ToDo;
-    this->difficultyScore = 0;
+    this->difficultyRating = 0;
 }
 
 Task::~Task() {
@@ -37,7 +37,7 @@ void Task::setStage(Stage newStage) {
     case Stage::ToDo:
         break;
     case Stage::InProgress:
-        if (this->description.empty() || this->difficultyScore == 0) {
+        if (this->description.empty() || this->difficultyRating == 0) {
             throw runtime_error("Task needs description and difficulty for 'In Progress' stage.");
         }
         break;
@@ -52,11 +52,11 @@ void Task::setStage(Stage newStage) {
     this->stage = newStage;
 }
 
-void Task::setDifficultyScore(int score) {
-    if (score < 1 || score > 5) {
-        throw invalid_argument("Score must be between 1 and 5.");
+void Task::setDifficultyRating(int rating) {
+    if (rating < 1 || rating > 5) {
+        throw invalid_argument("Rating must be between 1 and 5.");
     }
-    this->difficultyScore = score;
+    this->difficultyRating = rating;
 }
 
 int Task::getId() {
@@ -75,17 +75,17 @@ Stage Task::getStage() {
     return this->stage;
 }
 
-int Task::getDifficultyScore() {
-    return this->difficultyScore;
+int Task::getDifficultyRating() {
+    return this->difficultyRating;
 }
 
 string Task::getTaskCard() {
     string title = "Title: " + this->getTitle() + "\n";
     string desc = "Description: " + this->getDescription() + "\n";
     string stage = "Stage: " + this->stageToString(this->getStage()) + "\n";
-    string score = "Rated Difficulty: " + to_string(this->getDifficultyScore()) + "\n";
+    string rating = "Rated Difficulty: " + to_string(this->getDifficultyRating()) + "\n";
 
-    return title + desc + stage + score;
+    return title + desc + stage + rating;
 }
 
 list<Task*> Task::searchTasks(list<Task*> tasks, const string& query) {
@@ -112,10 +112,10 @@ void Task::sortTasks(list<Task*>& tasks, const string& sortType) {
     }
     else if (sortType == "difficulty") {
         tasks.sort([](Task* a, Task* b) {
-            if (a->getDifficultyScore() == b->getDifficultyScore()) {
+            if (a->getDifficultyRating() == b->getDifficultyRating()) {
                 return a->getId() < b->getId();
             }
-            return a->getDifficultyScore() < b->getDifficultyScore();
+            return a->getDifficultyRating() < b->getDifficultyRating();
             });
     }
 }

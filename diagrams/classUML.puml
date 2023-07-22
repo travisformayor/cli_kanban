@@ -17,19 +17,19 @@ class Task {
   -title: string
   -description: string
   -stage: Stage
-  -difficultyScore: int
+  -difficultyRating: int
   +Task(title: string, board: Board&)
   +~Task()
   +setId(id: int): void
   +setTitle(newTitle: string): void
   +setDescription(newDesc: string): void
   +setStage(newStage: Stage): void
-  +setDifficultyScore(score: int): void
+  +setDifficultyRating(rating: int): void
   +getId(): int
   +getTitle(): string
   +getDescription(): string
   +getStage(): Stage
-  +getDifficultyScore(): int
+  +getDifficultyRating(): int
   +stageToString(stage: Stage): string
   +stringToStage(stageStr: string): Stage
 }
