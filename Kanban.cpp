@@ -18,6 +18,12 @@ map<string, string> screenMenus = {
     {"Task", " Select to Edit | t: Title | d: Description | s: Stage | r: Rated Difficulty | b: Back/Save "}
 };
 
+// set the console text color
+void setTextColor(WORD color) {
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hConsole, color);
+}
+
 void topMenu(const string& currentScreen) {
     cout << "======================================= Kanban Board =======================================\n";
     cout << screenMenus[currentScreen] << "\n";
@@ -25,12 +31,6 @@ void topMenu(const string& currentScreen) {
     cout << "\n";
     cout << "                                       | " << currentScreen << " |\n";
     cout << "\n";
-}
-
-// set the console text color
-void setTextColor(WORD color) {
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    SetConsoleTextAttribute(hConsole, color);
 }
 
 // display list with selection highlighted
@@ -53,7 +53,6 @@ void displayList(const list<string>& items, int selectedIndex) {
 
 void displayScreen(const string& currentScreen, const list<string>& items, int selectedIndex) {
     system("cls"); // clear the console screen
-
     topMenu(currentScreen);
     displayList(items, selectedIndex);
 }
@@ -65,15 +64,20 @@ string getUserInput(const string& prompt) {
     return input;
 }
 
+void createBoard(Database* db, list<Board*>& boards);
+void deleteBoard(Database* db, list<Board*>& boards, int selectedIndex);
+void refreshBoardNames(const list<Board*>& boards, list<string>& boardNames);
+void boardsScreen(Database* db, list<Board*>& boards);
+void boardViewScreen(Database* db, Board* board);
+void taskScreen(Database* db, Board* board, Task* task);
+
 int main() {
     try {
         setTextColor(TEXT_WHITE);
-
         // Open DB
         Database db("kanban_db.db");
         // Load existing Boards
         list<Board*> boards = db.loadBoardData();
-
         // Load the UI
         boardsScreen(&db, boards);
     }
@@ -112,10 +116,8 @@ void refreshBoardNames(const list<Board*>& boards, list<string>& boardNames) {
 
 void boardsScreen(Database* db, list<Board*>& boards) {
     int selectedIndex = 0;
-
     list<string> boardNames;
     refreshBoardNames(boards, boardNames);
-
     // Load the UI
     displayScreen("Boards", boardNames, selectedIndex);
 
@@ -178,7 +180,6 @@ void boardViewScreen(Database* db, Board* board) {
     while (true) {
         if (_kbhit()) {
             int ch = _getch();
-
             // if arrow key
             if (ch == 224) {
                 ch = _getch();
@@ -197,6 +198,7 @@ void boardViewScreen(Database* db, Board* board) {
             else if (ch == 'c' || ch == 'C') {
                 string newTaskName = getUserInput("Enter a name for the new task: ");
                 Task* newTask = new Task(newTaskName);
+                board->addTask(newTask);
                 db->saveTaskData(*board, *newTask);
                 tasks = board->getTasks(); // reload the task list
                 taskNames.clear();
@@ -217,71 +219,88 @@ void boardViewScreen(Database* db, Board* board) {
                     taskNames.push_back(task->getName());
                 }
                 // Adjust the selected index if we're at the end of the list
-                if (selectedIndex >= static_cast<int>(taskNames.size())) {
-                    selectedIndex = max(0, static_cast<int>(taskNames.size()) - 1);
-                }
+                selectedIndex = max(0, static_cast<int>(tasks.size()) - 1);
                 displayScreen("Board", taskNames, selectedIndex);
             }
-            // 'enter' pressed
-            else if (ch == 13) {
-                auto it = tasks.begin();
-                advance(it, selectedIndex);
-                taskScreen(db, board, *it);
-                // Reload the tasks and taskNames as they might have changed
-                tasks = board->getTasks();
-                taskNames.clear();
-                for (Task* task : tasks) {
-                    taskNames.push_back(task->getName());
-                }
-                displayScreen("Board", taskNames, selectedIndex);
+            // 'b' pressed
+            else if (ch == 'b' || ch == 'B') {
+                break;
             }
-            // 'b' or 'esc' pressed
-            else if (ch == 'b' || ch == 'B' || ch == 27) {
-                break; // exit to the previous screen
+            // 'esc' pressed
+            else if (ch == 27) {
+                exit(0);
             }
         }
     }
 }
 
 void taskScreen(Database* db, Board* board, Task* task) {
-    string input;
+    // to do: rework this to use a dedicated display task screen function
+    string taskDetail = task->getTaskCard();
 
-    displayScreen("Task", { "Title: " + task->getTitle(), "Description: " + task->getDescription(),
-                           "Stage: " + task->getStage(), "Rated Difficulty: " + task->getRatedDifficulty() }, -1);
+    displayScreen("Task", { taskDetail }, -1);
 
     // Listen for keyboard commands
     while (true) {
         if (_kbhit()) {
             int ch = _getch();
-
             // 't' pressed
             if (ch == 't' || ch == 'T') {
-                input = getUserInput("Enter a new title for the task: ");
-                task->setTitle(input);
+                // to do: make this have a char length limit
+                // to do: can the user entry pre-populate with the current version of desc when updating it?
+                string newTitle = getUserInput("Enter a new title for the task: ");
+                task->setTitle(newTitle);
+                // save changes
+                db->saveTaskData(*task);
+                // update ui
+                taskDetail = task->getTaskCard();
+                displayScreen("Task", { taskDetail }, 0);
             }
             // 'd' pressed
             else if (ch == 'd' || ch == 'D') {
-                input = getUserInput("Enter a new description for the task: ");
-                task->setDescription(input);
+                // to do: display description with word wrap past certain length
+                // to do: can the user entry pre-populate with the current version of desc when updating it?
+                string newDescription = getUserInput("Enter a new description for the task: ");
+                task->setDescription(newDescription);
+                // save changes
+                db->saveTaskData(*task);
+                // update ui
+                taskDetail = task->getTaskCard();
+                displayScreen("Task", { taskDetail }, 0);
             }
             // 's' pressed
             else if (ch == 's' || ch == 'S') {
-                input = getUserInput("Enter a new stage for the task: ");
-                task->setStage(input);
+                // to do: make this a hardcoded selection list, not user input
+                // to do: can the user entry pre-populate with the current version of desc when updating it?
+                string newStage = getUserInput("Enter a new stage for the task: ");
+                task->setStage(task->stringToStage(newStage));
+                // save changes
+                db->saveTaskData(*task);
+                // update ui
+                taskDetail = task->getTaskCard();
+                displayScreen("Task", { taskDetail }, 0);
             }
             // 'r' pressed
             else if (ch == 'r' || ch == 'R') {
-                input = getUserInput("Enter a new rated difficulty for the task: ");
-                task->setRatedDifficulty(input);
+                // to do: catch error if they dont event a num 1 - 5. allow re-entry
+                // to do: explain in the UI they need to enter a num 1 - 5
+                // to do: can the user entry pre-populate with the current version of desc when updating it?
+                string newDifficulty = getUserInput("Enter a new difficulty rating for the task: ");
+                task->setDifficulty(stoi(newDifficulty));
+                // save changes
+                db->saveTaskData(*task);
+                // update ui
+                taskDetail = task->getTaskCard();
+                displayScreen("Task", { taskDetail }, 0);
             }
-            // 'b' or 'esc' pressed
-            else if (ch == 'b' || ch == 'B' || ch == 27) {
-                db->updateTaskData(*board, *task);
-                break; // exit to the previous screen
+            // 'b' pressed
+            else if (ch == 'b' || ch == 'B') {
+                break;
             }
-
-            displayScreen("Task", { "Title: " + task->getTitle(), "Description: " + task->getDescription(),
-                                   "Stage: " + task->getStage(), "Rated Difficulty: " + task->getRatedDifficulty() }, -1);
+            // 'esc' pressed
+            else if (ch == 27) {
+                exit(0);
+            }
         }
     }
 }

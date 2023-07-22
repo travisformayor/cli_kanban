@@ -28,6 +28,7 @@ public:
     string getDescription();
     Stage getStage();
     int getDifficultyScore();
+    string getTaskCard();
     list<Task*> searchTasks(list<Task*> tasks, const string& query);
     void sortTasks(list<Task*>& tasks, const string& sortType);
     static string stageToString(Stage stage);
