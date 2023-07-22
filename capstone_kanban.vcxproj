@@ -136,11 +136,13 @@
     <ClCompile Include="Database.cpp" />
     <ClCompile Include="Kanban.cpp" />
     <ClCompile Include="Task.cpp" />
+    <ClCompile Include="UI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Board.h" />
     <ClInclude Include="Database.h" />
     <ClInclude Include="Task.h" />
+    <ClCompile Include="UI.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
