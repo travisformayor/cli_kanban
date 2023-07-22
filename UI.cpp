@@ -1,79 +1,163 @@
 #include "UI.h"
 
+using namespace std;
+
+UI::UI(Database& db) : db(db) {
+    this->selectedIndex = 0;
+    this->currScreen = "Boards";
+    this->prevScreen = "";
+
+    this->screenMenus = {
+        {"Boards", "    | up/down: Navigate | enter: Select | c: Create Board | d: Delete Board | esc: Quit |   "},
+        {"BoardView", "| up/down: Navigate | enter: Select | c: Create Task | d: Delete Task | b: Back | esc: Quit | "},
+        {"Task", " Select to Edit | t: Title | d: Description | s: Stage | r: Rated Difficulty | b: Back/Save "}
+    };
+
+    setTextColor(TEXT_WHITE);
+}
+
 // set the console text color
 void UI::setTextColor(WORD color) {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(hConsole, color);
 }
 
-void UI::topMenu(const string& currentScreen) {
-    cout << "======================================= Kanban Board =======================================\n";
-    cout << screenMenus[currentScreen] << "\n";
-    cout << "============================== (Press key to make selection) ===============================\n";
-    cout << "\n";
-    cout << "                                       | " << currentScreen << " |\n";
-    cout << "\n";
+void UI::setSelectIndex(int index) {
+    this->selectedIndex = index;
 }
 
-void UI::displayScreen(const string& currentScreen, int& selectedIndex, const list<string>& items) {
+string UI::getScreen() {
+    return this->currScreen;
+}
+
+bool UI::screenChanged() {
+    // check if screen just changed
+    // if so, return true and set to not changed
+    if (this->currScreen != this->prevScreen) {
+        // mark as previously shown for next time
+        this->prevScreen = this->currScreen;
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+void UI::loadBoards() {
+    this->loadedBoards.clear();
+    this->loadedBoards = db.loadBoardData();
+}
+
+void UI::loadSelectedBoard() {
+    // find selected board
+    Board* ptr = this->loadedBoards.begin();
+    advance(ptr, this->selectedIndex);
+    // save selected board
+    this->selectedBoard = *ptr;
+    // load all tasks for selected board
+    this->loadedTasks.clear();
+    this->loadedTasks = db.loadTaskData(this->selectedBoard);
+}
+
+void UI::getSelectedTask() {
+    // find selected task
+    // to do: sorting the order of the tasks may break this
+    Task* ptr = this->loadedTasks.begin();
+    advance(ptr, this->selectedIndex);
+    // save selected task
+    this->selectedTask = *ptr;
+}
+
+void UI::displayScreen() {
     system("cls"); // clear the console screen
-    topMenu(currentScreen);
-    displayList(items, selectedIndex);
+    topMenu(this->currScreen);
+
+    // load titles
+    list<string> titles;
+    if (this->currScreen == "Boards") {
+        for (Board* board : this->loadedBoards) {
+            titles.push_back(board->getTitle());
+        }
+        displayTitles(titles);
+    }
+    else if (this->currScreen == "BoardView") {
+        for (Task* task : this->loadedTasks) {
+            titles.push_back(task->getTitle());
+        }
+        displayTitles(titles);
+    }
+    else if (this->currScreen == "TaskView") {
+        // get task info
+        string taskDetails = selectedTask->getTaskCard();
+        displayTaskInfo(taskDetails);
+    }
 }
 
-// display list with selection highlighted
-void UI::displayList(const list<string>& items, int& selectedIndex) {
+void UI::displayTitles(list<string>& titles) {
+    // display titles with selected title highlighted
     int index = 0;
-    for (const auto& item : items) {
-        // set the color
-        if (index == selectedIndex) {
+    for (const string title : titles) {
+        if (index == this->selectedIndex) {
             setTextColor(TEXT_GREEN); // highlighted item color
         }
         else {
             setTextColor(TEXT_WHITE); // regular item color
         }
-        // print the item
-        cout << "    - " << item << endl;
+        // print title
+        cout << "    * " << title << endl;
         index++;
     }
     setTextColor(TEXT_WHITE); // Reset color to white
 }
 
-void UI::addBoard(Database& db, list<Board*>& boards) {
-    string newBoardName = getUserInput("Enter a name for the new board: ");
-    Board* newBoard = new Board(newBoardName);
-    db->saveBoardData(*newBoard);
-    boards = db->loadBoardData();
+void UI::topMenu() {
+    cout << "======================================= Kanban Board =======================================\n";
+    cout << screenMenus[this->currScreen] << "\n";
+    cout << "============================== (Press key to make selection) ===============================\n";
+    cout << "\n";
+    cout << "                                       | " << this->currScreen << " |\n";
+    cout << "\n";
 }
 
-void UI::removeBoard(Database& db, list<Board*>& boards, int& selectedIndex) {
+void UI::addBoard() {
+    string newBoardTitle = getUserInput("Enter a title for the new board: ");
+    Board* newBoard = new Board(newBoardTitle);
+    this->db->saveBoardData(*newBoard);
+    this->loadedBoards = this->db->loadBoardData();
+}
+
+void UI::removeBoard() {
     // find the selected board
-    auto it = boards.begin();
-    advance(it, selectedIndex);
-    db->deleteBoard(**it);
-    delete* it; // delete the memory occupied by the board
-    boards.erase(it); // remove the pointer from the list
-    // Adjust the selected index if we're at the end of the list
-    selectedIndex = max(0, static_cast<int>(boards.size()) - 1);
+    Board* ptr = this->loadedBoards.begin();
+    advance(ptr, this->selectedIndex);
+    // delete board
+    this->db->deleteBoard(*ptr);
+    delete* ptr; // delete the memory occupied by the board
+    this->loadedBoards.erase(it); // remove the pointer from the list
+    // Adjust selected index if at end of list
+    this->selectedIndex = max(0, static_cast<int>(this->loadedBoards.size()) - 1);
 }
 
-void UI::addTask(Database& db, list<Task*>& tasks) {
-    string newTaskName = getUserInput("Enter a name for the new task: ");
-    Task* newTask = new Task(newTaskName);
-    board->addTask(newTask);
-    db->saveTaskData(*board, *newTask);
-    // to do: do i need to reload the tasks from the db and save them to the task list here?
+void UI::addTask() {
+    string newTaskTitle = getUserInput("Enter a title for the new task: ");
+    Task* newTask = new Task(newTaskTitle);
+    // add task to board and save
+    this->db->saveTaskData(this->selectedBoard, *newTask);
+    // reload tasks for selected board
+    this->loadedTasks.clear();
+    this->loadedTasks = db.loadTaskData(this->selectedBoard);
 }
 
-void UI::removeTask(Database& db, list<Task*>& tasks, int& selectedIndex) {
+void UI::removeTask() {
     // find the selected task
-    auto it = tasks.begin();
-    advance(it, selectedIndex);
-    db->deleteTask(**it);
+    Task* ptr = this->loadedTasks.begin();
+    advance(ptr, this->selectedIndex);
+    // delete task
+    this->db->deleteTask(*ptr);
     delete* it; // delete the memory occupied by the task
-    tasks.erase(it); // remove the pointer from the list
-    // Adjust the selected index if we're at the end of the list
-    selectedIndex = max(0, static_cast<int>(tasks.size()) - 1);
+    this->loadedTasks.erase(ptr); // remove the pointer from the list
+    // Adjust selected index if at end of list
+    this->selectedIndex = max(0, static_cast<int>(tasks.size()) - 1);
 }
 
 string UI::getUserInput(const string& prompt) {
@@ -83,7 +167,7 @@ string UI::getUserInput(const string& prompt) {
     return input;
 }
 
-void UI::navControls(string& screen, int& selectedIndex, Database& db, variant<list<Board*>, list<Task*>>& items) {
+void UI::navControls(variant<list<Board*>, list<Task*>>& items) {
     // Controls for Boards List and Board View
     // Listen for keyboard commands
     while (true) {
@@ -94,40 +178,40 @@ void UI::navControls(string& screen, int& selectedIndex, Database& db, variant<l
                 ch = _getch();
                 switch (ch) {
                 case 72: // up arrow key
-                    selectedIndex = static_cast<int>((selectedIndex - 1 + items.size()) % items.size());
+                    this->selectedIndex = static_cast<int>((this->selectedIndex - 1 + items.size()) % items.size());
                     break;
                 case 80: // down arrow key
-                    selectedIndex = static_cast<int>((selectedIndex + 1) % items.size());
+                    this->selectedIndex = static_cast<int>((this->selectedIndex + 1) % items.size());
                     break;
                 }
             }
             // 'enter' pressed
             else if (ch == 13) {
-                if (screen == "Boards") {
-                    screen = "BoardView";
+                if (this->currScreen == "Boards") {
+                    this->currScreen = "BoardView";
                 }
-                else if (screen == "BoardView") {
-                    screen = "TaskView";
+                else if (this->currScreen == "BoardView") {
+                    this->currScreen = "TaskView";
                 }
                 break;
             }
             // 'c' pressed
             else if (ch == 'c' || ch == 'C') {
-                if (screen == "Boards") {
-                    addBoard(db, items);
+                if (this->currScreen == "Boards") {
+                    addBoard(items);
                 }
-                else if (screen == "BoardView") {
-                    addTask(db, items);
+                else if (this->currScreen == "BoardView") {
+                    addTask(items);
                 }
                 break;
             }
             // 'd' pressed
             else if (ch == 'd' || ch == 'D') {
-                if (screen == "Boards") {
-                    removeBoard(db, items, selectedIndex);
+                if (this->currScreen == "Boards") {
+                    removeBoard(items);
                 }
-                else if (screen == "BoardView") {
-                    removeTask(db, items, selectedIndex);
+                else if (this->currScreen == "BoardView") {
+                    removeTask(items);
                 }
                 break;
             }
@@ -135,8 +219,8 @@ void UI::navControls(string& screen, int& selectedIndex, Database& db, variant<l
 
             // 'b' pressed
             else if (ch == 'b' || ch == 'B') {
-                if (screen == "BoardView") {
-                    screen = "Boards";
+                if (this->currScreen == "BoardView") {
+                    this->currScreen = "Boards";
                 }
                 break;
             }
@@ -148,7 +232,7 @@ void UI::navControls(string& screen, int& selectedIndex, Database& db, variant<l
     }
 }
 
-void UI::taskEditControls(string& screen, int& selectedIndex, Database& db, Task* task) {
+void UI::taskEditControls(Task* task) {
     // Controls for Task Edit View
     // Listen for keyboard commands
     while (true) {
@@ -188,9 +272,9 @@ void UI::taskEditControls(string& screen, int& selectedIndex, Database& db, Task
             // 'b' pressed
             else if (ch == 'b' || ch == 'B') {
                 // save changes
-                db->saveTaskData(*task);
+                this->db->saveTaskData(*task);
                 // exit to board view
-                screen = "BoardView";
+                this->currScreen = "BoardView";
                 break;
             }
             // 'esc' pressed

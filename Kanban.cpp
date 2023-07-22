@@ -10,93 +10,55 @@ using namespace std;
 
 int main() {
     try {
-        UI ui; // display modification object
-        ui.setTextColor(TEXT_WHITE);
-
-        string currScreen = "Boards";
-        string prevScreen = "";
-
-        list<Board*> boards;
-        list<Task*> tasks;
-        Task* selectedTask;
-        list<string> boardNames;
-        list<string> taskNames;
-
         // Open DB
         Database db("kanban_db.db");
+
+        UI ui(db); // display modification object
 
         // loop screen selection
         while (true) {
             // ==== boards screen
-            if (currScreen == "Boards") {
-                if (prevScreen != currScreen) {
+            if (ui.getScreen() == "Boards") {
+                if (ui.screenChanged()) {
                     // screen just changed to boards list
-                    // Load existing Boards
-                    boards.clear();
-                    boards = db.loadBoardData();
-
+                    // Load Boards
+                    ui.loadBoards();
                     // reset selection index
-                    int selectedIndex = 0;
-                    // mark screen as previously shown for next loop
-                    prevScreen = currScreen;
+                    ui.setSelectIndex(0);
                 }
-
-                // load/reload board names
-                boardNames.clear();
-                for (Board* board : boards) {
-                    boardNames.push_back(board->getName());
-                }
-                // Load the UI
-                ui.displayScreen(currScreen, selectedIndex, boardNames);
+                // Display/Update the UI
+                ui.displayScreen();
                 // Listen for user input (pauses here)
-                ui.navControls(currScreen, selectedIndex, db, boards);
+                ui.boardListControls();
             }
 
             // ==== board view screen
-            else if (currScreen == "BoardView") {
-                if (prevScreen != currScreen) {
+            else if (ui.getScreen() == "BoardView") {
+                if (ui.screenChanged()) {
                     // screen just changed to board view
-                    // determine which board was selected
-                    auto it = boards.begin();
-                    advance(it, selectedIndex);
-                    // Load existing selected board Tasks
-                    tasks.clear();
-                    tasks = db.loadTaskData(*it);
+                    // load selected board
+                    ui.loadSelectedBoard();
                     // reset selection index
-                    int selectedIndex = 0;
-                    // mark screen as previously shown for next loop
-                    prevScreen = currScreen;
+                    ui.setSelectIndex(0);
                 }
-
-                taskNames.clear();
-                for (Task* task : tasks) {
-                    taskNames.push_back(task->getName());
-                }
-                // Load the UI
-                ui.displayScreen(currScreen, selectedIndex, taskNames);
+                // Display/Update the UI
+                ui.displayScreen();
                 // Listen for user input (pauses here)
-                ui.navControls(currScreen, selectedIndex, db, tasks);
+                ui.boardViewControls();
             }
             // ==== task view screen
-            else if (currScreen == "TaskView") {
-                if (prevScreen != currScreen) {
+            else if (ui.getScreen() == "TaskView") {
+                if (ui.screenChanged()) {
                     // screen just changed to task view
-                    // determine which task was selected
-                    auto it = tasks.begin();
-                    advance(it, selectedIndex);
-                    selectedTask = *it;
+                    // get selected task
+                    ui.getSelectedTask();
                     // reset selection index
-                    int selectedIndex = 0;
-                    // mark screen as previously shown for next loop
-                    prevScreen = currScreen;
+                    ui.setSelectIndex(0);
                 }
-
-                // get updated task info
-                taskDetail = selectedTask->getTaskCard();
-                // Load the UI
-                ui.displayScreen("TaskView", -1, { taskDetail });
+                // Display/Update the UI
+                ui.displayScreen();
                 // Listen for user input (pauses here)
-                ui.taskEditControls(currScreen, selectedIndex, db, selectedTask);
+                ui.taskViewControls();
             }
         }
     }
