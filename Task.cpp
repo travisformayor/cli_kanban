@@ -79,6 +79,38 @@ int Task::getDifficultyScore() {
     return this->difficultyScore;
 }
 
+list<Task*> Task::searchTasks(list<Task*> tasks, const string& query) {
+    list<Task*> foundTasks;
+    for (Task* task : tasks) {
+        if (task->getTitle().find(query) != string::npos || task->getDescription().find(query) != string::npos) {
+            foundTasks.push_back(task);
+        }
+    }
+    return foundTasks;
+}
+
+void Task::sortTasks(list<Task*>& tasks, const string& sortType) {
+    if (sortType == "title") {
+        tasks.sort([](Task* a, Task* b) { return a->getTitle() < b->getTitle(); });
+    }
+    else if (sortType == "stage") {
+        tasks.sort([](Task* a, Task* b) { 
+            if (a->getStage() == b->getStage()) {
+                return a->getId() < b->getId();
+            }
+            return a->getStage() < b->getStage(); 
+        });
+    }
+    else if (sortType == "difficulty") {
+        tasks.sort([](Task* a, Task* b) { 
+            if (a->getDifficultyScore() == b->getDifficultyScore()) {
+                return a->getId() < b->getId();
+            }
+            return a->getDifficultyScore() < b->getDifficultyScore(); 
+        });
+    }
+}
+
 // helper convert methods for dealing with Stages as strings
 string Task::stageToString(Stage stage) {
     switch (stage) {
