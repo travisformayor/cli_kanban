@@ -15,24 +15,28 @@ using namespace std;
 class UI {
 public:
     UI(Database& db);
+    void topMenu();
     void setTextColor(WORD color);
     void setSelectIndex(int index);
-    string getScreen();
-    bool screenChanged();
-    Board* loadSelectedBoard();
-    Task* getSelectedTask();
+    void loadBoards();
+    void loadSelectedBoard();
+    void getSelectedTask();
     void displayScreen();
     void displayTitles(list<string>& titles);
-    void topMenu();
-    void loadBoards();
-    void addBoard();
-    void removeBoard();
-    void addTask();
-    void removeTask();
+    void displayTaskCard(string taskDetails);
+    void addNewBoard();
+    void removeSelectedBoard();
+    void addNewTask();
+    void removeSelectedTask();
     string getUserInput(const string& prompt);
-    void boardListControls();
-    void boardViewControls();
-    void taskViewControls();
+    void keyboardListen();
+    void changeSelector(int direction);
+    void changeScreen(string command);
+    void editTaskDescription();
+    void editTaskTitle();
+    void editBoardTitle();
+    void editTaskStage();
+    void editTaskRating();
 
 private:
     const WORD TEXT_WHITE = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
@@ -45,7 +49,6 @@ private:
     Task selectedTask;
     int selectedIndex;
     string currScreen;
-    string prevScreen;
     map<string, string> screenMenus;
 };
 

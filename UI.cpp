@@ -5,15 +5,23 @@ using namespace std;
 UI::UI(Database& db) : db(db) {
     this->selectedIndex = 0;
     this->currScreen = "Boards";
-    this->prevScreen = "";
 
     this->screenMenus = {
         {"Boards", "    | up/down: Navigate | enter: Select | c: Create Board | d: Delete Board | esc: Quit |   "},
-        {"BoardView", "| up/down: Navigate | enter: Select | c: Create Task | d: Delete Task | b: Back | esc: Quit | "},
-        {"Task", " Select to Edit | t: Title | d: Description | s: Stage | r: Rated Difficulty | b: Back/Save "}
+        {"Board View", "| up/down: Navigate | enter: Select | c: Create Task | d: Delete Task | t: Edit Board Title | b: Back | esc: Quit | "},
+        {"Task View", " | t: Edit Title | d: Edit Description | s: Edit Stage | r: Edit Difficulty Rating | b: Save & Back | esc: Save & Quit |"}
     };
 
     setTextColor(TEXT_WHITE);
+}
+
+void UI::topMenu() {
+    cout << "======================================= Kanban Board =======================================\n";
+    cout << screenMenus[this->currScreen] << "\n";
+    cout << "============================== (Press key to make selection) ===============================\n";
+    cout << "\n";
+    cout << "                                       | " << this->currScreen << " |\n";
+    cout << "\n";
 }
 
 // set the console text color
@@ -24,23 +32,6 @@ void UI::setTextColor(WORD color) {
 
 void UI::setSelectIndex(int index) {
     this->selectedIndex = index;
-}
-
-string UI::getScreen() {
-    return this->currScreen;
-}
-
-bool UI::screenChanged() {
-    // check if screen just changed
-    // if so, return true and set to not changed
-    if (this->currScreen != this->prevScreen) {
-        // mark as previously shown for next time
-        this->prevScreen = this->currScreen;
-        return true;
-    }
-    else {
-        return false;
-    }
 }
 
 void UI::loadBoards() {
@@ -61,7 +52,7 @@ void UI::loadSelectedBoard() {
 
 void UI::getSelectedTask() {
     // find selected task
-    // to do: sorting the order of the tasks may break this
+    // to do: sorting the order of the tasks may break this. sort at db level
     Task* ptr = this->loadedTasks.begin();
     advance(ptr, this->selectedIndex);
     // save selected task
@@ -72,24 +63,26 @@ void UI::displayScreen() {
     system("cls"); // clear the console screen
     topMenu(this->currScreen);
 
-    // load titles
+    // load titles list or task details
     list<string> titles;
     if (this->currScreen == "Boards") {
+        // display list of boards
         for (Board* board : this->loadedBoards) {
             titles.push_back(board->getTitle());
         }
         displayTitles(titles);
     }
-    else if (this->currScreen == "BoardView") {
+    else if (this->currScreen == "Board View") {
+        // display list of tasks on board
         for (Task* task : this->loadedTasks) {
             titles.push_back(task->getTitle());
         }
         displayTitles(titles);
     }
-    else if (this->currScreen == "TaskView") {
-        // get task info
+    else if (this->currScreen == "Task View") {
+        // display selected task info
         string taskDetails = selectedTask->getTaskCard();
-        displayTaskInfo(taskDetails);
+        displayTaskCard(taskDetails);
     }
 }
 
@@ -110,23 +103,19 @@ void UI::displayTitles(list<string>& titles) {
     setTextColor(TEXT_WHITE); // Reset color to white
 }
 
-void UI::topMenu() {
-    cout << "======================================= Kanban Board =======================================\n";
-    cout << screenMenus[this->currScreen] << "\n";
-    cout << "============================== (Press key to make selection) ===============================\n";
-    cout << "\n";
-    cout << "                                       | " << this->currScreen << " |\n";
-    cout << "\n";
+void UI::displayTaskCard(string taskDetails) {
+    // to do: expand on the task card view screen. multiline, word wrap, election highlight, etc
+    cout << taskDetails << endl;
 }
 
-void UI::addBoard() {
+void UI::addNewBoard() {
     string newBoardTitle = getUserInput("Enter a title for the new board: ");
     Board* newBoard = new Board(newBoardTitle);
     this->db->saveBoardData(*newBoard);
     this->loadedBoards = this->db->loadBoardData();
 }
 
-void UI::removeBoard() {
+void UI::removeSelectedBoard() {
     // find the selected board
     Board* ptr = this->loadedBoards.begin();
     advance(ptr, this->selectedIndex);
@@ -138,7 +127,7 @@ void UI::removeBoard() {
     this->selectedIndex = max(0, static_cast<int>(this->loadedBoards.size()) - 1);
 }
 
-void UI::addTask() {
+void UI::addNewTask() {
     string newTaskTitle = getUserInput("Enter a title for the new task: ");
     Task* newTask = new Task(newTaskTitle);
     // add task to board and save
@@ -148,7 +137,7 @@ void UI::addTask() {
     this->loadedTasks = db.loadTaskData(this->selectedBoard);
 }
 
-void UI::removeTask() {
+void UI::removeSelectedTask() {
     // find the selected task
     Task* ptr = this->loadedTasks.begin();
     advance(ptr, this->selectedIndex);
@@ -165,122 +154,172 @@ string UI::getUserInput(const string& prompt) {
     string input;
     getline(cin, input);
     return input;
+
+    // to do: catch and exceptions around user input
 }
 
-void UI::navControls(variant<list<Board*>, list<Task*>>& items) {
-    // Controls for Boards List and Board View
-    // Listen for keyboard commands
+// to do sort: for sort just throw some order by clauses in the sql, dont do the sort in UI 
+// to do search: just highlight some where clauses as search?
+
+void UI::keyboardListen() {
+    bool keyPressed = false;
+
     while (true) {
         if (_kbhit()) {
+            keyPressed = true;
             int ch = _getch();
-            // if arrow key
-            if (ch == 224) {
+
+            switch (ch) {
+            case 224: // potential arrow key
                 ch = _getch();
                 switch (ch) {
-                case 72: // up arrow key
-                    this->selectedIndex = static_cast<int>((this->selectedIndex - 1 + items.size()) % items.size());
+                case 72: // up arrow
+                    changeSelector(-1); // move selector up 1
                     break;
-                case 80: // down arrow key
-                    this->selectedIndex = static_cast<int>((this->selectedIndex + 1) % items.size());
+                case 80: // down arrow
+                    changeSelector(1); // move selector down 1
                     break;
                 }
-            }
-            // 'enter' pressed
-            else if (ch == 13) {
+                break;
+            case 13: // enter key. move to selected screen
+                changeScreen("enter");
+                break;
+            case 'b': // back to previous screen
+                changeScreen("back");
+                break;
+            case 'c': // create
                 if (this->currScreen == "Boards") {
-                    this->currScreen = "BoardView";
+                    addNewBoard();
                 }
-                else if (this->currScreen == "BoardView") {
-                    this->currScreen = "TaskView";
+                else if (this->currScreen == "Board View") {
+                    addNewTask();
                 }
                 break;
-            }
-            // 'c' pressed
-            else if (ch == 'c' || ch == 'C') {
+            case 'd': // delete or edit task description
                 if (this->currScreen == "Boards") {
-                    addBoard(items);
+                    removeSelectedBoard();
                 }
-                else if (this->currScreen == "BoardView") {
-                    addTask(items);
+                else if (this->currScreen == "Board View") {
+                    removeSelectedTask();
+                }
+                else if (this->currScreen == "Task View") {
+                    editTaskDescription();
                 }
                 break;
-            }
-            // 'd' pressed
-            else if (ch == 'd' || ch == 'D') {
-                if (this->currScreen == "Boards") {
-                    removeBoard(items);
-                }
-                else if (this->currScreen == "BoardView") {
-                    removeTask(items);
-                }
-                break;
-            }
-            // to do: add sort and search controls
+            case 'r': // edit task difficulty rating
+                if (this->currScreen == "Task View") {
+                    editTaskRating();
 
-            // 'b' pressed
-            else if (ch == 'b' || ch == 'B') {
-                if (this->currScreen == "BoardView") {
-                    this->currScreen = "Boards";
                 }
                 break;
-            }
-            // 'esc' pressed
-            else if (ch == 27) {
+            case 's': // edit task stage
+                if (this->currScreen == "Task View") {
+                    editTaskStage();
+                }
+                break;
+            case 't': // edit title
+                if (this->currScreen == "Board View") {
+                    editBoardTitle();
+                }
+                else if (this->currScreen == "Task View") {
+                    editTaskTitle();
+                }
+                break;
+            case 27: // 'esc', quit program
+                if (this->currScreen == "Task View") {
+                    // save any changes to task first
+                    this->db->saveTaskData(selectedTask);
+                }
                 exit(0);
             }
+        }
+
+        if (keyPressed) {
+            // exit while loop to allow display to react to key press
+            break;
         }
     }
 }
 
-void UI::taskEditControls(Task* task) {
-    // Controls for Task Edit View
-    // Listen for keyboard commands
-    while (true) {
-        if (_kbhit()) {
-            int ch = _getch();
+void UI::changeSelector(int direction) {
+    // move selector up or down, wrapping around if at end or start
+    if (direction == 1 || direction == -1) {
+        this->selectedIndex = static_cast<int>((this->selectedIndex + direction + items.size()) % items.size());
+    }
+}
 
-            // 't' pressed
-            if (ch == 't' || ch == 'T') {
-                // to do: make this have a char length limit
-                // to do: can the user entry pre-populate with the current version of desc when updating it?
-                string newTitle = getUserInput("Enter a new title for the task: ");
-                task->setTitle(newTitle);
-            }
-            // 'd' pressed
-            else if (ch == 'd' || ch == 'D') {
-                // to do: display description with word wrap past certain length
-                // to do: can the user entry pre-populate with the current version of desc when updating it?
-                string newDescription = getUserInput("Enter a new description for the task: ");
-                task->setDescription(newDescription);
-            }
-            // 's' pressed
-            else if (ch == 's' || ch == 'S') {
-                // to do: make this a hardcoded selection list, not user input
-                // to do: can the user entry pre-populate with the current version of desc when updating it?
-                string newStage = getUserInput("Enter a new stage for the task: ");
-                task->setStage(task->stringToStage(newStage));
-            }
-            // 'r' pressed
-            else if (ch == 'r' || ch == 'R') {
-                // to do: catch error if they dont event a num 1 - 5. allow re-entry
-                // to do: explain in the UI they need to enter a num 1 - 5
-                // to do: can the user entry pre-populate with the current version of desc when updating it?
-                string newDifficulty = getUserInput("Enter a new difficulty rating for the task: ");
-                task->setDifficulty(stoi(newDifficulty));
-
-            }
-            // 'b' pressed
-            else if (ch == 'b' || ch == 'B') {
-                // save changes
-                this->db->saveTaskData(*task);
-                // exit to board view
-                this->currScreen = "BoardView";
-                break;
-            }
-            // 'esc' pressed
-            else if (ch == 27) {
-                exit(0);
-            }
+void UI::changeScreen(string command) {
+    // 1. change screen
+    if (command == "enter") {
+        // Based on current screen, move forward to next screen
+        if (this->currScreen == "Boards") {
+            this->currScreen = "Board View";
+        }
+        else if (this->currScreen == "Board View") {
+            this->currScreen = "Task View";
         }
     }
+    else if (command == "back") {
+        // Based on current screen, move back to previous screen
+        if (this->currScreen == "Task View") {
+            // save edits first
+            this->db->saveTaskData(selectedTask);
+            // exit to board view
+            // move screens
+            this->currScreen = "Board View";
+        }
+        else if (this->currScreen == "Board View") {
+            this->currScreen = "Boards";
+        }
+    }
+
+    // 2. load items for new screen and reset selector position
+    if (this->currScreen == "Boards") {
+        ui.loadBoards();
+        ui.setSelectIndex(0);
+    }
+    else if (this->currScreen == "Board View") {
+        ui.loadSelectedBoard();
+        ui.setSelectIndex(0);
+    }
+    else if (this->currScreen == "Task View") {
+        ui.getSelectedTask();
+        ui.setSelectIndex(0);
+    }
+}
+
+void UI::editTaskDescription() {
+    // to do: display description with word wrap past certain length
+    // to do: can the user entry pre-populate with the current version of desc when updating it?
+    string newDescription = getUserInput("Enter a new description for the task: ");
+    this->selectedTask->setDescription(newDescription);
+}
+
+void UI::editTaskTitle() {
+    // to do: make this have a char length limit
+    // to do: can the user entry pre-populate with the current version of desc when updating it?
+    string newTitle = getUserInput("Enter a new title for the task: ");
+    this->selectedTask->setTitle(newTitle);
+}
+
+void UI::editBoardTitle() {
+    // to do: make this have a char length limit
+    // to do: can the user entry pre-populate with the current version of desc when updating it?
+    string newTitle = getUserInput("Enter a new title for the task: ");
+    this->selectedBoard->setTitle(newTitle);
+}
+
+void UI::editTaskStage() {
+    // to do: make this a hardcoded selection list, not user input
+    // to do: can the user entry pre-populate with the current version of desc when updating it?
+    string newStage = getUserInput("Enter a new stage for the task: ");
+    this->selectedTask->setStage(task->stringToStage(newStage));
+}
+
+void UI::editTaskRating() {
+    // to do: catch error if they dont event a num 1 - 5. allow re-entry
+    // to do: explain in the UI they need to enter a num 1 - 5
+    // to do: can the user entry pre-populate with the current version of desc when updating it?
+    string newDifficulty = getUserInput("Enter a new difficulty rating for the task: ");
+    this->selectedTask->setDifficulty(stoi(newDifficulty));
 }

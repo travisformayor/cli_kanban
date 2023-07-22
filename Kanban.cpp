@@ -10,56 +10,21 @@ using namespace std;
 
 int main() {
     try {
-        // Open DB
+        // open DB
         Database db("kanban_db.db");
+        // create display object
+        UI ui(db);
 
-        UI ui(db); // display modification object
+        // load boards, set user selector position
+        ui.loadBoards();
+        ui.setSelectIndex(0);
 
-        // loop screen selection
+        // loop screen refresh and user command listening
         while (true) {
-            // ==== boards screen
-            if (ui.getScreen() == "Boards") {
-                if (ui.screenChanged()) {
-                    // screen just changed to boards list
-                    // Load Boards
-                    ui.loadBoards();
-                    // reset selection index
-                    ui.setSelectIndex(0);
-                }
-                // Display/Update the UI
-                ui.displayScreen();
-                // Listen for user input (pauses here)
-                ui.boardListControls();
-            }
-
-            // ==== board view screen
-            else if (ui.getScreen() == "BoardView") {
-                if (ui.screenChanged()) {
-                    // screen just changed to board view
-                    // load selected board
-                    ui.loadSelectedBoard();
-                    // reset selection index
-                    ui.setSelectIndex(0);
-                }
-                // Display/Update the UI
-                ui.displayScreen();
-                // Listen for user input (pauses here)
-                ui.boardViewControls();
-            }
-            // ==== task view screen
-            else if (ui.getScreen() == "TaskView") {
-                if (ui.screenChanged()) {
-                    // screen just changed to task view
-                    // get selected task
-                    ui.getSelectedTask();
-                    // reset selection index
-                    ui.setSelectIndex(0);
-                }
-                // Display/Update the UI
-                ui.displayScreen();
-                // Listen for user input (pauses here)
-                ui.taskViewControls();
-            }
+            // Display/Update the UI
+            ui.displayScreen();
+            // Listen for user input (pauses here until key press)
+            ui.keyboardListen();
         }
     }
     catch (runtime_error& e) {
