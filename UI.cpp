@@ -125,9 +125,7 @@ void UI::addNewBoard() {
 
 void UI::addNewTask() {
     string newTaskTitle = getUserInput("Enter a title for the new task: ");
-    Task newTask(newTaskTitle);
-    // add board id
-    newTask.setBoardId(this->selectedBoardPtr->getId());
+    Task newTask(newTaskTitle, *this->selectedBoardPtr);
     // save task to db
     this->db.saveTaskData(newTask);
     // reload tasks for selected board

@@ -11,6 +11,7 @@ Task::Task(string title, Board& board) : title(title) {
     this->id = 0;
     this->stage = Stage::ToDo;
     this->difficultyRating = 0;
+    this->boardId = board.getId();
 }
 
 Task::~Task() {
