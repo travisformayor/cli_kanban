@@ -2,9 +2,6 @@
 #include "UI.h"
 #include "Board.h"
 #include "Task.h"
-#include <iostream>
-#include <map>
-#include <list>
 
 using namespace std;
 

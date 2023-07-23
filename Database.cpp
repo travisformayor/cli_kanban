@@ -1,7 +1,4 @@
 #include "Database.h"
-#include <stdexcept>
-#include <iostream>
-#include <sstream>
 
 using namespace std;
 

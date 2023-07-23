@@ -3,6 +3,8 @@
 
 #include "Board.h"
 #include <iostream>
+#include <stdexcept>
+#include <sstream>
 #include <string>
 #include <list>
 

@@ -2,6 +2,7 @@
 #define BOARD_H
 
 #include "Task.h"
+#include <stdexcept>
 #include <iostream>
 #include <string>
 #include <list>
