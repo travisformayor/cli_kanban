@@ -3,6 +3,7 @@
 
 #include "Board.h"
 #include "Task.h"
+#include <iostream>
 #include <sqlite3.h>
 #include <string>
 #include <list>
