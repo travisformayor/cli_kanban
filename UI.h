@@ -17,24 +17,26 @@ public:
     UI(Database& db);
     void setTextColor(WORD color);
     void setSelectIndex(int index);
-    void loadBoards();
-    void loadTasks();
-    void getSelectedBoardAndLoadTasks();
-    void getSelectedTask();
+    void reloadBoards();
+    void reloadBoardTasks();
+    void findSelectedBoard();
+    void findSelectedTask();
     void displayScreen();
     void displayTitles(list<string>& titles);
     void displayTaskCard(string taskDetails);
     void addNewBoard();
     void addNewTask();
-    void removeSelectedBoard();
-    void removeSelectedTask();
+    void deleteSelectedBoard();
+    void deleteSelectedTask();
     string getUserInput(const string& prompt);
     void keyboardListen();
-    void changeSelector(int direction);
+    void moveSelector(int direction);
     void changeScreen(string command);
+
+    // methods to update boards and tasks
     void editBoardTitle();
-    void editTaskDescription();
     void editTaskTitle();
+    void editTaskDescription();
     void editTaskStage();
     void editTaskRating();
 
@@ -44,9 +46,8 @@ private:
 
     Database db;
     list<Board*> loadedBoards;
-    list<Task*> loadedTasks;
-    Board selectedBoard;
-    Task selectedTask;
+    Board* selectedBoardPtr;
+    Task* selectedTaskPtr;
     int selectedIndex;
     string currScreen;
     map<string, string> screenMenus;

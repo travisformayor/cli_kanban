@@ -21,6 +21,7 @@ class Task {
   -description: string
   -stage: Stage
   -difficultyRating: int
+  -boardId: int
   +Task(title: string, board: Board&)
   +~Task()
   +setId(id: int): void
@@ -28,11 +29,15 @@ class Task {
   +setDescription(newDesc: string): void
   +setStage(newStage: Stage): void
   +setDifficultyRating(rating: int): void
+  +setBoardId(boardId: int): void
   +getId(): int
   +getTitle(): string
   +getDescription(): string
   +getStage(): Stage
   +getDifficultyRating(): int
+  +getBoardId(): int
+  +getTaskCard(): string
+  +searchTasks(tasks: list<Task*>, query: string): list<Task*>
   +stageToString(stage: Stage): string
   +stringToStage(stageStr: string): Stage
 }
@@ -45,6 +50,7 @@ class Board {
   +~Board()
   +setId(id: int): void
   +setTitle(newTitle: string): void
+  +setTasks(tasks: list<Task*>&): void
   +addTask(task: Task&): void
   +removeTask(task: Task&): void
   +getId(): int
@@ -58,29 +64,28 @@ class UI {
   -TEXT_GREEN: WORD
   -db: Database
   -loadedBoards: list<Board*>
-  -loadedTasks: list<Task*>
-  -selectedBoard: Board
-  -selectedTask: Task
+  -selectedBoardPtr: Board*
+  -selectedTaskPtr: Task*
   -selectedIndex: int
   -currScreen: string
   -screenMenus: map<string, string>
   +UI(db: Database&)
   +setTextColor(color: WORD): void
   +setSelectIndex(index: int): void
-  +loadBoards(): void
-  +loadTasks(): void
-  +getSelectedBoardAndLoadTasks(): void
-  +getSelectedTask(): void
+  +reloadBoards(): void
+  +reloadBoardTasks(): void
+  +findSelectedBoard(): void
+  +findSelectedTask(): void
   +displayScreen(): void
   +displayTitles(titles: list<string>&): void
   +displayTaskCard(taskDetails: string): void
   +addNewBoard(): void
   +addNewTask(): void
-  +removeSelectedBoard(): void
-  +removeSelectedTask(): void
+  +deleteSelectedBoard(): void
+  +deleteSelectedTask(): void
   +getUserInput(prompt: string): string
   +keyboardListen(): void
-  +changeSelector(direction: int): void
+  +moveSelector(direction: int): void
   +changeScreen(command: string): void
   +editBoardTitle(): void
   +editTaskDescription(): void
@@ -100,10 +105,10 @@ class Database {
   +queryString(tableName: string, dataMap: map<string, variant<int, string>>): string
   +saveBoardData(board: Board&): void
   +saveTaskData(task: Task&): void
-  +loadBoardData(): list<Board*>
-  +loadTaskData(boards: list<Board*>): list<Task*>
-  +deleteTask(task: Task&): void
   +deleteBoard(board: Board&): void
+  +deleteTask(task: Task&): void
+  +loadBoardData(): list<Board*>
+  +loadTaskData(board: Board&): list<Task*>
 }
 
 @enduml
