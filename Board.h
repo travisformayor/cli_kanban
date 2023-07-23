@@ -14,9 +14,9 @@ class Board {
 public:
     Board(string title);
     ~Board();
-    void setId(int id);
-    void setTitle(string newTitle);
-    void setTasks(list<Task*>& tasks);
+    void setId(const int id);
+    void setTitle(const string newTitle);
+    void setTasks(const list<Task*>& tasks);
     void addTask(Task& task);
     void removeTask(Task& task);
     int getId();

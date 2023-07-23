@@ -18,18 +18,18 @@ Board::~Board() {
     }
 }
 
-void Board::setId(int id) {
+void Board::setId(const int id) {
     this->id = id;
 }
 
-void Board::setTitle(string newTitle) {
+void Board::setTitle(const string newTitle) {
     if (newTitle.empty()) {
         throw invalid_argument("Title can't be empty.");
     }
     this->title = newTitle;
 }
 
-void Board::setTasks(list<Task*>& tasks) {
+void Board::setTasks(const list<Task*>& tasks) {
     this->tasks.clear();
     this->tasks = tasks;
 }
