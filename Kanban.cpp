@@ -16,7 +16,7 @@ int main() {
         UI ui(db);
 
         // load boards, set user selector position
-        ui.loadBoards();
+        ui.reloadBoards();
         ui.setSelectIndex(0);
 
         // loop screen refresh and user command listening
