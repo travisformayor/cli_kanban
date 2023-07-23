@@ -98,28 +98,6 @@ list<Task*> Task::searchTasks(list<Task*> tasks, const string& query) {
     return foundTasks;
 }
 
-void Task::sortTasks(list<Task*>& tasks, const string& sortType) {
-    if (sortType == "title") {
-        tasks.sort([](Task* a, Task* b) { return a->getTitle() < b->getTitle(); });
-    }
-    else if (sortType == "stage") {
-        tasks.sort([](Task* a, Task* b) {
-            if (a->getStage() == b->getStage()) {
-                return a->getId() < b->getId();
-            }
-            return a->getStage() < b->getStage();
-            });
-    }
-    else if (sortType == "difficulty") {
-        tasks.sort([](Task* a, Task* b) {
-            if (a->getDifficultyRating() == b->getDifficultyRating()) {
-                return a->getId() < b->getId();
-            }
-            return a->getDifficultyRating() < b->getDifficultyRating();
-            });
-    }
-}
-
 // helper convert methods for dealing with Stages as strings
 string Task::stageToString(Stage stage) {
     switch (stage) {

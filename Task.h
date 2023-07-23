@@ -30,7 +30,6 @@ public:
     int getDifficultyRating();
     string getTaskCard();
     list<Task*> searchTasks(list<Task*> tasks, const string& query);
-    void sortTasks(list<Task*>& tasks, const string& sortType);
     static string stageToString(Stage stage);
     static Stage stringToStage(const string& stageStr);
 

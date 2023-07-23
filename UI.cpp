@@ -24,8 +24,8 @@ void UI::topMenu() {
     cout << "\n";
 }
 
-// set the console text color
 void UI::setTextColor(WORD color) {
+    // set the console text color
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(hConsole, color);
 }
@@ -36,18 +36,22 @@ void UI::setSelectIndex(int index) {
 
 void UI::loadBoards() {
     this->loadedBoards.clear();
-    this->loadedBoards = db.loadBoardData();
+    this->loadedBoards = this->db->loadBoardData();
 }
 
-void UI::getSelectedBoard() {
+void UI::loadTasks() {
+    this->loadedTasks.clear();
+    this->loadedTasks = this->db->loadTaskData(this->selectedBoard);
+}
+
+void UI::getSelectedBoardAndLoadTasks() {
     // find selected board
     Board* boardPtr = this->loadedBoards.begin();
     advance(boardPtr, this->selectedIndex);
     // mark board as selected
     this->selectedBoard = *boardPtr;
     // load all tasks for selected board
-    this->loadedTasks.clear();
-    this->loadedTasks = db.loadTaskData(this->selectedBoard);
+    loadTasks();
 }
 
 void UI::getSelectedTask() {
@@ -113,8 +117,7 @@ void UI::addNewBoard() {
     // save board to db
     this->db->saveBoardData(newBoard);
     // reload list of boards
-    this->loadedBoards.clear();
-    this->loadedBoards = this->db->loadBoardData();
+    loadBoards();
 }
 
 void UI::addNewTask() {
@@ -123,8 +126,7 @@ void UI::addNewTask() {
     // add task to board and save to db
     this->db->saveTaskData(this->selectedBoard, newTask);
     // reload tasks for selected board
-    this->loadedTasks.clear();
-    this->loadedTasks = this->db.loadTaskData(this->selectedBoard);
+    loadTasks();
 }
 
 void UI::removeSelectedBoard() {
@@ -135,8 +137,7 @@ void UI::removeSelectedBoard() {
     this->db->deleteBoard(*boardPtr);
     delete* boardPtr;
     // reload list of boards
-    this->loadedBoards.clear();
-    this->loadedBoards = this->db->loadBoardData();
+    loadBoards();
     // Adjust selected index if at end of list
     this->selectedIndex = max(0, static_cast<int>(this->loadedBoards.size()) - 1);
 }
@@ -149,8 +150,7 @@ void UI::removeSelectedTask() {
     this->db->deleteTask(*taskPtr);
     delete* taskPtr;
     // reload tasks for selected board
-    this->loadedTasks.clear();
-    this->loadedTasks = this->db.loadTaskData(this->selectedBoard);
+    loadTasks();
     // Adjust selected index if at end of list
     this->selectedIndex = max(0, static_cast<int>(this->loadedTasks.size()) - 1);
 }
@@ -163,13 +163,6 @@ string UI::getUserInput(const string& prompt) {
 
     // to do: catch and exceptions around user input
 }
-
-// to do sort: 
-// - sort at db level: stage then id for tasks, title then id for boards
-// - show how clears and reloads from db every time there is a change to the list of tasks or boards
-// - show advance() command, now keeping everything sorted correctly lets this simple selection method work
-// to do search: 
-// - where clause in db searches for only tasks associated with the selected board. relationship key needed for this to work
 
 void UI::keyboardListen() {
     bool keyPressed = false;
@@ -289,7 +282,7 @@ void UI::changeScreen(string command) {
         ui.setSelectIndex(0);
     }
     else if (this->currScreen == "Board View") {
-        ui.getSelectedBoard();
+        ui.getSelectedBoardAndLoadTasks();
         ui.setSelectIndex(0);
     }
     else if (this->currScreen == "Task View") {
@@ -298,6 +291,13 @@ void UI::changeScreen(string command) {
     }
 
     // 3. while loops, display refreshes in main()
+}
+
+void UI::editBoardTitle() {
+    // to do: make this have a char length limit
+    // to do: can the user entry pre-populate with the current version of desc when updating it?
+    string newTitle = getUserInput("Enter a new title for the task: ");
+    this->selectedBoard->setTitle(newTitle);
 }
 
 void UI::editTaskDescription() {
@@ -312,13 +312,6 @@ void UI::editTaskTitle() {
     // to do: can the user entry pre-populate with the current version of desc when updating it?
     string newTitle = getUserInput("Enter a new title for the task: ");
     this->selectedTask->setTitle(newTitle);
-}
-
-void UI::editBoardTitle() {
-    // to do: make this have a char length limit
-    // to do: can the user entry pre-populate with the current version of desc when updating it?
-    string newTitle = getUserInput("Enter a new title for the task: ");
-    this->selectedBoard->setTitle(newTitle);
 }
 
 void UI::editTaskStage() {

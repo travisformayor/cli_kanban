@@ -24,10 +24,10 @@ public:
     string queryString(const string& tableName, const map<string, variant<int, string>>& dataMap);
     void saveBoardData(Board& board);
     void saveTaskData(Task& task);
-    list<Board*> loadBoardData();
-    list<Task*> loadTaskData(Board& board);
     void deleteBoard(Board& board);
     void deleteTask(Task& task);
+    list<Board*> loadBoardData();
+    list<Task*> loadTaskData(Board& board);
 
 private:
     string dbName;

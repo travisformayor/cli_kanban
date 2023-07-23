@@ -19,7 +19,8 @@ public:
     void setTextColor(WORD color);
     void setSelectIndex(int index);
     void loadBoards();
-    void getSelectedBoard();
+    void loadTasks();
+    void getSelectedBoardAndLoadTasks();
     void getSelectedTask();
     void displayScreen();
     void displayTitles(list<string>& titles);
@@ -32,9 +33,9 @@ public:
     void keyboardListen();
     void changeSelector(int direction);
     void changeScreen(string command);
+    void editBoardTitle();
     void editTaskDescription();
     void editTaskTitle();
-    void editBoardTitle();
     void editTaskStage();
     void editTaskRating();
 
