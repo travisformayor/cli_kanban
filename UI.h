@@ -1,6 +1,10 @@
 #ifndef UI_H
 #define UI_H
 
+#ifdef byte // undefine byte to avoid conflict with <windows.h>  
+#undef byte
+#endif
+
 #include "Database.h"
 #include "Board.h"
 #include "Task.h"
