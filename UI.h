@@ -1,6 +1,7 @@
 #ifndef UI_H
 #define UI_H
 
+#include <windows.h>
 #ifdef byte // undefine byte to avoid conflict with <windows.h>  
 #undef byte
 #endif
@@ -9,7 +10,6 @@
 #include "Board.h"
 #include "Task.h"
 #include <iostream>
-#include <windows.h>
 #include <conio.h>
 #include <variant>
 #include <string>
