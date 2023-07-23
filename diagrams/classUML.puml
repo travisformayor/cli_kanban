@@ -5,6 +5,9 @@ title Class UML Diagram
 Task "*" -- "1" Board : tasks
 Task "*" -- "1" Database
 Board "*" -- "1" Database
+Board "*" -- "1" UI
+Task "*" -- "1" UI
+UI "1" -- "1" Database
 
 enum Stage {
   ToDo
@@ -50,6 +53,42 @@ class Board {
   +findById(boards: list<Board*>, id: int): Board*
 }
 
+class UI {
+  -TEXT_WHITE: WORD
+  -TEXT_GREEN: WORD
+  -db: Database
+  -loadedBoards: list<Board*>
+  -loadedTasks: list<Task*>
+  -selectedBoard: Board
+  -selectedTask: Task
+  -selectedIndex: int
+  -currScreen: string
+  -screenMenus: map<string, string>
+  +UI(db: Database&)
+  +setTextColor(color: WORD): void
+  +setSelectIndex(index: int): void
+  +loadBoards(): void
+  +loadTasks(): void
+  +getSelectedBoardAndLoadTasks(): void
+  +getSelectedTask(): void
+  +displayScreen(): void
+  +displayTitles(titles: list<string>&): void
+  +displayTaskCard(taskDetails: string): void
+  +addNewBoard(): void
+  +addNewTask(): void
+  +removeSelectedBoard(): void
+  +removeSelectedTask(): void
+  +getUserInput(prompt: string): string
+  +keyboardListen(): void
+  +changeSelector(direction: int): void
+  +changeScreen(command: string): void
+  +editBoardTitle(): void
+  +editTaskDescription(): void
+  +editTaskTitle(): void
+  +editTaskStage(): void
+  +editTaskRating(): void
+}
+
 class Database {
   -dbName: string
   -db: sqlite3*
@@ -64,7 +103,7 @@ class Database {
   +loadBoardData(): list<Board*>
   +loadTaskData(boards: list<Board*>): list<Task*>
   +deleteTask(task: Task&): void
-  +deleteBoard(board: Board& board): void
+  +deleteBoard(board: Board&): void
 }
 
 @enduml
