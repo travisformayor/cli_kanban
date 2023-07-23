@@ -28,7 +28,7 @@ class Task {
   +setTitle(newTitle: string): void
   +setDescription(newDesc: string): void
   +setStage(newStage: Stage): void
-  +setDifficultyRating(rating: int): void
+  +setDifficulty(rating: int): void
   +setBoardId(boardId: int): void
   +getId(): int
   +getTitle(): string

@@ -53,7 +53,7 @@ void Task::setStage(Stage newStage) {
     this->stage = newStage;
 }
 
-void Task::setDifficultyRating(int rating) {
+void Task::setDifficulty(int rating) {
     if (rating < 1 || rating > 5) {
         throw invalid_argument("Rating must be between 1 and 5.");
     }

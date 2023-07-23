@@ -280,7 +280,7 @@ list<Task*> Database::loadTaskData(Board& board) {
         Task* task = new Task(title, board);
         task->setId(id);
         task->setDescription(description);
-        task->setDifficultyRating(difficultyRating);
+        task->setDifficulty(difficultyRating);
         task->setStage(task->stringToStage(stageStr));
         tasks.push_back(task);
     }

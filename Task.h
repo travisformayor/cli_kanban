@@ -24,7 +24,7 @@ public:
     void setTitle(string newTitle);
     void setDescription(string newDesc);
     void setStage(Stage newStage);
-    void setDifficultyRating(int rating);
+    void setDifficulty(int rating);
     void setBoardId(int boardId);
     int getId();
     string getTitle();
