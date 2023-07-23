@@ -3,94 +3,188 @@
 title Sequence Diagram
 
 actor User
+participant "UI" as UI
 participant "Task" as T
 participant "Board" as B
 participant "Database" as DB
 
-User -> DB: loadBoardData()
+'Initial load Boards list
+note over User, DB: Display all Boards
+User -> UI: loadBoards()
+activate UI
+UI -> DB: loadBoardData()
 activate DB
-DB --> User: boardData
+DB -> UI: loadedBoards
 deactivate DB
+UI --> User: displayScreen()
+deactivate UI
 
+'Create new Board
+note over User, DB: Add Board
 alt User creates a new Board
-  User -> B: createBoard()
+  User -> UI: addNewBoard()
+  activate UI
+  UI -> B: createBoard()
   activate B
   B -> DB: saveBoardData()
   activate DB
   DB --> B: confirm
   deactivate DB
   deactivate B
+  UI -> DB: loadBoards()
+  activate DB
+  DB -> UI: loadedBoards
+  deactivate DB
+  UI --> User: displayScreen()
+  deactivate UI
 end
 
-User -> DB: loadTaskData()
-activate DB
-DB --> User: taskData
-deactivate DB
-
-User -> T: createTask()
-activate T
-T -> DB: saveTaskData()
-activate DB
-DB --> T: confirm
-deactivate DB
-deactivate T
-
-User -> B: addTask(T)
+'Rename Board title
+note over User, DB: Rename Board
+User -> UI: editBoardTitle()
+activate UI
+UI -> B: setTitle()
 activate B
 B -> DB: saveBoardData()
 activate DB
 DB --> B: confirm
 deactivate DB
 deactivate B
+UI -> DB: loadBoardData()
+activate DB
+DB -> UI: loadedBoards
+deactivate DB
+UI --> User: displayScreen()
+deactivate UI
 
-'change to In Progress
-User -> T: setStage("In Progress")
-activate T
-alt Task has description and difficulty
+'Open Board
+note over User, DB: Open Board
+User -> UI: changeScreen() "Board View"
+activate UI
+UI -> DB: loadTasks()
+activate DB
+DB -> UI: loadedTasks
+deactivate DB
+UI --> User: displayScreen()
+deactivate UI
+
+'Create new Task
+note over User, DB: Add Task
+alt User creates a new Task
+  User -> UI: addNewTask()
+  activate UI
+  UI -> T: createTask()
+  activate T
   T -> DB: saveTaskData()
+  activate DB
+  DB --> T: confirm
+  deactivate DB
+  deactivate T
+  UI -> DB: loadTaskData()
+  activate DB
+  DB -> UI: loadedTasks
+  deactivate DB
+  UI --> User: displayScreen()
+  deactivate UI
+end
+
+'Delete Task
+note over User, DB: Delete Task
+User -> UI: removeSelectedTask()
+activate UI
+activate DB
+deactivate DB
+UI -> DB: loadTaskData()
+activate DB
+DB -> UI: loadedTasks
+deactivate DB
+UI --> User: displayScreen()
+deactivate UI
+
+'Open Task
+note over User, DB: Open Task
+User -> UI: changeScreen() "Task View"
+activate UI
+UI -> UI: loadedTasks
+UI --> User: displayScreen()
+deactivate UI
+
+'Edit Task Stages
+note over User, DB: Edit Task
+User -> UI: editTaskStage() "In Progress"
+activate UI
+alt Task has description and difficulty
+  UI -> T: saveTaskData()
+  activate T
+  T -> DB:
   activate DB
   DB --> T: confirm
   deactivate DB
 else Task missing description or difficulty
-  T --> User: error() 
+  T --> UI: error() 
   deactivate T
-  User -> T: setDescription()
+  User -> UI: editTaskDescription()
+  UI -> T: setDescription()
   activate T
   T -> DB: saveTaskData()
   activate DB
   DB --> T: confirm
-  deactivate DB
   deactivate T
-  User -> T: setDifficulty()
+  deactivate DB
+  User -> UI: editTaskRating()
+  UI -> T: setDifficulty()
   activate T
   T -> DB: saveTaskData()
   activate DB
   DB --> T: confirm
-  deactivate DB
   deactivate T
-  User -> T: setStage("In Progress")
+  deactivate DB
+  UI -> T: saveTaskData()
   activate T
-  T -> DB: saveTaskData()
+  T -> DB:
   activate DB
   DB --> T: confirm
   deactivate DB
   deactivate T
 end
+UI -> DB: loadTaskData()
+activate DB
+DB -> UI: loadedTasks
+deactivate DB
+UI --> User: displayScreen()
+deactivate UI
 
-User -> T: setStage("Done")
+User -> UI: editTaskStage() "Done"
+activate UI
+UI -> T: saveTaskData()
 activate T
-T -> DB: saveTaskData()
+T -> DB:
 activate DB
 DB --> T: confirm
-deactivate DB
 deactivate T
-
-User -> B: deleteBoard()
-activate B
-B -> DB: deleteBoard()
-activate DB
-DB --> B: confirm
 deactivate DB
-deactivate B
+UI -> DB: loadTaskData()
+activate DB
+DB -> UI: loadedTasks
+deactivate DB
+UI --> User: displayScreen()
+deactivate UI
+
+'Delete Board
+note over User, DB: Delete Board
+User -> UI: removeSelectedBoard()
+activate UI
+UI -> DB: deleteBoard()
+activate DB
+activate T
+T-> DB: delete associated Tasks
+deactivate T
+deactivate DB
+UI -> DB: loadBoardData()
+activate DB
+DB -> UI: loadedBoards
+deactivate DB
+UI --> User: displayScreen()
+deactivate UI
 
 @enduml
