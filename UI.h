@@ -1,10 +1,10 @@
 #ifndef UI_H
 #define UI_H
 
+// exclude parts of <windows.h> causing build errors
+#define WIN32_LEAN_AND_MEAN
+#define RPC_NO_WINDOWS_H
 #include <windows.h>
-#ifdef byte // undefine byte to avoid conflict with <windows.h>  
-#undef byte
-#endif
 
 #include "Database.h"
 #include "Board.h"
