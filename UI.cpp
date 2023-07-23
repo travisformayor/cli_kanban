@@ -268,10 +268,10 @@ void UI::moveSelector(int direction) {
     // find length of list on the screen
     int listSize;
     if (this->currScreen == "Boards") {
-        listSize = this->loadedBoards.size();
+        listSize = static_cast<int>(this->loadedBoards.size());
     }
     else if (this->currScreen == "Board View") {
-        listSize = this->selectedBoardPtr->getTasks().size();
+        listSize = static_cast<int>(this->selectedBoardPtr->getTasks().size());
     }
     else if (this->currScreen == "Task View") {
         listSize = 0; // task view does not use arrow keys
