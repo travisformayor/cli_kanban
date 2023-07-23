@@ -90,7 +90,7 @@ end
 
 'Delete Task
 note over User, DB: Delete Task
-User -> UI: removeSelectedTask()
+User -> UI: deleteSelectedTask()
 activate UI
 activate DB
 deactivate DB
@@ -172,7 +172,7 @@ deactivate UI
 
 'Delete Board
 note over User, DB: Delete Board
-User -> UI: removeSelectedBoard()
+User -> UI: deleteSelectedBoard()
 activate UI
 UI -> DB: deleteBoard()
 activate DB

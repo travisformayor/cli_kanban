@@ -52,7 +52,7 @@ void UI::findSelectedBoard() {
 
 void UI::findSelectedTask() {
     // find selected task. access tasks from the selected board
-    list<Task*>::iterator taskIter = this->selectedBoardPtr->tasks.begin();
+    list<Task*>::iterator taskIter = this->selectedBoardPtr->getTasks().begin();
     advance(taskIter, this->selectedIndex);
     // point selected to the correct task
     this->selectedTaskPtr = *taskIter; // dereference iterator returns Task*
@@ -170,7 +170,7 @@ string UI::getUserInput(const string& prompt) {
 
         if (cin.fail()) {
             cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cin.ignore((numeric_limits<streamsize>::max)(), '\n');
             throw runtime_error("Error reading input");
         }
     }
@@ -219,10 +219,10 @@ void UI::keyboardListen() {
                 break;
             case 'd': // delete or edit task description
                 if (this->currScreen == "Boards") {
-                    removeSelectedBoard();
+                    deleteSelectedBoard();
                 }
                 else if (this->currScreen == "Board View") {
-                    removeSelectedTask();
+                    deleteSelectedTask();
                 }
                 else if (this->currScreen == "Task View") {
                     editTaskDescription();
