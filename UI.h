@@ -15,7 +15,6 @@ using namespace std;
 class UI {
 public:
     UI(Database& db);
-    void topMenu();
     void setTextColor(WORD color);
     void setSelectIndex(int index);
     void loadBoards();

@@ -15,15 +15,6 @@ UI::UI(Database& db) : db(db) {
     setTextColor(TEXT_WHITE);
 }
 
-void UI::topMenu() {
-    cout << "======================================= Kanban Board =======================================\n";
-    cout << screenMenus[this->currScreen] << "\n";
-    cout << "============================== (Press key to make selection) ===============================\n";
-    cout << "\n";
-    cout << "                                       | " << this->currScreen << " |\n";
-    cout << "\n";
-}
-
 void UI::setTextColor(WORD color) {
     // set the console text color
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -64,7 +55,14 @@ void UI::getSelectedTask() {
 
 void UI::displayScreen() {
     system("cls"); // clear the console screen
-    topMenu(this->currScreen);
+
+    // top menu
+    cout << "======================================= Kanban Board =======================================\n";
+    cout << screenMenus[this->currScreen] << "\n";
+    cout << "============================== (Press key to make selection) ===============================\n";
+    cout << "\n";
+    cout << "                                       | " << this->currScreen << " |\n";
+    cout << "\n";
 
     // load titles list or task details
     list<string> titles;
@@ -252,9 +250,9 @@ void UI::changeSelector(int direction) {
 }
 
 void UI::changeScreen(string command) {
-    // 1. change screen
+    // change screen
     if (command == "enter") {
-        // Based on current screen, move forward to next screen
+        // move forward to next screen
         if (this->currScreen == "Boards") {
             this->currScreen = "Board View";
         }
@@ -263,7 +261,7 @@ void UI::changeScreen(string command) {
         }
     }
     else if (command == "back") {
-        // Based on current screen, move back to previous screen
+        // move back to previous screen
         if (this->currScreen == "Task View") {
             // save edits first
             this->db->saveTaskData(selectedTask);
@@ -276,21 +274,17 @@ void UI::changeScreen(string command) {
         }
     }
 
-    // 2. load items for new screen and reset selector position
+    // load items for new screen and reset selector position
     if (this->currScreen == "Boards") {
         ui.loadBoards();
-        ui.setSelectIndex(0);
     }
     else if (this->currScreen == "Board View") {
         ui.getSelectedBoardAndLoadTasks();
-        ui.setSelectIndex(0);
     }
     else if (this->currScreen == "Task View") {
         ui.getSelectedTask();
-        ui.setSelectIndex(0);
     }
-
-    // 3. while loops, display refreshes in main()
+    ui.setSelectIndex(0);
 }
 
 void UI::editBoardTitle() {
