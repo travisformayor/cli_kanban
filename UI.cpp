@@ -265,18 +265,16 @@ void UI::keyboardListen() {
 void UI::moveSelector(int direction) {
     // move selector up or down, wrapping around if at end or start
 
-    // find the length of the list on the screen
+    // find length of list on the screen
     int listSize;
-    switch (this->currScreen) {
-    case "Boards":
+    if (this->currScreen == "Boards") {
         listSize = this->loadedBoards.size();
-        break;
-    case "Board View":
+    }
+    else if (this->currScreen == "Board View") {
         listSize = this->selectedBoardPtr->getTasks().size();
-        break;
-    case "Task View":
+    }
+    else if (this->currScreen == "Task View") {
         listSize = 0; // task view does not use arrow keys
-        break;
     }
 
     // only move selector for Boards or Board View screen
