@@ -25,8 +25,16 @@ int main() {
         }
     }
     catch (runtime_error& e) {
-        cerr << "An error occurred: " << e.what() << endl;
+        cerr << "A runtime error occurred: " << e.what() << endl;
         return 1; // return 1 for error
+    }
+    catch (exception& e) {
+        cerr << "An exception occurred: " << e.what() << endl;
+        return 1;
+    }
+    catch (...) {
+        cerr << "An unknown error occurred." << endl;
+        return 1;
     }
 
     return 0;
