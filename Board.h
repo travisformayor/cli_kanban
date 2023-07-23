@@ -15,6 +15,7 @@ public:
     ~Board();
     void setId(int id);
     void setTitle(string newTitle);
+    void setTasks(list<Task*>& tasks);
     void addTask(Task& task);
     void removeTask(Task& task);
     int getId();

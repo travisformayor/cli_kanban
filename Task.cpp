@@ -59,6 +59,10 @@ void Task::setDifficultyRating(int rating) {
     this->difficultyRating = rating;
 }
 
+void Task::setBoardId(int boardId) {
+    this->boardId = boardId;
+}
+
 int Task::getId() {
     return this->id;
 }
@@ -77,6 +81,10 @@ Stage Task::getStage() {
 
 int Task::getDifficultyRating() {
     return this->difficultyRating;
+}
+
+int Task::getBoardId() {
+    return this->boardId;
 }
 
 string Task::getTaskCard() {

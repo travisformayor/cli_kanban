@@ -23,11 +23,13 @@ public:
     void setDescription(string newDesc);
     void setStage(Stage newStage);
     void setDifficultyRating(int rating);
+    void setBoardId(int boardId);
     int getId();
     string getTitle();
     string getDescription();
     Stage getStage();
     int getDifficultyRating();
+    int getBoardId();
     string getTaskCard();
     list<Task*> searchTasks(list<Task*> tasks, const string& query);
     static string stageToString(Stage stage);
@@ -39,6 +41,7 @@ private:
     string description;
     Stage stage;
     int difficultyRating;
+    int boardId;
 };
 
 #endif // TASK_H

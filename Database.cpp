@@ -156,8 +156,8 @@ void Database::saveTaskData(Task& task) {
         { "title", variant<int, string>{task.getTitle()} },
         { "description", variant<int, string>{task.getDescription()} },
         { "difficulty_rating", variant<int, string>{task.getDifficultyRating()} },
-        { "stage", variant<int, string>{task.stageToString(task.getStage())} }
-        // to do: add boardId
+        { "stage", variant<int, string>{task.stageToString(task.getStage())} },
+        { "board_id", variant<int, string>{task.getBoardId()} }
     };
 
     // include id only if not new

@@ -29,12 +29,17 @@ void Board::setTitle(string newTitle) {
     this->title = newTitle;
 }
 
+void Board::setTasks(list<Task*>& tasks) {
+    this->tasks.clear();
+    this->tasks = tasks;
+}
+
 void Board::addTask(Task& task) {
-    tasks.push_back(&task);
+    this->tasks.push_back(&task);
 }
 
 void Board::removeTask(Task& task) {
-    tasks.remove(&task);
+    this->tasks.remove(&task);
 }
 
 int Board::getId() {
