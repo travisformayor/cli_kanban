@@ -280,7 +280,7 @@ void UI::moveSelector(int direction) {
     // only move selector for Boards or Board View screen
     if (this->currScreen == "Boards" || this->currScreen == "Board View") {
         if (direction == 1 || direction == -1) {
-            this->selectedIndex = static_cast<int>((this->selectedIndex + direction + itemsSize) % itemsSize);
+            this->selectedIndex = static_cast<int>((this->selectedIndex + direction + listSize) % listSize);
         }
     }
     else {
