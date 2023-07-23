@@ -164,12 +164,25 @@ void UI::deleteSelectedTask() {
 }
 
 string UI::getUserInput(const string& prompt) {
-    cout << prompt;
     string input;
-    getline(cin, input);
-    return input;
 
-    // to do: catch and exceptions around user input
+    try {
+        cout << prompt;
+        getline(cin, input);
+
+        if (cin.fail()) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            throw runtime_error("Error reading input");
+        }
+    }
+    catch (const runtime_error& e) {
+        cerr << "An error occurred: " << e.what() << endl;
+        // reset input to not return bad data
+        input = "";
+    }
+
+    return input;
 }
 
 void UI::keyboardListen() {
@@ -264,8 +277,7 @@ void UI::moveSelector(int direction) {
         listSize = this->selectedBoardPtr->getTasks().size();
         break;
     case "Task View":
-        // to do: add arrow support to task view?
-        listSize = 0; // no arrow key support on task view
+        listSize = 0; // task view does not use arrow keys
         break;
     }
 
