@@ -27,35 +27,19 @@ void UI::setSelectIndex(int index) {
 
 void UI::reloadBoards() {
     this->loadedBoards.clear();
-    this->loadedBoards = this->db.loadBoardData();
+    this->loadedBoards = this->db.loadBoardsList();
 }
 
 void UI::reloadBoardTasks() {
-    // reload tasks for currently selected board
+    // reload tasks for currently active board
     // check if a board is selected
-    if (this->selectedBoardPtr != nullptr) {
+    if (this->activeBoardPtr != nullptr) {
         // reload tasks from DB
-        this->selectedBoardPtr->setTasks(this->db.loadTaskData(*this->selectedBoardPtr));
+        this->activeBoardPtr->setTasks(this->db.loadTaskData(*this->activeBoardPtr));
     }
     else {
         cout << "Select a board before loading tasks." << endl;
     }
-}
-
-void UI::findSelectedBoard() {
-    // find selected board
-    list<Board*>::iterator boardIter = this->loadedBoards.begin();
-    advance(boardIter, this->selectedIndex);
-    // point selected to the correct board
-    this->selectedBoardPtr = *boardIter; // dereference iterator returns Board*
-}
-
-void UI::findSelectedTask() {
-    // find selected task. access tasks from the selected board
-    list<Task*>::iterator taskIter = this->selectedBoardPtr->getTasks().begin();
-    advance(taskIter, this->selectedIndex);
-    // point selected to the correct task
-    this->selectedTaskPtr = *taskIter; // dereference iterator returns Task*
 }
 
 void UI::displayScreen() {
@@ -73,22 +57,35 @@ void UI::displayScreen() {
     list<string> titles;
     if (this->currScreen == "Boards") {
         // display list of boards
-        for (Board* board : this->loadedBoards) {
-            titles.push_back(board->getTitle());
+        if (this->loadedBoards.size() > 0) {
+            for (Board* board : this->loadedBoards) {
+                titles.push_back(board->getTitle());
+            }
+        }
+        else {
+            titles.push_back("[Create first board with 'c' command]");
         }
         displayTitles(titles);
     }
     else if (this->currScreen == "Board View") {
-        // display list of tasks for selected board
-        for (Task* task : this->selectedBoardPtr->getTasks()) {
-            titles.push_back(task->getTitle());
+        // display list of tasks for active board
+        if (this->activeBoardPtr != nullptr && this->activeBoardPtr->getTasks().size() > 0) {
+            for (Task* task : this->activeBoardPtr->getTasks()) {
+                titles.push_back(task->getTitle());
+            }
+        }
+        else {
+            titles.push_back("[Create first task with 'c' command]");
         }
         displayTitles(titles);
     }
+
     else if (this->currScreen == "Task View") {
         // display selected task info
-        string taskDetails = this->selectedTaskPtr->getTaskCard();
-        displayTaskCard(taskDetails);
+        if (this->activeTaskPtr != nullptr) {
+            string taskDetails = this->activeTaskPtr->getTaskCard();
+            displayTaskCard(taskDetails);
+        }
     }
 }
 
@@ -114,6 +111,52 @@ void UI::displayTaskCard(string taskDetails) {
     cout << taskDetails << endl;
 }
 
+void UI::findSelectedBoard() {
+    // check if there are boards
+    if (this->loadedBoards.size() > 0) {
+        // find selected board, set active
+        this->activeBoardPtr = this->loadedBoards[this->selectedIndex]; // list of pointers
+    }
+    else {
+        this->activeBoardPtr = nullptr;
+        cout << "Create a new board to manage." << endl;
+    }
+
+    this->selectedIndex = 0;
+
+    // find selected board
+    // list<Board*>::iterator boardIter = this->loadedBoards.begin();
+    // advance(boardIter, this->selectedIndex);
+    // point selected to the correct board
+    // this->activeBoardPtr = *boardIter; // dereference iterator returns Board*
+}
+
+void UI::findSelectedTask() {
+    // find selected task. access tasks from the active board
+    // check for active board
+    if (this->activeBoardPtr != nullptr) {
+        // check if there are tasks to select
+        if (this->activeBoardPtr->getTasks().size() > 0) {
+            // set selected task as active task
+            this->activeTaskPtr = this->activeBoardPtr->getTasks()[this->selectedIndex]; // list of pointers
+        }
+        else {
+            this->activeTaskPtr = nullptr;
+            cout << "No tasks to open. Create a new task first." << endl;
+            this->selectedIndex = 0;
+        }
+    }
+    else {
+        cout << "Select a board before opening a task." << endl;
+        this->selectedIndex = 0;
+    }
+
+    // list<Task*>::iterator taskIter = this->activeBoardPtr->getTasks().begin();
+    // advance(taskIter, this->selectedIndex);
+    // // point selected to the correct task
+    // this->activeTaskPtr = *taskIter; // dereference iterator returns Task*
+}
+
 void UI::addNewBoard() {
     string newBoardTitle = getUserInput("Enter a title for the new board: ");
     Board newBoard(newBoardTitle);
@@ -124,41 +167,90 @@ void UI::addNewBoard() {
 }
 
 void UI::addNewTask() {
-    string newTaskTitle = getUserInput("Enter a title for the new task: ");
-    Task newTask(newTaskTitle, *this->selectedBoardPtr);
-    // save task to db
-    this->db.saveTaskData(newTask);
-    // reload tasks for selected board
-    reloadBoardTasks();
+    // check there is an active board
+    if (this->activeBoardPtr != nullptr) {
+        // Add new task to board
+        string newTaskTitle = getUserInput("Enter a title for the new task: ");
+        Task newTask(newTaskTitle, *this->activeBoardPtr);
+        // save task to db
+        this->db.saveTaskData(newTask);
+        // reload tasks for active board
+        reloadBoardTasks();
+    }
+    else {
+        cout << "Select a board before adding a task." << endl;
+        this->selectedIndex = 0;
+    }
 }
 
 void UI::deleteSelectedBoard() {
-    // find the selected board
-    list<Board*>::iterator boardIter = this->loadedBoards.begin();
-    advance(boardIter, this->selectedIndex);
-    // delete board from database
-    this->db.deleteBoard(**boardIter); // deref iterator = board ptr, then deref ptr
-    //  deallocate memory
-    delete* boardIter; // deref iterator returns board*
-    // reload list of boards
-    reloadBoards();
-    // fix selected index if was at end of list
-    this->selectedIndex = max(0, static_cast<int>(this->loadedBoards.size()) - 1);
+
+    // check if there are boards
+    if (this->loadedBoards.size() > 0) {
+        // find the selected board
+        Board* selectedBoard = this->loadedBoards[this->selectedIndex];
+        // delete board from DB and deallocated memory
+        this->db.deleteBoard(*selectedBoard); // deref pointer
+        delete selectedBoard;
+        // reload list of boards
+        reloadBoards();
+        // fix selected index if was at end of list
+        this->selectedIndex = max(0, static_cast<int>(this->loadedBoards.size()) - 1);
+    }
+    else {
+        cout << "No boards to delete." << endl;
+        this->selectedIndex = 0;
+    }
+
+    // list<Board*>::iterator boardIter = this->loadedBoards.begin();
+    // advance(boardIter, this->selectedIndex);
+    // // delete board from database
+    // this->db.deleteBoard(**boardIter); // deref iterator = board ptr, then deref ptr
+    // //  deallocate memory
+    // delete* boardIter; // deref iterator returns board*
+    // // reload list of boards
+    // reloadBoards();
+    // // fix selected index if was at end of list
+    // this->selectedIndex = max(0, static_cast<int>(this->loadedBoards.size()) - 1);
 }
 
 
 void UI::deleteSelectedTask() {
-    // find the selected task
-    list<Task*>::iterator taskIter = this->selectedBoardPtr->getTasks().begin();
-    advance(taskIter, this->selectedIndex);
-    // delete task from db
-    this->db.deleteTask(**taskIter); // deref iterator = task ptr, then deref prt
-    // deallocate memory
-    delete* taskIter; // deref iterator returns task*
-    // reload tasks for selected board
-    reloadBoardTasks();
-    // fix selected index if was at end of list
-    this->selectedIndex = max(0, static_cast<int>(this->selectedBoardPtr->getTasks().size()) - 1);
+    // check if there is an active board
+    if (this->activeBoardPtr != nullptr) {
+        // check if there are tasks to select
+        if (this->activeBoardPtr->getTasks().size() > 0) {
+            // find selected task 
+            Task* selectedTask = this->activeBoardPtr->getTasks()[this->selectedIndex];
+            // delete task from DB and deallocate memory
+            this->db.deleteTask(*selectedTask);
+            delete selectedTask;
+            // reload tasks for active board
+            reloadBoardTasks();
+            // fix selected index if at end of list
+            this->selectedIndex = max(0, static_cast<int>(this->activeBoardPtr->getTasks().size()) - 1);
+        }
+        else {
+            cout << "No tasks to delete." << endl;
+            this->selectedIndex = 0;
+        }
+    }
+    else {
+        cout << "Select a board before deleting a task." << endl;
+        this->selectedIndex = 0;
+    }
+
+    // // find the selected task
+    // list<Task*>::iterator taskIter = this->activeBoardPtr->getTasks().begin();
+    // advance(taskIter, this->selectedIndex);
+    // // delete task from db
+    // this->db.deleteTask(**taskIter); // deref iterator = task ptr, then deref prt
+    // // deallocate memory
+    // delete* taskIter; // deref iterator returns task*
+    // // reload tasks for selected board
+    // reloadBoardTasks();
+    // // fix selected index if was at end of list
+    // this->selectedIndex = max(0, static_cast<int>(this->activeBoardPtr->getTasks().size()) - 1);
 }
 
 string UI::getUserInput(const string& prompt) {
@@ -248,8 +340,10 @@ void UI::keyboardListen() {
                 break;
             case 27: // 'esc', quit program
                 if (this->currScreen == "Task View") {
-                    // save any changes to task first
-                    this->db.saveTaskData(*this->selectedTaskPtr);
+                    // save any changes to active task first
+                    if (this->activeTaskPtr != nullptr) {
+                        this->db.saveTaskData(*this->activeTaskPtr);
+                    }
                 }
                 exit(0);
             }
@@ -270,14 +364,14 @@ void UI::moveSelector(int direction) {
     if (this->currScreen == "Boards") {
         listSize = static_cast<int>(this->loadedBoards.size());
     }
-    else if (this->currScreen == "Board View") {
-        listSize = static_cast<int>(this->selectedBoardPtr->getTasks().size());
+    else if (this->currScreen == "Board View" && this->activeBoardPtr != nullptr) {
+        listSize = static_cast<int>(this->activeBoardPtr->getTasks().size());
     }
-    else if (this->currScreen == "Task View") {
-        listSize = 0; // task view does not use arrow keys
+    else {
+        listSize = 0; // other screens have no selector
     }
 
-    // only move selector for Boards or Board View screen
+    // only move selector on Boards or Board View screen
     if (this->currScreen == "Boards" || this->currScreen == "Board View") {
         if (direction == 1 || direction == -1) {
             this->selectedIndex = static_cast<int>((this->selectedIndex + direction + listSize) % listSize);
@@ -308,8 +402,10 @@ void UI::changeScreen(string command) {
         // move back to previous screen
         if (this->currScreen == "Task View") {
             // save task edits
-            this->db.saveTaskData(*this->selectedTaskPtr);
-            // task board still selected. reload the boards tasks
+            if (this->activeTaskPtr != nullptr) {
+                this->db.saveTaskData(*this->activeTaskPtr);
+            }
+            // update the tasks listed for the still active board
             reloadBoardTasks();
             this->currScreen = "Board View";
         }
@@ -326,35 +422,75 @@ void UI::changeScreen(string command) {
 void UI::editBoardTitle() {
     // to do: make this have a char length limit
     // to do: can the user entry pre-populate with the current version of desc when updating it?
-    string newTitle = getUserInput("Enter a new title for the task: ");
-    this->selectedBoardPtr->setTitle(newTitle);
+    if (this->activeBoardPtr != nullptr) {
+        string newTitle = getUserInput("Enter a new title for the task: ");
+        this->activeBoardPtr->setTitle(newTitle);
+        // save board to db and reload board list
+        this->db.saveBoardData(*this->activeBoardPtr);
+        reloadBoards();
+    }
+    else {
+        cout << "Missing active board." << endl;
+    }
 }
 
 void UI::editTaskTitle() {
     // to do: make this have a char length limit
     // to do: can the user entry pre-populate with the current version of desc when updating it?
-    string newTitle = getUserInput("Enter a new title for the task: ");
-    this->selectedTaskPtr->setTitle(newTitle);
+    if (this->activeTaskPtr != nullptr) {
+        string newTitle = getUserInput("Enter a new title for the task: ");
+        this->activeTaskPtr->setTitle(newTitle);
+        // save task to db and reload task list
+        this->db.saveTaskData(*this->activeTaskPtr);
+        reloadBoardTasks();
+    }
+    else {
+        cout << "Missing active task." << endl;
+    }
 }
 
 void UI::editTaskDescription() {
     // to do: display description with word wrap past certain length
     // to do: can the user entry pre-populate with the current version of desc when updating it?
-    string newDescription = getUserInput("Enter a new description for the task: ");
-    this->selectedTaskPtr->setDescription(newDescription);
+    if (this->activeTaskPtr != nullptr) {
+        string newDescription = getUserInput("Enter a new description for the task: ");
+        this->activeTaskPtr->setDescription(newDescription);
+        // save task to db and reload task list
+        this->db.saveTaskData(*this->activeTaskPtr);
+        reloadBoardTasks();
+    }
+    else {
+        cout << "Missing active task." << endl;
+    }
 }
 
 void UI::editTaskStage() {
     // to do: make this a hardcoded selection list, not user input
     // to do: can the user entry pre-populate with the current version of desc when updating it?
-    string newStage = getUserInput("Enter a new stage for the task: ");
-    this->selectedTaskPtr->setStage(Task::stringToStage(newStage));
+    if (this->activeTaskPtr != nullptr) {
+        string newStage = getUserInput("Enter a new stage for the task: ");
+        this->activeTaskPtr->setStage(Task::stringToStage(newStage));
+        // save task to db and reload task list
+        this->db.saveTaskData(*this->activeTaskPtr);
+        reloadBoardTasks();
+    }
+    else {
+        cout << "Missing active task." << endl;
+    }
 }
 
 void UI::editTaskRating() {
     // to do: catch error if they dont event a num 1 - 5. allow re-entry
     // to do: explain in the UI they need to enter a num 1 - 5
     // to do: can the user entry pre-populate with the current version of desc when updating it?
-    string newDifficulty = getUserInput("Enter a new difficulty rating for the task: ");
-    this->selectedTaskPtr->setDifficulty(stoi(newDifficulty));
+    if (this->activeTaskPtr != nullptr) {
+        string newDifficulty = getUserInput("Enter a new difficulty rating for the task: ");
+        this->activeTaskPtr->setDifficulty(stoi(newDifficulty));
+        // save task to db and reload task list
+        this->db.saveTaskData(*this->activeTaskPtr);
+        reloadBoardTasks();
+    }
+    else {
+        cout << "Missing active task." << endl;
+    }
 }
