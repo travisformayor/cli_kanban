@@ -107,7 +107,7 @@ class Database {
   +saveTaskData(task: Task&): void
   +deleteBoard(board: Board&): void
   +deleteTask(task: Task&): void
-  +loadBoardData(): list<Board*>
+  +loadBoardsList(): list<Board*>
   +loadTaskData(board: Board&): list<Task*>
 }
 

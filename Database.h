@@ -29,7 +29,7 @@ public:
     void saveTaskData(Task& task);
     void deleteBoard(Board& board);
     void deleteTask(Task& task);
-    list<Board*> loadBoardData();
+    list<Board*> loadBoardsList();
     list<Task*> loadTaskData(Board& board);
 
 private:

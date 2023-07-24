@@ -206,7 +206,7 @@ void Database::deleteTask(Task& task) {
 }
 
 // Load Boards
-list<Board*> Database::loadBoardData() {
+list<Board*> Database::loadBoardsList() {
     list<Board*> boards;
     string sql = "SELECT * FROM Boards ORDER BY title, id;";
     sqlite3_stmt* stmt;

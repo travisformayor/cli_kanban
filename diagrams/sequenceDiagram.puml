@@ -12,7 +12,7 @@ participant "Database" as DB
 note over User, DB: Display all Boards
 User -> UI: loadBoards()
 activate UI
-UI -> DB: loadBoardData()
+UI -> DB: loadBoardsList()
 activate DB
 DB -> UI: loadedBoards
 deactivate DB
@@ -50,7 +50,7 @@ activate DB
 DB --> B: confirm
 deactivate DB
 deactivate B
-UI -> DB: loadBoardData()
+UI -> DB: loadBoardsList()
 activate DB
 DB -> UI: loadedBoards
 deactivate DB
@@ -180,7 +180,7 @@ activate T
 T-> DB: delete associated Tasks
 deactivate T
 deactivate DB
-UI -> DB: loadBoardData()
+UI -> DB: loadBoardsList()
 activate DB
 DB -> UI: loadedBoards
 deactivate DB
