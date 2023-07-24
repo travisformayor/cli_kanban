@@ -53,12 +53,13 @@ private:
     const WORD TEXT_GREEN = FOREGROUND_INTENSITY | FOREGROUND_GREEN;
 
     Database db;
+    map<string, string> screenMenus;
+    int screenWidth;
+    int selectedIndex;
+    string currScreen;
     list<Board*> loadedBoards;
     Board* activeBoardPtr;
     Task* activeTaskPtr;
-    int selectedIndex;
-    string currScreen;
-    map<string, string> screenMenus;
 };
 
 #endif // UI_H

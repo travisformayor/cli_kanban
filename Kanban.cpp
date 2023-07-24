@@ -5,6 +5,14 @@
 
 using namespace std;
 
+// to do: 
+// - handle for first time load, when there are no boards or tasks
+// - in this case, hitting the arrow key or enter crashes the program
+// - there is no list to size for the selectedIndex
+// - there is no list for the enter to open
+// - so, handle by checking for null on the screen list
+// - then any attempt to act on the list or move the selector, protect with message
+
 int main() {
     try {
         // open DB

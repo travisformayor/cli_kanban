@@ -5,13 +5,12 @@ using namespace std;
 UI::UI(Database& db) : db(db) {
     this->selectedIndex = 0;
     this->currScreen = "Boards";
-
     this->screenMenus = {
-        {"Boards", "    | up/down: Navigate | enter: Select | c: Create Board | d: Delete Board | esc: Quit |   "},
-        {"Board View", "| up/down: Navigate | enter: Select | c: Create Task | d: Delete Task | t: Edit Board Title | b: Back | esc: Quit | "},
+        {"Boards", "| up/down: Navigate | enter: Select | c: Create Board | d: Delete Board | esc: Quit |"},
+        {"Board View", "| up/down: Navigate | enter: Select | c: Create Task | d: Delete Task | t: Edit Board Title | b: Back | esc: Quit |"},
         {"Task View", " | t: Edit Title | d: Edit Description | s: Edit Stage | r: Edit Difficulty Rating | b: Save & Back | esc: Save & Quit |"}
     };
-
+    this->screenWidth = 120; // length of the longest command menu
     setTextColor(TEXT_WHITE);
 }
 
@@ -26,17 +25,55 @@ void UI::setSelectIndex(int index) {
 }
 
 void UI::displayScreen() {
-    system("cls"); // clear the console screen
+    /* The following code outputs a menu like this, but always centered:
+    '=================================== Kanban Board ====================================
+    '| up/down: Navigate | enter: Select | c: Create Board | d: Delete Board | esc: Quit |
+    '=========================== (Press key to make selection) ===========================
+    '                                     | Boards |
+    ' 
+    '     * Item one
+    '     * Item two
+    */
 
+    system("cls"); // clear the screen between each refresh
     // top menu
-    cout << "======================================= Kanban Board =======================================\n";
-    cout << screenMenus[this->currScreen] << "\n";
-    cout << "============================== (Press key to make selection) ===============================\n";
-    cout << "\n";
-    cout << "                                       | " << this->currScreen << " |\n";
-    cout << "\n";
+    // get current menu
+    string menu = this->screenMenus[this->currScreen];
+    // center the top title
+    string menuTop = " Kanban Board ";
+    string topPadding((this->screenWidth - menuTitle.length()) / 2, '=');
+    // center the current menu
+    string menu = this->screenMenus[this->currScreen];
+    string menuPadding((this->screenWidth - menu.length()) / 2, ' ');
+    // center menu bottom
+    string menuBottom = " (Press key to make selection) ";
+    string bottomPadding((this->screenWidth - menuBottom.length()) / 2, '=');
+    // center screen name
+    string screenName = this->currScreen;
+    string namePadding((this->screenWidth - screenName.length() - 4) / 2, ' ');
 
-    // load titles list or task details
+    // output centered menu
+    cout << topPadding << menuTop << topPadding << endl;
+    cout << menuPadding << menu << menuPadding << endl;
+    cout << bottomPadding << menuBottom << bottomPadding << endl;
+    cout << endl;
+    cout << namePadding << "| " screenName << " |" << endl;
+    cout << endl;
+
+    // Output active board or task title
+    if (currScreen == "Board View" && this->activeBoardPtr != nullptr) {
+        string boardTitle = this->activeBoardPtr->getTitle();
+        string padding((this->screenWidth - boardTitle.length() - 7) / 2, ' ');
+        cout << padding << "Board: " << boardTitle << endl;
+    }
+    else if (currScreen == "Task View" && this->activeTaskPtr != nullptr) {
+        string taskTitle = this->activeTaskPtr->getTitle();
+        string padding((this->screenWidth - taskTitle.length() - 6) / 2, ' ');
+        cout << padding << "Task: " << taskTitle << endl;
+    }
+    cout << endl;
+
+    // the following code displays a selectable list of board or task titles
     list<string> titles;
     if (this->currScreen == "Boards") {
         // display list of boards
@@ -62,7 +99,6 @@ void UI::displayScreen() {
         }
         displayTitles(titles);
     }
-
     else if (this->currScreen == "Task View") {
         // display selected task info
         if (this->activeTaskPtr != nullptr) {
@@ -215,7 +251,7 @@ void UI::moveSelector(int direction) {
     // only move selector on Boards or Board View screen
     if (this->currScreen == "Boards" || this->currScreen == "Board View") {
         if (direction == 1 || direction == -1) {
-            this->selectedIndex = static_cast<int>((this->selectedIndex + direction + listSize) % listSize);
+            this->selectedIndex = (this->selectedIndex + direction + listSize) % listSize);
         }
     }
     else {
