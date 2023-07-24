@@ -25,23 +25,6 @@ void UI::setSelectIndex(int index) {
     this->selectedIndex = index;
 }
 
-void UI::reloadBoards() {
-    this->loadedBoards.clear();
-    this->loadedBoards = this->db.loadBoardsList();
-}
-
-void UI::reloadBoardTasks() {
-    // reload tasks for currently active board
-    // check if a board is selected
-    if (this->activeBoardPtr != nullptr) {
-        // reload tasks from DB
-        this->activeBoardPtr->setTasks(this->db.loadTaskData(*this->activeBoardPtr));
-    }
-    else {
-        cout << "Select a board before loading tasks." << endl;
-    }
-}
-
 void UI::displayScreen() {
     system("cls"); // clear the console screen
 
@@ -109,148 +92,6 @@ void UI::displayTitles(list<string>& titles) {
 void UI::displayTaskCard(string taskDetails) {
     // to do: expand on the task card view screen. multiline, word wrap, election highlight, etc
     cout << taskDetails << endl;
-}
-
-void UI::findSelectedBoard() {
-    // check if there are boards
-    if (this->loadedBoards.size() > 0) {
-        // find selected board, set active
-        this->activeBoardPtr = this->loadedBoards[this->selectedIndex]; // list of pointers
-    }
-    else {
-        this->activeBoardPtr = nullptr;
-        cout << "Create a new board to manage." << endl;
-    }
-
-    this->selectedIndex = 0;
-
-    // find selected board
-    // list<Board*>::iterator boardIter = this->loadedBoards.begin();
-    // advance(boardIter, this->selectedIndex);
-    // point selected to the correct board
-    // this->activeBoardPtr = *boardIter; // dereference iterator returns Board*
-}
-
-void UI::findSelectedTask() {
-    // find selected task. access tasks from the active board
-    // check for active board
-    if (this->activeBoardPtr != nullptr) {
-        // check if there are tasks to select
-        if (this->activeBoardPtr->getTasks().size() > 0) {
-            // set selected task as active task
-            this->activeTaskPtr = this->activeBoardPtr->getTasks()[this->selectedIndex]; // list of pointers
-        }
-        else {
-            this->activeTaskPtr = nullptr;
-            cout << "No tasks to open. Create a new task first." << endl;
-            this->selectedIndex = 0;
-        }
-    }
-    else {
-        cout << "Select a board before opening a task." << endl;
-        this->selectedIndex = 0;
-    }
-
-    // list<Task*>::iterator taskIter = this->activeBoardPtr->getTasks().begin();
-    // advance(taskIter, this->selectedIndex);
-    // // point selected to the correct task
-    // this->activeTaskPtr = *taskIter; // dereference iterator returns Task*
-}
-
-void UI::addNewBoard() {
-    string newBoardTitle = getUserInput("Enter a title for the new board: ");
-    Board newBoard(newBoardTitle);
-    // save board to db
-    this->db.saveBoardData(newBoard);
-    // reload list of boards
-    reloadBoards();
-}
-
-void UI::addNewTask() {
-    // check there is an active board
-    if (this->activeBoardPtr != nullptr) {
-        // Add new task to board
-        string newTaskTitle = getUserInput("Enter a title for the new task: ");
-        Task newTask(newTaskTitle, *this->activeBoardPtr);
-        // save task to db
-        this->db.saveTaskData(newTask);
-        // reload tasks for active board
-        reloadBoardTasks();
-    }
-    else {
-        cout << "Select a board before adding a task." << endl;
-        this->selectedIndex = 0;
-    }
-}
-
-void UI::deleteSelectedBoard() {
-
-    // check if there are boards
-    if (this->loadedBoards.size() > 0) {
-        // find the selected board
-        Board* selectedBoard = this->loadedBoards[this->selectedIndex];
-        // delete board from DB and deallocated memory
-        this->db.deleteBoard(*selectedBoard); // deref pointer
-        delete selectedBoard;
-        // reload list of boards
-        reloadBoards();
-        // fix selected index if was at end of list
-        this->selectedIndex = max(0, static_cast<int>(this->loadedBoards.size()) - 1);
-    }
-    else {
-        cout << "No boards to delete." << endl;
-        this->selectedIndex = 0;
-    }
-
-    // list<Board*>::iterator boardIter = this->loadedBoards.begin();
-    // advance(boardIter, this->selectedIndex);
-    // // delete board from database
-    // this->db.deleteBoard(**boardIter); // deref iterator = board ptr, then deref ptr
-    // //  deallocate memory
-    // delete* boardIter; // deref iterator returns board*
-    // // reload list of boards
-    // reloadBoards();
-    // // fix selected index if was at end of list
-    // this->selectedIndex = max(0, static_cast<int>(this->loadedBoards.size()) - 1);
-}
-
-
-void UI::deleteSelectedTask() {
-    // check if there is an active board
-    if (this->activeBoardPtr != nullptr) {
-        // check if there are tasks to select
-        if (this->activeBoardPtr->getTasks().size() > 0) {
-            // find selected task 
-            Task* selectedTask = this->activeBoardPtr->getTasks()[this->selectedIndex];
-            // delete task from DB and deallocate memory
-            this->db.deleteTask(*selectedTask);
-            delete selectedTask;
-            // reload tasks for active board
-            reloadBoardTasks();
-            // fix selected index if at end of list
-            this->selectedIndex = max(0, static_cast<int>(this->activeBoardPtr->getTasks().size()) - 1);
-        }
-        else {
-            cout << "No tasks to delete." << endl;
-            this->selectedIndex = 0;
-        }
-    }
-    else {
-        cout << "Select a board before deleting a task." << endl;
-        this->selectedIndex = 0;
-    }
-
-    // // find the selected task
-    // list<Task*>::iterator taskIter = this->activeBoardPtr->getTasks().begin();
-    // advance(taskIter, this->selectedIndex);
-    // // delete task from db
-    // this->db.deleteTask(**taskIter); // deref iterator = task ptr, then deref prt
-    // // deallocate memory
-    // delete* taskIter; // deref iterator returns task*
-    // // reload tasks for selected board
-    // reloadBoardTasks();
-    // // fix selected index if was at end of list
-    // this->selectedIndex = max(0, static_cast<int>(this->activeBoardPtr->getTasks().size()) - 1);
 }
 
 string UI::getUserInput(const string& prompt) {
@@ -417,6 +258,164 @@ void UI::changeScreen(string command) {
     }
     // reset selector position
     this->setSelectIndex(0);
+}
+
+void UI::reloadBoards() {
+    this->loadedBoards.clear();
+    this->loadedBoards = this->db.loadBoardsList();
+}
+
+void UI::reloadBoardTasks() {
+    // reload tasks for currently active board
+    // check if a board is selected
+    if (this->activeBoardPtr != nullptr) {
+        // reload tasks from DB
+        this->activeBoardPtr->setTasks(this->db.loadTaskData(*this->activeBoardPtr));
+    }
+    else {
+        cout << "Select a board before loading tasks." << endl;
+    }
+}
+
+void UI::findSelectedBoard() {
+    // check if there are boards
+    if (this->loadedBoards.size() > 0) {
+        // find selected board, set active
+        this->activeBoardPtr = this->loadedBoards[this->selectedIndex]; // list of pointers
+    }
+    else {
+        this->activeBoardPtr = nullptr;
+        cout << "Create a new board to manage." << endl;
+    }
+
+    this->selectedIndex = 0;
+
+    // find selected board
+    // list<Board*>::iterator boardIter = this->loadedBoards.begin();
+    // advance(boardIter, this->selectedIndex);
+    // point selected to the correct board
+    // this->activeBoardPtr = *boardIter; // dereference iterator returns Board*
+}
+
+void UI::findSelectedTask() {
+    // find selected task. access tasks from the active board
+    // check for active board
+    if (this->activeBoardPtr != nullptr) {
+        // check if there are tasks to select
+        if (this->activeBoardPtr->getTasks().size() > 0) {
+            // set selected task as active task
+            this->activeTaskPtr = this->activeBoardPtr->getTasks()[this->selectedIndex]; // list of pointers
+        }
+        else {
+            this->activeTaskPtr = nullptr;
+            cout << "No tasks to open. Create a new task first." << endl;
+            this->selectedIndex = 0;
+        }
+    }
+    else {
+        cout << "Select a board before opening a task." << endl;
+        this->selectedIndex = 0;
+    }
+
+    // list<Task*>::iterator taskIter = this->activeBoardPtr->getTasks().begin();
+    // advance(taskIter, this->selectedIndex);
+    // // point selected to the correct task
+    // this->activeTaskPtr = *taskIter; // dereference iterator returns Task*
+}
+
+void UI::addNewBoard() {
+    string newBoardTitle = getUserInput("Enter a title for the new board: ");
+    Board newBoard(newBoardTitle);
+    // save board to db
+    this->db.saveBoardData(newBoard);
+    // reload list of boards
+    reloadBoards();
+}
+
+void UI::addNewTask() {
+    // check there is an active board
+    if (this->activeBoardPtr != nullptr) {
+        // Add new task to board
+        string newTaskTitle = getUserInput("Enter a title for the new task: ");
+        Task newTask(newTaskTitle, *this->activeBoardPtr);
+        // save task to db
+        this->db.saveTaskData(newTask);
+        // reload tasks for active board
+        reloadBoardTasks();
+    }
+    else {
+        cout << "Select a board before adding a task." << endl;
+        this->selectedIndex = 0;
+    }
+}
+
+void UI::deleteSelectedBoard() {
+
+    // check if there are boards
+    if (this->loadedBoards.size() > 0) {
+        // find the selected board
+        Board* selectedBoard = this->loadedBoards[this->selectedIndex];
+        // delete board from DB and deallocated memory
+        this->db.deleteBoard(*selectedBoard); // deref pointer
+        delete selectedBoard;
+        // reload list of boards
+        reloadBoards();
+        // fix selected index if was at end of list
+        this->selectedIndex = max(0, static_cast<int>(this->loadedBoards.size()) - 1);
+    }
+    else {
+        cout << "No boards to delete." << endl;
+        this->selectedIndex = 0;
+    }
+
+    // list<Board*>::iterator boardIter = this->loadedBoards.begin();
+    // advance(boardIter, this->selectedIndex);
+    // // delete board from database
+    // this->db.deleteBoard(**boardIter); // deref iterator = board ptr, then deref ptr
+    // //  deallocate memory
+    // delete* boardIter; // deref iterator returns board*
+    // // reload list of boards
+    // reloadBoards();
+    // // fix selected index if was at end of list
+    // this->selectedIndex = max(0, static_cast<int>(this->loadedBoards.size()) - 1);
+}
+
+void UI::deleteSelectedTask() {
+    // check if there is an active board
+    if (this->activeBoardPtr != nullptr) {
+        // check if there are tasks to select
+        if (this->activeBoardPtr->getTasks().size() > 0) {
+            // find selected task 
+            Task* selectedTask = this->activeBoardPtr->getTasks()[this->selectedIndex];
+            // delete task from DB and deallocate memory
+            this->db.deleteTask(*selectedTask);
+            delete selectedTask;
+            // reload tasks for active board
+            reloadBoardTasks();
+            // fix selected index if at end of list
+            this->selectedIndex = max(0, static_cast<int>(this->activeBoardPtr->getTasks().size()) - 1);
+        }
+        else {
+            cout << "No tasks to delete." << endl;
+            this->selectedIndex = 0;
+        }
+    }
+    else {
+        cout << "Select a board before deleting a task." << endl;
+        this->selectedIndex = 0;
+    }
+
+    // // find the selected task
+    // list<Task*>::iterator taskIter = this->activeBoardPtr->getTasks().begin();
+    // advance(taskIter, this->selectedIndex);
+    // // delete task from db
+    // this->db.deleteTask(**taskIter); // deref iterator = task ptr, then deref prt
+    // // deallocate memory
+    // delete* taskIter; // deref iterator returns task*
+    // // reload tasks for selected board
+    // reloadBoardTasks();
+    // // fix selected index if was at end of list
+    // this->selectedIndex = max(0, static_cast<int>(this->activeBoardPtr->getTasks().size()) - 1);
 }
 
 void UI::editBoardTitle() {

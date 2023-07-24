@@ -20,25 +20,28 @@ using namespace std;
 class UI {
 public:
     UI(Database& db);
+    // methods to manipulate the interface
     void setTextColor(WORD color);
     void setSelectIndex(int index);
-    void reloadBoards();
-    void reloadBoardTasks();
-    void findSelectedBoard();
-    void findSelectedTask();
     void displayScreen();
     void displayTitles(list<string>& titles);
     void displayTaskCard(string taskDetails);
-    void addNewBoard();
-    void addNewTask();
-    void deleteSelectedBoard();
-    void deleteSelectedTask();
     string getUserInput(const string& prompt);
     void keyboardListen();
     void moveSelector(int direction);
     void changeScreen(string command);
 
-    // methods to update boards and tasks
+    // methods to manage displayed boards and tasks
+    void reloadBoards();
+    void reloadBoardTasks();
+    void findSelectedBoard();
+    void findSelectedTask();
+    void addNewBoard();
+    void addNewTask();
+    void deleteSelectedBoard();
+    void deleteSelectedTask();
+
+    // methods to edit displayed boards and tasks
     void editBoardTitle();
     void editTaskTitle();
     void editTaskDescription();
@@ -51,8 +54,8 @@ private:
 
     Database db;
     list<Board*> loadedBoards;
-    Board* selectedBoardPtr;
-    Task* selectedTaskPtr;
+    Board* activeBoardPtr;
+    Task* activeTaskPtr;
     int selectedIndex;
     string currScreen;
     map<string, string> screenMenus;

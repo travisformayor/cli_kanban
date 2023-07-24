@@ -64,8 +64,8 @@ class UI {
   -TEXT_GREEN: WORD
   -db: Database
   -loadedBoards: list<Board*>
-  -selectedBoardPtr: Board*
-  -selectedTaskPtr: Task*
+  -activeBoardPtr: Board*
+  -activeTaskPtr: Task*
   -selectedIndex: int
   -currScreen: string
   -screenMenus: map<string, string>
