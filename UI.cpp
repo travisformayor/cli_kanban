@@ -391,8 +391,8 @@ void UI::deleteSelectedBoard() {
         advance(boardIter, this->selectedIndex);
 
         Board* boardPtr = *boardIter;
-        cout << "Board ID: " << *boardPtr->getId() << endl;
-        cout << "Board Title: " << *boardPtr->getTitle() << endl;
+        cout << "Board ID: " << boardPtr->getId() << endl;
+        cout << "Board Title: " << boardPtr->getTitle() << endl;
 
         // delete board from DB and deallocated memory
         this->db.deleteBoard(**boardIter); // deref iterator gets board ptr, then deref ptr
