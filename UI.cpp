@@ -162,10 +162,11 @@ string UI::getUserInput(const string& prompt) {
         }
     }
     catch (const invalid_argument& e) {
+        addAlert("debug test");
         // reset input to not return bad data
         input = "";
         // rethrow the exception upward
-        throw;
+        throw e;
     }
 
     return input;
