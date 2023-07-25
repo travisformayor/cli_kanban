@@ -81,7 +81,7 @@ void UI::displayScreen() {
             }
         }
         else {
-            titles.push_back("[Create first board with 'c' command]");
+            cout << "      [Create first board with 'c' command]" << endl;;
         }
         displayTitles(titles);
     }
@@ -93,7 +93,7 @@ void UI::displayScreen() {
             }
         }
         else {
-            titles.push_back("[Create first task with 'c' command]");
+            cout << "      [Create first task with 'c' command]" << endl;;
         }
         displayTitles(titles);
     }
