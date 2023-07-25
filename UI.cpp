@@ -505,7 +505,7 @@ void UI::editTaskRating() {
     if (this->activeTaskPtr != nullptr) {
         try {
             string strRating = getUserInput("Enter a new difficulty rating for the task: ");
-            cout << "Entered string is - start:" << strRating << ":end." << endl;
+            addAlert("Entered string is - start:" + strRating + ":end.");
 
             int newRating;
             try {
