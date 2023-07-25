@@ -516,8 +516,11 @@ void UI::editTaskRating() {
                 throw invalid_argument("Enter a number between 1 and 5.");
             }
             this->activeTaskPtr->setDifficulty(newRating);
+            cout << "sets successfully" << endl;
             this->db.saveTaskData(*this->activeTaskPtr);
+            cout << "saves successfully" << endl;
             reloadBoardTasks();
+            cout << "reloads successfully" << endl;
         }
         catch (invalid_argument& e) {
             // catch invalid_argument from isNumber or setDifficulty
