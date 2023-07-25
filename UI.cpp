@@ -400,14 +400,14 @@ void UI::deleteSelectedBoard() {
     // check if there are boards
     if (this->loadedBoards.size() > 0) {
         // to do: remove debug couts
-        addAlert("1. Index: " + to_string(selectedIndex) + ". List size: " + to_string(this->loadedBoards.size()));
+        cout << "1. Index: " + to_string(selectedIndex) + ". List size: " + to_string(this->loadedBoards.size()) << endl;
         // find the selected board
         list<Board*>::iterator boardIter = this->loadedBoards.begin();
         advance(boardIter, this->selectedIndex);
 
         Board* boardPtr = *boardIter;
-        addAlert("Board ID: " + to_string(boardPtr->getId()));
-        addAlert("Board Title: " + boardPtr->getTitle());
+        cout << "Board ID: " + to_string(boardPtr->getId()) << endl;
+        cout << "Board Title: " + boardPtr->getTitle() << endl;
 
         // delete board from DB and deallocated memory
         this->db.deleteBoard(**boardIter); // deref iterator gets board ptr, then deref ptr
@@ -416,10 +416,10 @@ void UI::deleteSelectedBoard() {
         reloadBoards();
         // fix selected index if was at end of list
         this->selectedIndex = max(0, static_cast<int>(this->loadedBoards.size()) - 1);
-        addAlert("2. Index: " + to_string(selectedIndex) + ". List size: " + to_string(this->loadedBoards.size()));
+        cout << "2. Index: " + to_string(selectedIndex) + ". List size: " + to_string(this->loadedBoards.size()) << endl;
     }
     else {
-        addAlert("No boards to delete.");
+        cout << "No boards to delete." << endl;
         this->selectedIndex = 0;
     }
 }
