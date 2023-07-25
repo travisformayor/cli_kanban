@@ -160,12 +160,9 @@ string UI::getUserInput(const string& prompt) {
             cin.ignore((numeric_limits<streamsize>::max)(), '\n');
             throw invalid_argument("Invalid input.");
         }
-
-        cout << "input success" << endl;
     }
     catch (const invalid_argument&) {
         // reset input to not return bad data
-        cout << "input issue" << endl;
         input = "";
         // rethrow the exception upward
         throw;
@@ -508,9 +505,6 @@ void UI::editTaskRating() {
     if (this->activeTaskPtr != nullptr) {
         try {
             string strRating = getUserInput("Enter a new difficulty rating for the task: ");
-            addAlert("alert - Entered string is - start:" + strRating + ":end.");
-            cout <<"cout - Entered string is - start:" << strRating << ":end." << endl;
-
             int newRating;
             try {
                 newRating = stoi(strRating);
@@ -518,12 +512,12 @@ void UI::editTaskRating() {
             catch (invalid_argument&) {
                 throw invalid_argument("Enter a number between 1 and 5.");
             }
+            // update task and save to db
             this->activeTaskPtr->setDifficulty(newRating);
-            cout << "sets successfully" << endl;
             this->db.saveTaskData(*this->activeTaskPtr);
-            cout << "saves successfully" << endl;
+            // reload board tasks from db
             reloadBoardTasks();
-            cout << "reloads successfully" << endl;
+
         }
         catch (invalid_argument& e) {
             // catch invalid_argument from isNumber or setDifficulty
