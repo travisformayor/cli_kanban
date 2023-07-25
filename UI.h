@@ -28,6 +28,7 @@ public:
     void displayTitles(list<string>& titles);
     void displayTaskCard(string taskDetails);
     string getUserInput(const string& prompt);
+    void addAlert(const string& alert);
     void keyboardListen();
     void moveSelector(int direction);
     void changeScreen(string command);
@@ -55,6 +56,7 @@ private:
 
     Database db;
     map<string, string> screenMenus;
+    list<string> userAlerts;
     int screenWidth;
     int selectedIndex;
     string currScreen;

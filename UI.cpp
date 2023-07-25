@@ -116,6 +116,17 @@ void UI::displayScreen() {
             displayTaskCard(taskDetails);
         }
     }
+
+    // Print any message to user from the last loop
+    if (this->userAlerts.size() > 0) {
+        cout << endl;
+        for (const string& alert : this->userAlerts) {
+            cout << alert << endl;
+        }
+        myStrings.clear();
+    }
+
+    cout << endl;
 }
 
 void UI::displayTitles(list<string>& titles) {
@@ -154,12 +165,16 @@ string UI::getUserInput(const string& prompt) {
         }
     }
     catch (const runtime_error& e) {
-        cerr << "An error occurred: " << e.what() << endl;
+        addAlert("Input error occurred: " + e.what());
         // reset input to not return bad data
         input = "";
     }
 
     return input;
+}
+
+void UI::addAlert(const string& alert) {
+    this->userAlerts.push_back(alert);
 }
 
 void UI::keyboardListen() {
@@ -271,7 +286,7 @@ void UI::changeScreen(string command) {
                 this->currScreen = "Board View";
             }
             else {
-                cout << "No board selected." << endl;
+                addAlert("No board selected.");
             }
         }
         else if (this->currScreen == "Board View") {
@@ -283,7 +298,7 @@ void UI::changeScreen(string command) {
                 this->currScreen = "Task View";
             }
             else {
-                cout << "No task selected." << endl;
+                addAlert("No task selected.");
             }
         }
     }
@@ -322,7 +337,7 @@ void UI::reloadBoardTasks() {
         this->activeBoardPtr->setTasks(this->db.loadTaskData(*this->activeBoardPtr));
     }
     else {
-        cout << "Select a board before loading tasks." << endl;
+        addAlert("Select a board before loading tasks.");
     }
 }
 
@@ -335,7 +350,7 @@ void UI::findSelectedBoard() {
         this->activeBoardPtr = *boardIter; // deref iterator returns Board*. set active.
     }
     else {
-        cout << "Missing boards." << endl;
+        addAlert("Missing boards.");
     }
     this->selectedIndex = 0;
 }
@@ -350,7 +365,7 @@ void UI::findSelectedTask() {
         this->activeTaskPtr = *taskIter; // deref iterator returns Task*. set active.
     }
     else {
-        cout << "Missing tasks." << endl;
+        addAlert("Missing tasks.");
     }
     this->selectedIndex = 0;
 }
@@ -376,7 +391,7 @@ void UI::addNewTask() {
         reloadBoardTasks();
     }
     else {
-        cout << "Select a board before adding a task." << endl;
+        addAlert("Select a board before adding a task.");
         this->selectedIndex = 0;
     }
 }
@@ -385,14 +400,14 @@ void UI::deleteSelectedBoard() {
     // check if there are boards
     if (this->loadedBoards.size() > 0) {
         // to do: remove debug couts
-        cout << "1. Index: " << selectedIndex << ". List size: " << this->loadedBoards.size() << endl;
+        addAlert("1. Index: " + to_string(selectedIndex) + ". List size: " + to_string(this->loadedBoards.size()));
         // find the selected board
         list<Board*>::iterator boardIter = this->loadedBoards.begin();
         advance(boardIter, this->selectedIndex);
 
         Board* boardPtr = *boardIter;
-        cout << "Board ID: " << boardPtr->getId() << endl;
-        cout << "Board Title: " << boardPtr->getTitle() << endl;
+        addAlert("Board ID: " + to_string(boardPtr->getId()));
+        addAlert("Board Title: " + boardPtr->getTitle());
 
         // delete board from DB and deallocated memory
         this->db.deleteBoard(**boardIter); // deref iterator gets board ptr, then deref ptr
@@ -401,10 +416,10 @@ void UI::deleteSelectedBoard() {
         reloadBoards();
         // fix selected index if was at end of list
         this->selectedIndex = max(0, static_cast<int>(this->loadedBoards.size()) - 1);
-        cout << "2. Index: " << selectedIndex << ". List size: " << this->loadedBoards.size() << endl;
+        addAlert("2. Index: " + to_string(selectedIndex) + ". List size: " + to_string(this->loadedBoards.size()));
     }
     else {
-        cout << "No boards to delete." << endl;
+        addAlert("No boards to delete.");
         this->selectedIndex = 0;
     }
 }
@@ -426,12 +441,12 @@ void UI::deleteSelectedTask() {
             this->selectedIndex = max(0, static_cast<int>(this->activeBoardPtr->getTasks().size()) - 1);
         }
         else {
-            cout << "No tasks to delete." << endl;
+            addAlert("No tasks to delete.");
             this->selectedIndex = 0;
         }
     }
     else {
-        cout << "Select a board before deleting a task." << endl;
+        addAlert("Missing active board.");
         this->selectedIndex = 0;
     }
 }
@@ -447,7 +462,7 @@ void UI::editBoardTitle() {
         reloadBoards();
     }
     else {
-        cout << "Missing active board." << endl;
+        addAlert("Missing active board.");
     }
 }
 
@@ -462,7 +477,7 @@ void UI::editTaskTitle() {
         reloadBoardTasks();
     }
     else {
-        cout << "Missing active task." << endl;
+        addAlert("Missing active task.");
     }
 }
 
@@ -477,7 +492,7 @@ void UI::editTaskDescription() {
         reloadBoardTasks();
     }
     else {
-        cout << "Missing active task." << endl;
+        addAlert("Missing active task.");
     }
 }
 
@@ -492,7 +507,7 @@ void UI::editTaskStage() {
         reloadBoardTasks();
     }
     else {
-        cout << "Missing active task." << endl;
+        addAlert("Missing active task.");
     }
 }
 
@@ -508,6 +523,6 @@ void UI::editTaskRating() {
         reloadBoardTasks();
     }
     else {
-        cout << "Missing active task." << endl;
+        addAlert("Missing active task.");
     }
 }
