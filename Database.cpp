@@ -73,22 +73,20 @@ int Database::executeQuery(const string& sql, const map<string, variant<int, str
     // bind values to sql datatype
     int index = 1;
     for (const auto& param : dataMap) {
+        if (holds_alternative<int>(param.second)) {
+            sqlite3_bind_int(stmt, index, get<int>(param.second));
+        }
+        else if (holds_alternative<string>(param.second)) {
+            sqlite3_bind_text(stmt, index, get<string>(param.second).c_str(), -1, SQLITE_STATIC);
+        }
         if (param.first != "id") {
-            if (holds_alternative<int>(param.second)) {
-                sqlite3_bind_int(stmt, index, get<int>(param.second));
-            }
-            else if (holds_alternative<string>(param.second)) {
-                sqlite3_bind_text(stmt, index, get<string>(param.second).c_str(), -1, SQLITE_STATIC);
-            }
             index++;
         }
     }
-    // bind the id last if present
-    if (dataMap.find("id") != dataMap.end()) {
-        const auto& param = dataMap.at("id");
-        if (holds_alternative<int>(param)) {
-            sqlite3_bind_int(stmt, index, get<int>(param));
-        }
+
+    // bind the id if present
+    if (dataMap.count("id") > 0) {
+        sqlite3_bind_int(stmt, index, get<int>(dataMap.at("id")));
     }
 
     if (sqlite3_step(stmt) != SQLITE_DONE) {
@@ -102,42 +100,31 @@ int Database::executeQuery(const string& sql, const map<string, variant<int, str
 
 // helper method to construct the sql query string
 string Database::queryString(const string& tableName, const map<string, variant<int, string>>& dataMap) {
-    list<string> columns;
-    for (const auto& pair : dataMap) {
-        columns.push_back(pair.first);
-    }
-
     bool hasId = (dataMap.count("id") > 0);
     string query;
+
     if (hasId) {
+        // Construct an UPDATE query
         query = "UPDATE " + tableName + " SET ";
-        for (auto i = columns.begin(); i != columns.end(); ++i) {
-            if (*i != "id") {
-                query += *i + " = ?";
-                if (next(i) != columns.end()) {
-                    query += ", ";
-                }
+        for (const auto& column : dataMap) {
+            if (column.first != "id") {
+                query += column.first + " = ?, ";
             }
         }
+        query = query.substr(0, query.length() - 2); // remove trailing comma and space
         query += " WHERE id = ?";
-    }
-    else {
-        query = "INSERT INTO " + tableName + "(";
-        for (auto i = columns.begin(); i != columns.end(); ++i) {
-            query += *i;
-            if (next(i) != columns.end()) {
-                query += ", ";
-            }
+    } else {
+        // Construct an INSERT INTO query
+        string columns, placeholders;
+        for (const auto& column : dataMap) {
+            columns += column.first + ", ";
+            placeholders += "?, ";
         }
-        query += ") VALUES(";
-        for (auto i = columns.begin(); i != columns.end(); ++i) {
-            query += "?";
-            if (next(i) != columns.end()) {
-                query += ", ";
-            }
-        }
-        query += ")";
+        columns = columns.substr(0, columns.length() - 2); // remove trailing comma and space
+        placeholders = placeholders.substr(0, placeholders.length() - 2); // remove trailing comma and space
+        query = "INSERT INTO " + tableName + "(" + columns + ") VALUES(" + placeholders + ")";
     }
+
     return query;
 }
 
