@@ -37,11 +37,9 @@ void UI::displayScreen() {
 
     system("cls"); // clear the screen between each refresh
     // top menu
-    // get current menu
-    string menu = this->screenMenus[this->currScreen];
     // center the top title
     string menuTop = " Kanban Board ";
-    string topPadding((this->screenWidth - menuTitle.length()) / 2, '=');
+    string topPadding((this->screenWidth - menuTop.length()) / 2, '=');
     // center the current menu
     string menu = this->screenMenus[this->currScreen];
     string menuPadding((this->screenWidth - menu.length()) / 2, ' ');
@@ -57,7 +55,7 @@ void UI::displayScreen() {
     cout << menuPadding << menu << menuPadding << endl;
     cout << bottomPadding << menuBottom << bottomPadding << endl;
     cout << endl;
-    cout << namePadding << "| " screenName << " |" << endl;
+    cout << namePadding << "| " << screenName << " |" << endl;
     cout << endl;
 
     // Output active board or task title
@@ -251,7 +249,7 @@ void UI::moveSelector(int direction) {
     // only move selector on Boards or Board View screen
     if (this->currScreen == "Boards" || this->currScreen == "Board View") {
         if (direction == 1 || direction == -1) {
-            this->selectedIndex = (this->selectedIndex + direction + listSize) % listSize);
+            this->selectedIndex = ((this->selectedIndex + direction + listSize) % listSize);
         }
     }
     else {
