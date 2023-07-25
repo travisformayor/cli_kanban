@@ -43,7 +43,7 @@ void Task::setStage(Stage newStage, bool loading) {
     case Stage::Done:
         // check if task update or loading task from db
         // skip previous stage check if loading is true
-        if (!loading && this->stage != Stage::InProgress) {
+        if (!loading && (this->stage == Stage::ToDo)) {
             throw runtime_error("Cannot skip 'In Progress' stage.");
         }
         break;
