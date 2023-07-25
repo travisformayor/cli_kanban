@@ -226,28 +226,27 @@ void UI::keyboardListen() {
 }
 
 void UI::moveSelector(int direction) {
-    // move selector up or down, wrapping around if at end or start
-
-    // find length of list on the screen
-    int listSize;
-    if (this->currScreen == "Boards") {
-        listSize = static_cast<int>(this->loadedBoards.size());
-    }
-    else if (this->currScreen == "Board View" && this->activeBoardPtr != nullptr) {
-        listSize = static_cast<int>(this->activeBoardPtr->getTasks().size());
-    }
-    else {
-        listSize = 0; // other screens have no selector
-    }
-
-    // only move selector on Boards or Board View screen
-    if (this->currScreen == "Boards" || this->currScreen == "Board View") {
-        if (direction == 1 || direction == -1) {
+    // move selector by 1 on Boards or Board View screens, wrapping around at end or start
+    if (direction == 1 || direction == -1) {
+        int listSize;
+        if (this->currScreen == "Boards") {
+            // how to move selector on board screen
+            if (this->loadedBoards.size() > 0) {
+                listSize = static_cast<int>(this->loadedBoards.size());
+            }
             this->selectedIndex = ((this->selectedIndex + direction + listSize) % listSize);
         }
-    }
-    else {
-        this->selectedIndex = 0;
+        else if (this->currScreen == "Board View") {
+            // how to move selector on board view screen
+            if (this->activeBoardPtr != nullptr && this->activeBoardPtr->getTasks().size() > 0) {
+                listSize = static_cast<int>(this->activeBoardPtr->getTasks().size());
+            }
+            this->selectedIndex = ((this->selectedIndex + direction + listSize) % listSize);
+        }
+        else {
+            // dont move selector on other screens
+            this->selectedIndex = 0;
+        }
     }
 }
 
