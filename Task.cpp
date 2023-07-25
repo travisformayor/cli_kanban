@@ -55,7 +55,7 @@ void Task::setStage(Stage newStage, bool loading) {
 
 void Task::setDifficulty(int rating) {
     if (rating < 1 || rating > 5) {
-        throw invalid_argument("Rating must be between 1 and 5.");
+        throw invalid_argument("Enter a number between 1 and 5.");
     }
     this->difficultyRating = rating;
 }

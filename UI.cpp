@@ -318,6 +318,10 @@ void UI::changeScreen(string command) {
     this->setSelectIndex(0);
 }
 
+bool UI::isNumber(const string& s) {
+    return !s.empty() && all_of(s.begin(), s.end(), ::isdigit);
+}
+
 void UI::reloadBoards() {
     // deallocate and clear current list
     for (auto board : this->loadedBoards) {
@@ -506,14 +510,16 @@ void UI::editTaskRating() {
     if (this->activeTaskPtr != nullptr) {
         try {
             string newDifficulty = getUserInput("Enter a new difficulty rating for the task: ");
+            if (!isNumber(newDifficulty)) {
+                throw invalid_argument("Enter a number between 1 and 5.");
+            }
             this->activeTaskPtr->setDifficulty(stoi(newDifficulty));
-            // save task to db and reload task list
             this->db.saveTaskData(*this->activeTaskPtr);
             reloadBoardTasks();
         }
         catch (invalid_argument& e) {
-            // Display the input error message
-            // db errors return runtime, which is caught elsewhere
+            // catch invalid_argument from isNumber or setDifficulty
+            // note: db errors return runtime error, which is caught elsewhere
             addAlert("Issue: " + string(e.what()));
         }
     }
