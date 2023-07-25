@@ -73,13 +73,22 @@ int Database::executeQuery(const string& sql, const map<string, variant<int, str
     // bind values to sql datatype
     int index = 1;
     for (const auto& param : dataMap) {
-        if (holds_alternative<int>(param.second)) {
-            sqlite3_bind_int(stmt, index, get<int>(param.second));
+        if (param.first != "id") {
+            if (holds_alternative<int>(param.second)) {
+                sqlite3_bind_int(stmt, index, get<int>(param.second));
+            }
+            else if (holds_alternative<string>(param.second)) {
+                sqlite3_bind_text(stmt, index, get<string>(param.second).c_str(), -1, SQLITE_STATIC);
+            }
+            index++;
         }
-        else if (holds_alternative<string>(param.second)) {
-            sqlite3_bind_text(stmt, index, get<string>(param.second).c_str(), -1, SQLITE_STATIC);
+    }
+    // bind the id last if present
+    if (dataMap.find("id") != dataMap.end()) {
+        const auto& param = dataMap.at("id");
+        if (holds_alternative<int>(param)) {
+            sqlite3_bind_int(stmt, index, get<int>(param));
         }
-        index++;
     }
 
     if (sqlite3_step(stmt) != SQLITE_DONE) {
@@ -98,28 +107,37 @@ string Database::queryString(const string& tableName, const map<string, variant<
         columns.push_back(pair.first);
     }
 
-    bool hasId = (!columns.empty() && columns.front() == "id");
-    string query = hasId ? "REPLACE INTO " : "INSERT INTO ";
-    query += tableName + "(";
-
-    // Add column names
-    for (auto i = columns.begin(); i != columns.end(); ++i) {
-        query += *i;
-        if (next(i) != columns.end()) {
-            query += ", ";
+    bool hasId = (dataMap.count("id") > 0);
+    string query;
+    if (hasId) {
+        query = "UPDATE " + tableName + " SET ";
+        for (auto i = columns.begin(); i != columns.end(); ++i) {
+            if (*i != "id") {
+                query += *i + " = ?";
+                if (next(i) != columns.end()) {
+                    query += ", ";
+                }
+            }
         }
+        query += " WHERE id = ?";
     }
-
-    // Add placeholder values
-    query += ") VALUES(";
-    for (auto i = columns.begin(); i != columns.end(); ++i) {
-        query += "?";
-        if (next(i) != columns.end()) {
-            query += ", ";
+    else {
+        query = "INSERT INTO " + tableName + "(";
+        for (auto i = columns.begin(); i != columns.end(); ++i) {
+            query += *i;
+            if (next(i) != columns.end()) {
+                query += ", ";
+            }
         }
+        query += ") VALUES(";
+        for (auto i = columns.begin(); i != columns.end(); ++i) {
+            query += "?";
+            if (next(i) != columns.end()) {
+                query += ", ";
+            }
+        }
+        query += ")";
     }
-    query += ")";
-
     return query;
 }
 
