@@ -261,7 +261,7 @@ void UI::moveSelector(int direction) {
         }
     }
     else if (this->currScreen == "Board View" && this->activeBoardId != 0) {
-        list<Task*>& tasks = getBoardById(this - activeBoardId)->getTasks();
+        list<Task*>& tasks = getBoardById(this->activeBoardId)->getTasks();
         if (tasks.size() > 0) {
             // how to move selector on board view screen
             int listSize = static_cast<int>(tasks.size());
