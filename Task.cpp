@@ -37,6 +37,7 @@ void Task::setStage(Stage newStage, bool loading) {
         break;
     case Stage::InProgress:
         if (this->description.empty() || this->difficultyRating == 0) {
+            cout << "debug error" << endl;
             throw runtime_error("Task needs description and difficulty for 'In Progress' stage.");
         }
         break;
