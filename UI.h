@@ -61,8 +61,8 @@ private:
     int selectedIndex;
     string currScreen;
     list<Board*> loadedBoards;
-    Board* activeBoardPtr;
-    Task* activeTaskPtr;
+    Board* activeBoardPtr; // to do: switch from pointer to id as well?
+    int activeTaskId;
 };
 
 #endif // UI_H

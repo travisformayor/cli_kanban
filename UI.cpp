@@ -4,6 +4,7 @@ using namespace std;
 
 UI::UI(Database& db) : db(db) {
     this->selectedIndex = 0;
+    this->activeTaskId = 0;
     this->currScreen = "Boards";
     this->screenMenus = {
         {"Boards", "| up/down: Navigate | enter: Select | c: Create Board | d: Delete Board | esc: Quit |"},
@@ -18,7 +19,7 @@ UI::~UI() {
     // Deallocate and clear lists and pointers
     for (auto board : this->loadedBoards) {
         delete board;
-        // also deletes activeBoardPtr and activeTaskPtr memory
+        // also deletes activeBoardPtr from memory
     }
     this->loadedBoards.clear();
 }
@@ -73,8 +74,8 @@ void UI::displayScreen() {
         string padding((this->screenWidth - boardTitle.length() - 7) / 2, ' ');
         cout << padding << "Board: " << boardTitle << endl;
     }
-    else if (currScreen == "Task View" && this->activeTaskPtr != nullptr) {
-        string taskTitle = this->activeTaskPtr->getTitle();
+    else if (currScreen == "Task View" && this->activeBoardPtr != nullptr && this->activeTaskId != 0) {
+        string taskTitle = this->activeBoardPtr->getTaskById(this->activeTaskId)->getTitle();
         string padding((this->screenWidth - taskTitle.length() - 6) / 2, ' ');
         cout << padding << "Task: " << taskTitle << endl;
     }
@@ -106,12 +107,10 @@ void UI::displayScreen() {
         }
         displayTitles(titles);
     }
-    else if (this->currScreen == "Task View") {
+    else if (this->currScreen == "Task View" && this->activeBoardPtr != nullptr && this->activeTaskId != 0) {
         // display selected task info
-        if (this->activeTaskPtr != nullptr) {
-            string taskDetails = this->activeTaskPtr->getTaskCard();
-            displayTaskCard(taskDetails);
-        }
+        string taskDetails = this->activeBoardPtr->getTaskById(this->activeTaskId)->getTaskCard();
+        displayTaskCard(taskDetails);
     }
 
     // Print any message to user from the last loop
@@ -360,7 +359,13 @@ void UI::findSelectedTask() {
         // set selected task as active task
         list<Task*>::iterator taskIter = this->activeBoardPtr->getTasks().begin();
         advance(taskIter, this->selectedIndex);
-        this->activeTaskPtr = *taskIter; // deref iterator returns Task*. set active.
+
+        if (it != tasks.end()) { // a result was found
+            this->activeTaskId = *taskIter->getId(); // deref iterator returns Task*, get id.
+        }
+        else {
+            addAlert("Missing task.");
+        }
     }
     else {
         addAlert("Missing tasks.");
@@ -457,11 +462,13 @@ void UI::editBoardTitle() {
 void UI::editTaskTitle() {
     // to do: make this have a char length limit
     // to do: can the user entry pre-populate with the current version of desc when updating it?
-    if (this->activeTaskPtr != nullptr) {
+    if (this->activeBoardPtr != nullptr && this->activeTaskId != 0) {
+        Task* activeTask = this->activeBoardPtr->getTaskById(this->activeTaskId);
+
         string newTitle = getUserInput("Enter a new title for the task: ");
-        this->activeTaskPtr->setTitle(newTitle);
+        activeTask->setTitle(newTitle);
         // save task to db and reload task list
-        this->db.saveTaskData(*this->activeTaskPtr);
+        this->db.saveTaskData(*activeTask);
         reloadBoardTasks();
     }
     else {
@@ -472,11 +479,13 @@ void UI::editTaskTitle() {
 void UI::editTaskDescription() {
     // to do: display description with word wrap past certain length
     // to do: can the user entry pre-populate with the current version of desc when updating it?
-    if (this->activeTaskPtr != nullptr) {
+    if (this->activeBoardPtr != nullptr && this->activeTaskId != 0) {
+        Task* activeTask = this->activeBoardPtr->getTaskById(this->activeTaskId);
+
         string newDescription = getUserInput("Enter a new description for the task: ");
-        this->activeTaskPtr->setDescription(newDescription);
+        activeTask->setDescription(newDescription);
         // save task to db and reload task list
-        this->db.saveTaskData(*this->activeTaskPtr);
+        this->db.saveTaskData(*activeTask);
         reloadBoardTasks();
     }
     else {
@@ -487,11 +496,13 @@ void UI::editTaskDescription() {
 void UI::editTaskStage() {
     // to do: make this a hardcoded selection list, not user input
     // to do: can the user entry pre-populate with the current version of desc when updating it?
-    if (this->activeTaskPtr != nullptr) {
+    if (this->activeBoardPtr != nullptr && this->activeTaskId != 0) {
+        Task* activeTask = this->activeBoardPtr->getTaskById(this->activeTaskId);
+
         string newStage = getUserInput("Enter a new stage for the task: ");
-        this->activeTaskPtr->setStage(Task::stringToStage(newStage), false);
+        activeTask->setStage(Task::stringToStage(newStage), false);
         // save task to db and reload task list
-        this->db.saveTaskData(*this->activeTaskPtr);
+        this->db.saveTaskData(*activeTask);
         reloadBoardTasks();
     }
     else {
@@ -502,7 +513,9 @@ void UI::editTaskStage() {
 void UI::editTaskRating() {
     // to do: explain in the UI they need to enter a num 1 - 5
     // to do: can the user entry pre-populate with the current version of desc when updating it?
-    if (this->activeTaskPtr != nullptr) {
+    if (this->activeBoardPtr != nullptr && this->activeTaskId != 0) {
+        Task* activeTask = this->activeBoardPtr->getTaskById(this->activeTaskId);
+
         try {
             string strRating = getUserInput("Enter a new difficulty rating for the task: ");
             int newRating;
@@ -513,8 +526,8 @@ void UI::editTaskRating() {
                 throw invalid_argument("Enter a number between 1 and 5.");
             }
             // update task and save to db
-            this->activeTaskPtr->setDifficulty(newRating);
-            this->db.saveTaskData(*this->activeTaskPtr);
+            activeTask->setDifficulty(newRating);
+            this->db.saveTaskData(*activeTask);
             // reload board tasks from db
             reloadBoardTasks();
 
