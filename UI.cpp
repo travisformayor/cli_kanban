@@ -516,7 +516,7 @@ void UI::editTaskRating() {
             this->db.saveTaskData(*this->activeTaskPtr);
             reloadBoardTasks();
         }
-        catch (invalid_argument&) {
+        catch (invalid_argument& e) {
             // catch invalid_argument from isNumber or setDifficulty
             // note: db errors return runtime error, which is caught elsewhere
             addAlert("Issue: " + string(e.what()));
