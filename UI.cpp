@@ -261,8 +261,12 @@ void UI::moveSelector(int direction) {
         }
     }
     else if (this->currScreen == "Board View" && this->activeBoardId != 0) {
+        addAlert("boop");
         list<Task*>& tasks = getBoardById(this->activeBoardId)->getTasks();
+        addAlert("size: " + to_string(tasks.size()));
+        
         if (tasks.size() > 0) {
+            
             // how to move selector on board view screen
             int listSize = static_cast<int>(tasks.size());
             this->selectedIndex = ((this->selectedIndex + direction + listSize) % listSize);
