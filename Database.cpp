@@ -283,7 +283,7 @@ list<Task*> Database::loadTaskData(Board& board) {
         task->setId(id);
         task->setDescription(description);
         task->setDifficulty(difficultyRating);
-        task->setStage(task->stringToStage(stageStr));
+        task->setStage(task->stringToStage(stageStr), true);
         tasks.push_back(task);
     }
 

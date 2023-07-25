@@ -31,7 +31,7 @@ void Task::setDescription(string newDesc) {
     this->description = newDesc;
 }
 
-void Task::setStage(Stage newStage) {
+void Task::setStage(Stage newStage, bool loading) {
     switch (newStage) {
     case Stage::ToDo:
         break;
@@ -41,7 +41,9 @@ void Task::setStage(Stage newStage) {
         }
         break;
     case Stage::Done:
-        if (this->stage != Stage::InProgress) {
+        // check if task update or loading task from db
+        // skip previous stage check if loading is true
+        if (!loading && this->stage != Stage::InProgress) {
             throw runtime_error("Cannot skip 'In Progress' stage.");
         }
         break;

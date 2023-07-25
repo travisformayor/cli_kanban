@@ -474,7 +474,7 @@ void UI::editTaskStage() {
     // to do: can the user entry pre-populate with the current version of desc when updating it?
     if (this->activeTaskPtr != nullptr) {
         string newStage = getUserInput("Enter a new stage for the task: ");
-        this->activeTaskPtr->setStage(Task::stringToStage(newStage));
+        this->activeTaskPtr->setStage(Task::stringToStage(newStage), false);
         // save task to db and reload task list
         this->db.saveTaskData(*this->activeTaskPtr);
         reloadBoardTasks();
