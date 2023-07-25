@@ -14,6 +14,18 @@ UI::UI(Database& db) : db(db) {
     setTextColor(TEXT_WHITE);
 }
 
+UI::~UI() {
+    // Deallocate and clear lists and pointers
+    for (auto board : this->loadedBoards) {
+        delete board;
+        // also deletes activeBoardPtr's memory
+    }
+    this->loadedBoards.clear();
+
+    delete activeTaskPtr;
+    activeTaskPtr = nullptr;
+}
+
 void UI::setTextColor(WORD color) {
     // set the console text color
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -250,15 +262,29 @@ void UI::changeScreen(string command) {
     if (command == "enter") {
         // move forward to next screen
         if (this->currScreen == "Boards") {
-            // find which board was selected and load its tasks
-            findSelectedBoard();
-            reloadBoardTasks();
-            this->currScreen = "Board View";
+            // are there boards listed?
+            if (this->loadedBoards.size() > 0) {
+                // find which board was selected and load its tasks
+                findSelectedBoard();
+                reloadBoardTasks();
+                // change screen
+                this->currScreen = "Board View";
+            }
+            else {
+                cout << "No board selected." << endl;
+            }
         }
         else if (this->currScreen == "Board View") {
-            // find which task was selected
-            findSelectedTask();
-            this->currScreen = "Task View";
+            // does the board have tasks?
+            if (this->activeBoardPtr != nullptr && this->activeBoardPtr->getTasks().size() > 0) {
+                // find which task was selected
+                findSelectedTask();
+                // change screen
+                this->currScreen = "Task View";
+            }
+            else {
+                cout << "No task selected." << endl;
+            }
         }
     }
     else if (command == "back") {
@@ -279,7 +305,12 @@ void UI::changeScreen(string command) {
 }
 
 void UI::reloadBoards() {
+    // deallocate and clear current list
+    for (auto board : this->loadedBoards) {
+        delete board;
+    }
     this->loadedBoards.clear();
+    // reload list from db
     this->loadedBoards = this->db.loadBoardsList();
 }
 
@@ -304,44 +335,24 @@ void UI::findSelectedBoard() {
         this->activeBoardPtr = *boardIter; // deref iterator returns Board*. set active.
     }
     else {
-        this->activeBoardPtr = nullptr;
-        cout << "Create a new board to manage." << endl;
+        cout << "Missing boards." << endl;
     }
-
     this->selectedIndex = 0;
-
-    // find selected board
-
 }
 
 void UI::findSelectedTask() {
     // find selected task. access tasks from the active board
-    // check for active board
-    if (this->activeBoardPtr != nullptr) {
-        // check if there are tasks to select
-        if (this->activeBoardPtr->getTasks().size() > 0) {
-            // set selected task as active task
-
-            // debug:
-            cout << "Debug :\n";
-            cout << this->activeBoardPtr->getTasks().size() << endl;
-            cout << this->selectedIndex << endl;
-            cout << "End Debug.\n";
-
-            list<Task*>::iterator taskIter = this->activeBoardPtr->getTasks().begin();
-            advance(taskIter, this->selectedIndex);
-            this->activeTaskPtr = *taskIter; // deref iterator returns Task*. set active.
-        }
-        else {
-            this->activeTaskPtr = nullptr;
-            cout << "No tasks to open. Create a new task first." << endl;
-            this->selectedIndex = 0;
-        }
+    // check for active board with tasks
+    if (this->activeBoardPtr != nullptr && this->activeBoardPtr->getTasks().size() > 0) {
+        // set selected task as active task
+        list<Task*>::iterator taskIter = this->activeBoardPtr->getTasks().begin();
+        advance(taskIter, this->selectedIndex);
+        this->activeTaskPtr = *taskIter; // deref iterator returns Task*. set active.
     }
     else {
-        cout << "Select a board before opening a task." << endl;
-        this->selectedIndex = 0;
+        cout << "Missing tasks." << endl;
     }
+    this->selectedIndex = 0;
 }
 
 void UI::addNewBoard() {

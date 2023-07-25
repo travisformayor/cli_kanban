@@ -20,6 +20,7 @@ using namespace std;
 class UI {
 public:
     UI(Database& db);
+    ~UI();
     // methods to manipulate the interface
     void setTextColor(WORD color);
     void setSelectIndex(int index);

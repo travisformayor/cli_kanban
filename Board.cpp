@@ -10,11 +10,11 @@ Board::Board(string title) : title(title) {
 }
 
 Board::~Board() {
-    // Deallocate assigned tasks list
-    for (auto task : tasks) {
+    // Deallocate and clear assigned tasks list
+    for (auto task : this->tasks) {
         delete task;
-        task = nullptr;
     }
+    this->tasks.clear();
 }
 
 void Board::setId(const int id) {
@@ -29,7 +29,12 @@ void Board::setTitle(const string newTitle) {
 }
 
 void Board::setTasks(const list<Task*>& tasks) {
+    // deallocate and clear current list
+    for (auto task : this->tasks) {
+        delete task;
+    }
     this->tasks.clear();
+    // set new list
     this->tasks = tasks;
 }
 
