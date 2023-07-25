@@ -49,7 +49,7 @@ string Board::getTitle() {
     return this->title;
 }
 
-list<Task*> Board::getTasks() {
+list<Task*>& Board::getTasks() {
     return this->tasks;
 }
 

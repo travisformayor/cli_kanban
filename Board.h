@@ -22,7 +22,7 @@ public:
     void removeTask(Task& task);
     int getId();
     string getTitle();
-    list<Task*> getTasks();
+    list<Task*>& getTasks();
     static Board* findById(list<Board*> boards, int id);
 
 private:
