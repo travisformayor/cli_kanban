@@ -357,11 +357,12 @@ void UI::findSelectedTask() {
     // check for active board with tasks
     if (this->activeBoardPtr != nullptr && this->activeBoardPtr->getTasks().size() > 0) {
         // set selected task as active task
-        list<Task*>::iterator taskIter = this->activeBoardPtr->getTasks().begin();
+        list<Task*>& tasks = this->activeBoardPtr->getTasks();
+        list<Task*>::iterator taskIter = tasks.begin();
         advance(taskIter, this->selectedIndex);
 
-        if (it != tasks.end()) { // a result was found
-            this->activeTaskId = *taskIter->getId(); // deref iterator returns Task*, get id.
+        if (taskIter != tasks.end()) { // a result was found
+            this->activeTaskId = (*taskIter)->getId(); // deref iterator returns Task*, get id.
         }
         else {
             addAlert("Missing task.");
