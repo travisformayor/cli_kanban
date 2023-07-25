@@ -382,19 +382,25 @@ void UI::addNewTask() {
 }
 
 void UI::deleteSelectedBoard() {
-
     // check if there are boards
     if (this->loadedBoards.size() > 0) {
+        // to do: remove debug couts
+        cout << "1. Index: " << selectedIndex << ". List size: " << this->loadedBoards.size() << endl;
         // find the selected board
         list<Board*>::iterator boardIter = this->loadedBoards.begin();
         advance(boardIter, this->selectedIndex);
         // delete board from DB and deallocated memory
+        cout << "a. " boardIter << endl;
+        cout << "b. " *boardIter << endl;
+        cout << "c. " **boardIter << endl;
+
         this->db.deleteBoard(**boardIter); // deref iterator gets board ptr, then deref ptr
         delete* boardIter; // deref iterator returns board*
         // reload list of boards
         reloadBoards();
         // fix selected index if was at end of list
         this->selectedIndex = max(0, static_cast<int>(this->loadedBoards.size()) - 1);
+        cout << "2. Index: " << selectedIndex << ". List size: " << this->loadedBoards.size() << endl;
     }
     else {
         cout << "No boards to delete." << endl;
