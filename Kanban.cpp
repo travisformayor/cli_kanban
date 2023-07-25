@@ -26,6 +26,7 @@ int main() {
             ui.displayScreen();
             // Listen for user input (pauses here until key press)
             ui.keyboardListen();
+            cout << "listening" << endl;
         }
     }
     catch (runtime_error& e) {

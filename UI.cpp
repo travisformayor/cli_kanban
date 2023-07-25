@@ -160,9 +160,12 @@ string UI::getUserInput(const string& prompt) {
             cin.ignore((numeric_limits<streamsize>::max)(), '\n');
             throw invalid_argument("Invalid input.");
         }
+
+        cout << "input success" << endl;
     }
     catch (const invalid_argument&) {
         // reset input to not return bad data
+        cout << "input issue" << endl;
         input = "";
         // rethrow the exception upward
         throw;
