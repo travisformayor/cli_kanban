@@ -228,24 +228,19 @@ void UI::keyboardListen() {
 void UI::moveSelector(int direction) {
     // move selector by 1 on Boards or Board View screens, wrapping around at end or start
     if (direction == 1 || direction == -1) {
-        int listSize;
         if (this->currScreen == "Boards") {
             // how to move selector on board screen
             if (this->loadedBoards.size() > 0) {
-                listSize = static_cast<int>(this->loadedBoards.size());
+                int listSize = static_cast<int>(this->loadedBoards.size());
+                this->selectedIndex = ((this->selectedIndex + direction + listSize) % listSize);
             }
-            this->selectedIndex = ((this->selectedIndex + direction + listSize) % listSize);
         }
         else if (this->currScreen == "Board View") {
             // how to move selector on board view screen
             if (this->activeBoardPtr != nullptr && this->activeBoardPtr->getTasks().size() > 0) {
-                listSize = static_cast<int>(this->activeBoardPtr->getTasks().size());
+                int listSize = static_cast<int>(this->activeBoardPtr->getTasks().size());
+                this->selectedIndex = ((this->selectedIndex + direction + listSize) % listSize);
             }
-            this->selectedIndex = ((this->selectedIndex + direction + listSize) % listSize);
-        }
-        else {
-            // dont move selector on other screens
-            this->selectedIndex = 0;
         }
     }
 }
