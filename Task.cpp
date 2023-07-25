@@ -37,14 +37,14 @@ void Task::setStage(Stage newStage, bool loading) {
         break;
     case Stage::InProgress:
         if (this->description.empty() || this->difficultyRating == 0) {
-            throw runtime_error("Task needs description and difficulty for 'In Progress' stage.");
+            throw invalid_argument("Task needs description and difficulty for 'In Progress' stage.");
         }
         break;
     case Stage::Done:
         // check if task update or loading task from db
         // skip previous stage check if loading is true
         if (!loading && (this->stage == Stage::ToDo)) {
-            throw runtime_error("Cannot skip 'In Progress' stage.");
+            throw invalid_argument("Cannot skip 'In Progress' stage.");
         }
         break;
     }
@@ -117,7 +117,7 @@ string Task::stageToString(Stage stage) {
     case Stage::Done:
         return "Done";
     default:
-        throw runtime_error("Invalid stage");
+        throw invalid_argument("Invalid stage");
     }
 }
 
@@ -129,5 +129,5 @@ Stage Task::stringToStage(const string& stageStr) {
     else if (stageStr == "Done")
         return Stage::Done;
     else
-        throw runtime_error("Invalid stage string: " + stageStr);
+        throw invalid_argument("Invalid stage string: " + stageStr);
 }

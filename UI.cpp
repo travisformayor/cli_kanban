@@ -158,13 +158,14 @@ string UI::getUserInput(const string& prompt) {
         if (cin.fail()) {
             cin.clear();
             cin.ignore((numeric_limits<streamsize>::max)(), '\n');
-            throw runtime_error("Error reading input");
+            throw invalid_argument("Invalid input.");
         }
     }
-    catch (const runtime_error& e) {
-        addAlert("Input error occurred: " + string(e.what()));
+    catch (const invalid_argument& e) {
         // reset input to not return bad data
         input = "";
+        // rethrow the exception upward
+        throw;
     }
 
     return input;
@@ -499,15 +500,21 @@ void UI::editTaskStage() {
 }
 
 void UI::editTaskRating() {
-    // to do: catch error if they dont event a num 1 - 5. allow re-entry
     // to do: explain in the UI they need to enter a num 1 - 5
     // to do: can the user entry pre-populate with the current version of desc when updating it?
     if (this->activeTaskPtr != nullptr) {
-        string newDifficulty = getUserInput("Enter a new difficulty rating for the task: ");
-        this->activeTaskPtr->setDifficulty(stoi(newDifficulty));
-        // save task to db and reload task list
-        this->db.saveTaskData(*this->activeTaskPtr);
-        reloadBoardTasks();
+        try {
+            string newDifficulty = getUserInput("Enter a new difficulty rating for the task: ");
+            this->activeTaskPtr->setDifficulty(stoi(newDifficulty));
+            // save task to db and reload task list
+            this->db.saveTaskData(*this->activeTaskPtr);
+            reloadBoardTasks();
+        }
+        catch (invalid_argument& e) {
+            // Display the input error message
+            // db errors return runtime, which is caught elsewhere
+            addAlert("Issue: " + string(e.what()));
+        }
     }
     else {
         addAlert("Missing active task.");
