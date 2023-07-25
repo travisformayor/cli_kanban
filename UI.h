@@ -34,6 +34,7 @@ public:
     void changeScreen(string command);
 
     // methods to manage displayed boards and tasks
+    Board* getBoardById(int id);
     void reloadBoards();
     void reloadBoardTasks();
     void findSelectedBoard();
@@ -61,7 +62,7 @@ private:
     int selectedIndex;
     string currScreen;
     list<Board*> loadedBoards;
-    Board* activeBoardPtr; // to do: switch from pointer to id as well?
+    int activeBoardId;
     int activeTaskId;
 };
 

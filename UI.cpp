@@ -4,6 +4,7 @@ using namespace std;
 
 UI::UI(Database& db) : db(db) {
     this->selectedIndex = 0;
+    this->activeBoardId = 0;
     this->activeTaskId = 0;
     this->currScreen = "Boards";
     this->screenMenus = {
@@ -19,7 +20,6 @@ UI::~UI() {
     // Deallocate and clear lists and pointers
     for (auto board : this->loadedBoards) {
         delete board;
-        // also deletes activeBoardPtr from memory
     }
     this->loadedBoards.clear();
 }
@@ -69,13 +69,13 @@ void UI::displayScreen() {
     cout << endl;
 
     // Output active board or task title
-    if (currScreen == "Board View" && this->activeBoardPtr != nullptr) {
-        string boardTitle = this->activeBoardPtr->getTitle();
+    if (currScreen == "Board View" && this->activeBoardId != 0) {
+        string boardTitle = getBoardById(this->activeBoardId)->getTitle();
         string padding((this->screenWidth - boardTitle.length() - 7) / 2, ' ');
         cout << padding << "Board: " << boardTitle << endl;
     }
-    else if (currScreen == "Task View" && this->activeBoardPtr != nullptr && this->activeTaskId != 0) {
-        string taskTitle = this->activeBoardPtr->getTaskById(this->activeTaskId)->getTitle();
+    else if (currScreen == "Task View" && this->activeBoardId != 0 && this->activeTaskId != 0) {
+        string taskTitle = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId)->getTitle();
         string padding((this->screenWidth - taskTitle.length() - 6) / 2, ' ');
         cout << padding << "Task: " << taskTitle << endl;
     }
@@ -95,10 +95,12 @@ void UI::displayScreen() {
         }
         displayTitles(titles);
     }
-    else if (this->currScreen == "Board View") {
+    else if (this->currScreen == "Board View" && this->activeBoardId != 0) {
         // display list of tasks for active board
-        if (this->activeBoardPtr != nullptr && this->activeBoardPtr->getTasks().size() > 0) {
-            for (Task* task : this->activeBoardPtr->getTasks()) {
+        list<Task*>& tasks = getBoardById(this->activeBoardId)->getTasks();
+
+        if (tasks.size() > 0) {
+            for (Task* task : tasks) {
                 titles.push_back(task->getTitle());
             }
         }
@@ -107,9 +109,9 @@ void UI::displayScreen() {
         }
         displayTitles(titles);
     }
-    else if (this->currScreen == "Task View" && this->activeBoardPtr != nullptr && this->activeTaskId != 0) {
+    else if (this->currScreen == "Task View" && this->activeBoardId != 0 && this->activeTaskId != 0) {
         // display selected task info
-        string taskDetails = this->activeBoardPtr->getTaskById(this->activeTaskId)->getTaskCard();
+        string taskDetails = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId)->getTaskCard();
         displayTaskCard(taskDetails);
     }
 
@@ -252,19 +254,18 @@ void UI::keyboardListen() {
 void UI::moveSelector(int direction) {
     // move selector by 1 on Boards or Board View screens, wrapping around at end or start
     if (direction == 1 || direction == -1) {
-        if (this->currScreen == "Boards") {
+        if (this->currScreen == "Boards" && this->loadedBoards.size() > 0) {
             // how to move selector on board screen
-            if (this->loadedBoards.size() > 0) {
-                int listSize = static_cast<int>(this->loadedBoards.size());
-                this->selectedIndex = ((this->selectedIndex + direction + listSize) % listSize);
-            }
+            int listSize = static_cast<int>(this->loadedBoards.size());
+            this->selectedIndex = ((this->selectedIndex + direction + listSize) % listSize);
         }
-        else if (this->currScreen == "Board View") {
+    }
+    else if (this->currScreen == "Board View" && this->activeBoardId != 0) {
+        list<Task*>& tasks = getBoardById(this - activeBoardId)->getTasks();
+        if (tasks.size() > 0) {
             // how to move selector on board view screen
-            if (this->activeBoardPtr != nullptr && this->activeBoardPtr->getTasks().size() > 0) {
-                int listSize = static_cast<int>(this->activeBoardPtr->getTasks().size());
-                this->selectedIndex = ((this->selectedIndex + direction + listSize) % listSize);
-            }
+            int listSize = static_cast<int>(tasks.size());
+            this->selectedIndex = ((this->selectedIndex + direction + listSize) % listSize);
         }
     }
 }
@@ -286,9 +287,9 @@ void UI::changeScreen(string command) {
                 addAlert("No board selected.");
             }
         }
-        else if (this->currScreen == "Board View") {
+        else if (this->currScreen == "Board View" && this->activeBoardId != 0) {
             // does the board have tasks?
-            if (this->activeBoardPtr != nullptr && this->activeBoardPtr->getTasks().size() > 0) {
+            if (getBoardById(this->activeBoardId)->getTasks().size() > 0) {
                 // find which task was selected
                 findSelectedTask();
                 // change screen
@@ -316,6 +317,16 @@ void UI::changeScreen(string command) {
     this->setSelectIndex(0);
 }
 
+Board* UI::getBoardById(int id) {
+    for (Board* board : this->loadedBoards) {
+        if (board->getId() == id) {
+            return board;
+        }
+    }
+    throw runtime_error("Board with id " + to_string(id) + " not found.");
+    return nullptr;
+}
+
 void UI::reloadBoards() {
     // deallocate and clear current list
     for (auto board : this->loadedBoards) {
@@ -329,9 +340,10 @@ void UI::reloadBoards() {
 void UI::reloadBoardTasks() {
     // reload tasks for currently active board
     // check if a board is selected
-    if (this->activeBoardPtr != nullptr) {
+    if (this->activeBoardId != 0) {
         // reload tasks from DB
-        this->activeBoardPtr->setTasks(this->db.loadTaskData(*this->activeBoardPtr));
+        Board* board = getBoardById(this->activeBoardId);
+        board->setTasks(this->db.loadTaskData(*board));
     }
     else {
         addAlert("Select a board before loading tasks.");
@@ -344,7 +356,7 @@ void UI::findSelectedBoard() {
         // find selected board, set active
         list<Board*>::iterator boardIter = this->loadedBoards.begin();
         advance(boardIter, this->selectedIndex);
-        this->activeBoardPtr = *boardIter; // deref iterator returns Board*. set active.
+        this->activeBoardId = (*boardIter)->getId(); // deref iterator returns Board*. set active board id
     }
     else {
         addAlert("Missing boards.");
@@ -355,22 +367,25 @@ void UI::findSelectedBoard() {
 void UI::findSelectedTask() {
     // find selected task. access tasks from the active board
     // check for active board with tasks
-    if (this->activeBoardPtr != nullptr && this->activeBoardPtr->getTasks().size() > 0) {
-        // set selected task as active task
-        list<Task*>& tasks = this->activeBoardPtr->getTasks();
-        list<Task*>::iterator taskIter = tasks.begin();
-        advance(taskIter, this->selectedIndex);
+    if (this->activeBoardId != 0) {
+        list<Task*>& tasks = getBoardById(this->activeBoardId)->getTasks();
+        if (tasks.size() > 0) {
+            // set selected task as active task
+            list<Task*>::iterator taskIter = tasks.begin();
+            advance(taskIter, this->selectedIndex);
 
-        if (taskIter != tasks.end()) { // a result was found
-            this->activeTaskId = (*taskIter)->getId(); // deref iterator returns Task*, get id.
+            if (taskIter != tasks.end()) { // a result was found
+                this->activeTaskId = (*taskIter)->getId(); // deref iterator returns Task*, get id.
+            }
+            else {
+                addAlert("Missing task.");
+            }
         }
         else {
-            addAlert("Missing task.");
+            addAlert("No tasks.");
         }
     }
-    else {
-        addAlert("Missing tasks.");
-    }
+
     this->selectedIndex = 0;
 }
 
@@ -385,10 +400,10 @@ void UI::addNewBoard() {
 
 void UI::addNewTask() {
     // check there is an active board
-    if (this->activeBoardPtr != nullptr) {
+    if (this->activeBoardId != 0) {
         // Add new task to board
         string newTaskTitle = getUserInput("Enter a title for the new task: ");
-        Task newTask(newTaskTitle, *this->activeBoardPtr);
+        Task newTask(newTaskTitle, *getBoardById(this->activeBoardId));
         // save task to db
         this->db.saveTaskData(newTask);
         // reload tasks for active board
@@ -408,7 +423,7 @@ void UI::deleteSelectedBoard() {
         advance(boardIter, this->selectedIndex);
         // delete board from DB
         this->db.deleteBoard(**boardIter); // deref iterator gets board ptr, then deref ptr
-        // reload list of boards (also deallocates board pointer)
+        // reload list of boards
         reloadBoards();
         // fix selected index if was at end of list
         this->selectedIndex = max(0, static_cast<int>(this->loadedBoards.size()) - 1);
@@ -420,19 +435,20 @@ void UI::deleteSelectedBoard() {
 }
 
 void UI::deleteSelectedTask() {
-    // check if there is an active board
-    if (this->activeBoardPtr != nullptr) {
-        // check if there are tasks to select
-        if (this->activeBoardPtr->getTasks().size() > 0) {
-            // find selected task 
-            list<Task*>::iterator taskIter = this->activeBoardPtr->getTasks().begin();
+    // check if there is an active board, then get its tasks
+    if (this->activeBoardId != 0) {
+        list<Task*>& tasks = getBoardById(this->activeBoardId)->getTasks();
+
+        if (tasks.size() > 0) {
+            // find selected task
+            list<Task*>::iterator taskIter = tasks.begin();
             advance(taskIter, this->selectedIndex);
             // delete task from DB
-            this->db.deleteTask(**taskIter); // deref iterator gets task ptr, then deref prt
-            // reload tasks for active board (also deallocates task pointer)
+            this->db.deleteTask(**taskIter); // deref iterator gets task ptr, then deref ptr
+            // reload tasks for active board
             reloadBoardTasks();
             // fix selected index if at end of list
-            this->selectedIndex = max(0, static_cast<int>(this->activeBoardPtr->getTasks().size()) - 1);
+            this->selectedIndex = max(0, static_cast<int>(tasks.size()) - 1);
         }
         else {
             addAlert("No tasks to delete.");
@@ -448,11 +464,13 @@ void UI::deleteSelectedTask() {
 void UI::editBoardTitle() {
     // to do: make this have a char length limit
     // to do: can the user entry pre-populate with the current version of desc when updating it?
-    if (this->activeBoardPtr != nullptr) {
+    if (this->activeBoardId != 0) {
         string newTitle = getUserInput("Enter a new title for the task: ");
-        this->activeBoardPtr->setTitle(newTitle);
+
+        Board* activeBoard = getBoardById(this->activeBoardId);
+        activeBoard->setTitle(newTitle);
         // save board to db and reload board list
-        this->db.saveBoardData(*this->activeBoardPtr);
+        this->db.saveBoardData(*activeBoard);
         reloadBoards();
     }
     else {
@@ -463,8 +481,8 @@ void UI::editBoardTitle() {
 void UI::editTaskTitle() {
     // to do: make this have a char length limit
     // to do: can the user entry pre-populate with the current version of desc when updating it?
-    if (this->activeBoardPtr != nullptr && this->activeTaskId != 0) {
-        Task* activeTask = this->activeBoardPtr->getTaskById(this->activeTaskId);
+    if (this->activeBoardId != 0 && this->activeTaskId != 0) {
+        Task* activeTask = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId);
 
         string newTitle = getUserInput("Enter a new title for the task: ");
         activeTask->setTitle(newTitle);
@@ -480,8 +498,8 @@ void UI::editTaskTitle() {
 void UI::editTaskDescription() {
     // to do: display description with word wrap past certain length
     // to do: can the user entry pre-populate with the current version of desc when updating it?
-    if (this->activeBoardPtr != nullptr && this->activeTaskId != 0) {
-        Task* activeTask = this->activeBoardPtr->getTaskById(this->activeTaskId);
+    if (this->activeBoardId != 0 && this->activeTaskId != 0) {
+        Task* activeTask = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId);
 
         string newDescription = getUserInput("Enter a new description for the task: ");
         activeTask->setDescription(newDescription);
@@ -497,8 +515,8 @@ void UI::editTaskDescription() {
 void UI::editTaskStage() {
     // to do: make this a hardcoded selection list, not user input
     // to do: can the user entry pre-populate with the current version of desc when updating it?
-    if (this->activeBoardPtr != nullptr && this->activeTaskId != 0) {
-        Task* activeTask = this->activeBoardPtr->getTaskById(this->activeTaskId);
+    if (this->activeBoardId != 0 && this->activeTaskId != 0) {
+        Task* activeTask = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId);
 
         string newStage = getUserInput("Enter a new stage for the task: ");
         activeTask->setStage(Task::stringToStage(newStage), false);
@@ -514,8 +532,8 @@ void UI::editTaskStage() {
 void UI::editTaskRating() {
     // to do: explain in the UI they need to enter a num 1 - 5
     // to do: can the user entry pre-populate with the current version of desc when updating it?
-    if (this->activeBoardPtr != nullptr && this->activeTaskId != 0) {
-        Task* activeTask = this->activeBoardPtr->getTaskById(this->activeTaskId);
+    if (this->activeBoardId != 0 && this->activeTaskId != 0) {
+        Task* activeTask = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId);
 
         try {
             string strRating = getUserInput("Enter a new difficulty rating for the task: ");
@@ -531,7 +549,6 @@ void UI::editTaskRating() {
             this->db.saveTaskData(*activeTask);
             // reload board tasks from db
             reloadBoardTasks();
-
         }
         catch (invalid_argument& e) {
             // catch invalid_argument from isNumber or setDifficulty
