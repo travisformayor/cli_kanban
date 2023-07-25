@@ -18,12 +18,9 @@ UI::~UI() {
     // Deallocate and clear lists and pointers
     for (auto board : this->loadedBoards) {
         delete board;
-        // also deletes activeBoardPtr's memory
+        // also deletes activeBoardPtr and activeTaskPtr memory
     }
     this->loadedBoards.clear();
-
-    delete activeTaskPtr;
-    activeTaskPtr = nullptr;
 }
 
 void UI::setTextColor(WORD color) {
