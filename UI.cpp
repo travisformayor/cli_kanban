@@ -51,25 +51,25 @@ void UI::displayScreen() {
     string namePadding((this->screenWidth - screenName.length() - 4) / 2, ' ');
 
     // output centered menu
-    cout << topPadding << menuTop << topPadding << endl;
-    cout << menuPadding << menu << menuPadding << endl;
-    cout << bottomPadding << menuBottom << bottomPadding << endl;
-    cout << endl;
-    cout << namePadding << "| " << screenName << " |" << endl;
-    cout << endl;
+    cout << topPadding << menuTop << topPadding << "\n";
+    cout << menuPadding << menu << menuPadding << "\n";
+    cout << bottomPadding << menuBottom << bottomPadding << "\n";
+    cout << "\n";
+    cout << namePadding << "| " << screenName << " |" << "\n";
+    cout << "\n";
 
     // Output active board or task title
     if (currScreen == "Board View" && this->activeBoardPtr != nullptr) {
         string boardTitle = this->activeBoardPtr->getTitle();
         string padding((this->screenWidth - boardTitle.length() - 7) / 2, ' ');
-        cout << padding << "Board: " << boardTitle << endl;
+        cout << padding << "Board: " << boardTitle << "\n";
     }
     else if (currScreen == "Task View" && this->activeTaskPtr != nullptr) {
         string taskTitle = this->activeTaskPtr->getTitle();
         string padding((this->screenWidth - taskTitle.length() - 6) / 2, ' ');
-        cout << padding << "Task: " << taskTitle << endl;
+        cout << padding << "Task: " << taskTitle << "\n";
     }
-    cout << endl;
+    cout << "\n";
 
     // the following code displays a selectable list of board or task titles
     list<string> titles;
