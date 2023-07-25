@@ -32,7 +32,6 @@ public:
     void keyboardListen();
     void moveSelector(int direction);
     void changeScreen(string command);
-    bool isNumber(const string& s);
 
     // methods to manage displayed boards and tasks
     void reloadBoards();

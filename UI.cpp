@@ -318,10 +318,6 @@ void UI::changeScreen(string command) {
     this->setSelectIndex(0);
 }
 
-bool UI::isNumber(const string& s) {
-    return !s.empty() && all_of(s.begin(), s.end(), ::isdigit);
-}
-
 void UI::reloadBoards() {
     // deallocate and clear current list
     for (auto board : this->loadedBoards) {
@@ -509,11 +505,15 @@ void UI::editTaskRating() {
     // to do: can the user entry pre-populate with the current version of desc when updating it?
     if (this->activeTaskPtr != nullptr) {
         try {
-            string newDifficulty = getUserInput("Enter a new difficulty rating for the task: ");
-            if (!isNumber(newDifficulty)) {
+            string strRating = getUserInput("Enter a new difficulty rating for the task: ");
+            int newRating;
+            try {
+                newRating = stoi(strRating);
+            }
+            catch (invalid_argument& e) {
                 throw invalid_argument("Enter a number between 1 and 5.");
             }
-            this->activeTaskPtr->setDifficulty(stoi(newDifficulty));
+            this->activeTaskPtr->setDifficulty(newRating);
             this->db.saveTaskData(*this->activeTaskPtr);
             reloadBoardTasks();
         }
