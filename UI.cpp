@@ -161,12 +161,11 @@ string UI::getUserInput(const string& prompt) {
             throw invalid_argument("Invalid input.");
         }
     }
-    catch (const invalid_argument& e) {
-        addAlert("debug test");
+    catch (const invalid_argument&) {
         // reset input to not return bad data
         input = "";
         // rethrow the exception upward
-        throw e;
+        throw;
     }
 
     return input;
@@ -510,14 +509,14 @@ void UI::editTaskRating() {
             try {
                 newRating = stoi(strRating);
             }
-            catch (invalid_argument& e) {
+            catch (invalid_argument&) {
                 throw invalid_argument("Enter a number between 1 and 5.");
             }
             this->activeTaskPtr->setDifficulty(newRating);
             this->db.saveTaskData(*this->activeTaskPtr);
             reloadBoardTasks();
         }
-        catch (invalid_argument& e) {
+        catch (invalid_argument&) {
             // catch invalid_argument from isNumber or setDifficulty
             // note: db errors return runtime error, which is caught elsewhere
             addAlert("Issue: " + string(e.what()));
