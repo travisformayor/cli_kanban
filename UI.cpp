@@ -214,12 +214,6 @@ void UI::keyboardListen() {
                 }
                 break;
             case 27: // 'esc', quit program
-                if (this->currScreen == "Task View") {
-                    // save any changes to active task first
-                    if (this->activeTaskPtr != nullptr) {
-                        this->db.saveTaskData(*this->activeTaskPtr);
-                    }
-                }
                 exit(0);
             }
         }
@@ -276,10 +270,6 @@ void UI::changeScreen(string command) {
     else if (command == "back") {
         // move back to previous screen
         if (this->currScreen == "Task View") {
-            // save task edits
-            if (this->activeTaskPtr != nullptr) {
-                this->db.saveTaskData(*this->activeTaskPtr);
-            }
             // update the tasks listed for the still active board
             reloadBoardTasks();
             this->currScreen = "Board View";
@@ -413,8 +403,6 @@ void UI::deleteSelectedTask() {
         // check if there are tasks to select
         if (this->activeBoardPtr->getTasks().size() > 0) {
             // find selected task 
-
-
             list<Task*>::iterator taskIter = this->activeBoardPtr->getTasks().begin();
             advance(taskIter, this->selectedIndex);
             // delete task from DB and deallocate memory
