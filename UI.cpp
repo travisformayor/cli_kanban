@@ -399,30 +399,18 @@ void UI::addNewTask() {
 void UI::deleteSelectedBoard() {
     // check if there are boards
     if (this->loadedBoards.size() > 0) {
-        // to do: remove debug couts
-        cout << "1. Index: " + to_string(selectedIndex) + ". List size: " + to_string(this->loadedBoards.size()) << endl;
         // find the selected board
         list<Board*>::iterator boardIter = this->loadedBoards.begin();
         advance(boardIter, this->selectedIndex);
-
-        Board* boardPtr = *boardIter;
-        cout << "Board ID: " + to_string(boardPtr->getId()) << endl;
-        cout << "Board Title: " + boardPtr->getTitle() << endl;
-
-        // delete board from DB and deallocated memory
+        // delete board from DB
         this->db.deleteBoard(**boardIter); // deref iterator gets board ptr, then deref ptr
-        cout << "Deleted board" << endl;
-        // delete* boardIter; // deref iterator returns board*
-        // cout << "Deallocated board pointer" << endl;
-        // reload list of boards (deallocates all board pointers)
+        // reload list of boards (also deallocates board pointer)
         reloadBoards();
-        cout << "Reloaded boards" << endl;
         // fix selected index if was at end of list
         this->selectedIndex = max(0, static_cast<int>(this->loadedBoards.size()) - 1);
-        cout << "2. Index: " + to_string(selectedIndex) + ". List size: " + to_string(this->loadedBoards.size()) << endl;
     }
     else {
-        cout << "No boards to delete." << endl;
+        addAlert("No boards to delete.");
         this->selectedIndex = 0;
     }
 }
@@ -435,10 +423,9 @@ void UI::deleteSelectedTask() {
             // find selected task 
             list<Task*>::iterator taskIter = this->activeBoardPtr->getTasks().begin();
             advance(taskIter, this->selectedIndex);
-            // delete task from DB and deallocate memory
+            // delete task from DB
             this->db.deleteTask(**taskIter); // deref iterator gets task ptr, then deref prt
-            delete* taskIter; // deref iterator returns task*
-            // reload tasks for active board
+            // reload tasks for active board (also deallocates task pointer)
             reloadBoardTasks();
             // fix selected index if at end of list
             this->selectedIndex = max(0, static_cast<int>(this->activeBoardPtr->getTasks().size()) - 1);
