@@ -123,7 +123,7 @@ void UI::displayScreen() {
         for (const string& alert : this->userAlerts) {
             cout << alert << endl;
         }
-        myStrings.clear();
+        this->userAlerts.clear();
     }
 
     cout << endl;
@@ -165,7 +165,7 @@ string UI::getUserInput(const string& prompt) {
         }
     }
     catch (const runtime_error& e) {
-        addAlert("Input error occurred: " + e.what());
+        addAlert("Input error occurred: " + string(e.what()));
         // reset input to not return bad data
         input = "";
     }
