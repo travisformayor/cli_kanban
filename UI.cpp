@@ -337,6 +337,13 @@ void UI::findSelectedTask() {
         // check if there are tasks to select
         if (this->activeBoardPtr->getTasks().size() > 0) {
             // set selected task as active task
+
+            // debug:
+            cout << "Debug :\n";
+            cout << this->activeBoardPtr->getTasks().size() << endl;
+            cout << this->selectedIndex << endl;
+            cout << "End Debug.\n";
+
             list<Task*>::iterator taskIter = this->activeBoardPtr->getTasks().begin();
             advance(taskIter, this->selectedIndex);
             this->activeTaskPtr = *taskIter; // deref iterator returns Task*. set active.
@@ -351,7 +358,6 @@ void UI::findSelectedTask() {
         cout << "Select a board before opening a task." << endl;
         this->selectedIndex = 0;
     }
-
 }
 
 void UI::addNewBoard() {
