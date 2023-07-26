@@ -14,7 +14,7 @@ UI::UI(Database& db) : db(db) {
     };
     this->screenWidth = 120; // length of the longest command menu
     string leftPadding(10, ' ');
-    string headerPadding(70, '=');
+    string headerPadding(30, '=');
     this->padL = leftPadding;
     this->padHeader = headerPadding;
     setTextColor(TEXT_WHITE);
@@ -64,14 +64,14 @@ void UI::displayScreen() {
     // output centered menu
     cout << topPadding << menuTop << topPadding << endl;
     cout << menuPadding << menu << menuPadding << endl;
-    cout << bottomPadding << menuBottom << bottomPadding << endl;
+    cout << bottomPadding << menuBottom << bottomPadding << "=" << endl;
     cout << endl;
 
     // the following code displays a selectable list of board or task titles
     map<string, list<string>> titles;
     if (this->currScreen == "Boards") {
         // display title of board list view
-        cout << this->padL << "| Boards |" << endl;
+        cout << this->padL << "| Boards |" << endl << endl;
 
         // display list of boards
         if (this->loadedBoards.size() > 0) {
@@ -87,7 +87,7 @@ void UI::displayScreen() {
     else if (this->currScreen == "Board View" && this->activeBoardId != 0) {
         // display title of board view, ie the name of the board
         string boardTitle = getBoardById(this->activeBoardId)->getTitle();
-        cout << this->padL << "| Board: " << boardTitle << " |" << endl;
+        cout << this->padL << "| Board Name: " << boardTitle << " |" << endl << endl;
 
         // display list of tasks for active board
         list<Task*>& tasks = getBoardById(this->activeBoardId)->getTasks();
@@ -125,6 +125,7 @@ void UI::displayScreen() {
     else if (this->currScreen == "Task View" && this->activeBoardId != 0 && this->activeTaskId != 0) {
         // display selected task info
         string taskDetails = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId)->getTaskCard();
+        cout << endl;
         displayTaskCard(taskDetails);
     }
 
@@ -170,7 +171,7 @@ void UI::displayTitles(map<string, list<string>>& titles) {
                 setTextColor(TEXT_WHITE); // regular item color
             }
             // print title
-            cout << this->padL << " * " << title << endl;
+            cout << this->padL << "* " << title << endl;
             setTextColor(TEXT_WHITE); // reset item color regular
 
             index++;
