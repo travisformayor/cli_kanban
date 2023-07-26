@@ -523,22 +523,20 @@ void UI::editTaskStage() {
         Task* activeTask = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId);
 
         try {
-            string strStage = getUserInput("Select a new stage for the task. Enter a number 1 - 3.\n  1. To Do\n  2. In Progress\n  3. Completed\n  ");
+            string strStage = getUserInput("Select a new stage for the task. Enter a number 1 - 3.\n  1. To Do\n  2. In Progress\n  3. Done\n  ");
             Stage newStage;
             try {
                 // attempt convert to int and stage selection
                 int stageNum = stoi(strStage);
-                if (stageNum < 1 || stageNum > 3) {
-                    switch (stageNum) {
-                    case 1: newStage = Stage::ToDo; break;
-                    case 2: newStage = Stage::InProgress; break;
-                    case 3: newStage = Stage::Done; break;
-                    default: throw invalid_argument("");
-                    }
+                switch (stageNum) {
+                case 1: newStage = Stage::ToDo; break;
+                case 2: newStage = Stage::InProgress; break;
+                case 3: newStage = Stage::Done; break;
+                default: throw invalid_argument();
                 }
             }
             catch (invalid_argument&) {
-                // catches invalid getUserInput, failed stoi() convert, or switch 1-3 default
+                // catches failed stoi() convert or switch default not 1, 2, or 3
                 throw invalid_argument("Invalid stage selection. Enter 1, 2 or 3.");
             }
             // update task and save to db
@@ -569,9 +567,11 @@ void UI::editTaskRating() {
                 newRating = stoi(strRating);
             }
             catch (invalid_argument&) {
+                // catches failed stoi() convert
                 throw invalid_argument("Enter a number between 1 and 5.");
             }
             // update task and save to db
+            addAlert(string(newRating)); // to do: remove debug
             activeTask->setDifficulty(newRating);
             this->db.saveTaskData(*activeTask);
             // reload board tasks from db
