@@ -6,11 +6,9 @@
 using namespace std;
 
 // to do: code
-// - bug: renaming a board doesn't display it's tasks after, not till you back and reenter
-// - bug: try/catches in the rest of the ui edit methods
-// - improve card view. multiline, word wrap, election highlight, etc
+// - board view lists grouped stage titles
 // - char limit on titles and descriptions
-// - change stage gives list of selections
+// - improve card view. padding, multiline, word wrap, election highlight, etc
 // - pre-populate edit's for title and description with current value
 
 // to do: docs

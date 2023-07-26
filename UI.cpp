@@ -571,7 +571,6 @@ void UI::editTaskRating() {
                 throw invalid_argument("Enter a number between 1 and 5.");
             }
             // update task and save to db
-            addAlert(to_string(newRating)); // to do: remove debug
             activeTask->setDifficulty(newRating);
             this->db.saveTaskData(*activeTask);
             // reload board tasks from db
