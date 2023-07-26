@@ -24,6 +24,9 @@ void Task::setTitle(string newTitle) {
     if (newTitle.empty()) {
         throw invalid_argument("Title can't be empty.");
     }
+    else if (newTitle.length() > 50) { // char limit on title
+        throw invalid_argument("Title can't exceed 50 characters.");
+    }
     this->title = newTitle;
 }
 
