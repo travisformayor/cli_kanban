@@ -66,15 +66,15 @@ void UI::displayScreen() {
     cout << menuPadding << menu << menuPadding << endl;
     cout << bottomPadding << menuBottom << bottomPadding << endl;
     cout << endl;
-    cout << this->padL << "| " << screenName << " |" << endl;
+    cout << this->padL << "| " << this->currScreen << " |" << endl;
     cout << endl;
 
     // Output active board or task title
-    if (currScreen == "Board View" && this->activeBoardId != 0) {
+    if (this->currScreen == "Board View" && this->activeBoardId != 0) {
         string boardTitle = getBoardById(this->activeBoardId)->getTitle();
         cout << this->padL << "Board: " << boardTitle << endl;
     }
-    else if (currScreen == "Task View" && this->activeBoardId != 0 && this->activeTaskId != 0) {
+    else if (this->currScreen == "Task View" && this->activeBoardId != 0 && this->activeTaskId != 0) {
         string taskTitle = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId)->getTitle();
         cout << this->padL << "Task: " << taskTitle << endl;
     }
