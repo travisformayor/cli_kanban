@@ -10,6 +10,7 @@
 #include "Board.h"
 #include "Task.h"
 #include <iostream>
+#include <sstream>
 #include <conio.h>
 #include <variant>
 #include <string>
@@ -27,6 +28,7 @@ public:
     void displayScreen();
     void displayTitles(map<string, list<string>>& titles);
     void displayTaskCard(Task* task);
+    void wrapAndPrint(const string& text, int line_length);
     string getUserInput(const string& prompt);
     void addAlert(const string& alert);
     void keyboardListen();
