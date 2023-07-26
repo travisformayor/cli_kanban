@@ -459,24 +459,36 @@ void UI::findSelectedTask() {
 }
 
 void UI::addNewBoard() {
-    string newBoardTitle = getUserInput("Enter a title for the new board: ");
-    Board newBoard(newBoardTitle);
-    // save board to db
-    this->db.saveBoardData(newBoard);
-    // reload list of boards
-    reloadBoards();
+    try {
+        string newBoardTitle = getUserInput("Enter a title for the new board: ");
+        Board newBoard(newBoardTitle);
+        // save board to db
+        this->db.saveBoardData(newBoard);
+        // reload list of boards
+        reloadBoards();
+    }
+    catch (invalid_argument& e) {
+        // catch invalid_argument from getUserInput or new board
+        addAlert(string(e.what()) + " 'c' to retry.");
+    }
 }
 
 void UI::addNewTask() {
     // check there is an active board
     if (this->activeBoardId != 0) {
-        // Add new task to board
-        string newTaskTitle = getUserInput("Enter a title for the new task: ");
-        Task newTask(newTaskTitle, *getBoardById(this->activeBoardId));
-        // save task to db
-        this->db.saveTaskData(newTask);
-        // reload tasks for active board
-        reloadBoardTasks();
+        try {
+            // Add new task to board
+            string newTaskTitle = getUserInput("Enter a title for the new task: ");
+            Task newTask(newTaskTitle, *getBoardById(this->activeBoardId));
+            // save task to db
+            this->db.saveTaskData(newTask);
+            // reload tasks for active board
+            reloadBoardTasks();
+        }
+        catch (invalid_argument& e) {
+            // catch invalid_argument from getUserInput or new task
+            addAlert(string(e.what()) + " 'c' to retry.");
+        }
     }
     else {
         addAlert("Select a board before adding a task.");
