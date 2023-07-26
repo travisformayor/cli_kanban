@@ -182,16 +182,16 @@ void UI::displayTaskCard(Task* task) {
     // display card of task information
     cout << endl;
     // print Title
-    cout << this->padL << "Title: " << setTextColor(TEXT_GREEN) << task->getTitle() << setTextColor(TEXT_WHITE) << "\n";
+    cout << this->padL << "Title: " << setTextColor(TEXT_GREEN) << task->getTitle() << setTextColor(TEXT_WHITE) << endl;
 
     // print Description
-    cout << this->padL << "Description: " << setTextColor(TEXT_GREEN) << task->getDescription() << setTextColor(TEXT_WHITE) << "\n";
+    cout << this->padL << "Description: " << setTextColor(TEXT_GREEN) << task->getDescription() << setTextColor(TEXT_WHITE) << endl;
 
     // print Stage
-    cout << this->padL << "Stage: " << setTextColor(TEXT_GREEN) << this->stageToString(task->getStage()) << setTextColor(TEXT_WHITE) << "\n";
+    cout << this->padL << "Stage: " << setTextColor(TEXT_GREEN) << this->stageToString(task->getStage()) << setTextColor(TEXT_WHITE) << endl;
 
     // print Rated Difficulty
-    cout << this->padL << "Rated Difficulty: " << setTextColor(TEXT_GREEN) << task->getDifficultyRating() << setTextColor(TEXT_WHITE) << "\n";
+    cout << this->padL << "Rated Difficulty: " << setTextColor(TEXT_GREEN) << task->getDifficultyRating() << setTextColor(TEXT_WHITE) << endl;
 }
 
 string UI::getUserInput(const string& prompt) {
