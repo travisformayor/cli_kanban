@@ -25,7 +25,7 @@ public:
     void setTextColor(WORD color);
     void setSelectIndex(int index);
     void displayScreen();
-    void displayTitles(list<string>& titles);
+    void displayTitles(map<string, list<string>>& titles);
     void displayTaskCard(string taskDetails);
     string getUserInput(const string& prompt);
     void addAlert(const string& alert);
