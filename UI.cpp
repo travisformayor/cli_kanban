@@ -179,19 +179,34 @@ void UI::displayTitles(map<string, list<string>>& titles) {
 }
 
 void UI::displayTaskCard(Task* task) {
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
     // display card of task information
     cout << endl;
+
     // print Title
-    cout << this->padL << "Title: " << setTextColor(TEXT_GREEN) << task->getTitle() << setTextColor(TEXT_WHITE) << endl;
+    SetConsoleTextAttribute(hConsole, FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+    cout << this->padL << "Title: ";
+    SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+    cout << task->getTitle() << endl;
 
     // print Description
-    cout << this->padL << "Description: " << setTextColor(TEXT_GREEN) << task->getDescription() << setTextColor(TEXT_WHITE) << endl;
+    SetConsoleTextAttribute(hConsole, FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+    cout << this->padL << "Description: ";
+    SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+    cout << task->getDescription() << endl;
 
     // print Stage
-    cout << this->padL << "Stage: " << setTextColor(TEXT_GREEN) << this->stageToString(task->getStage()) << setTextColor(TEXT_WHITE) << endl;
+    SetConsoleTextAttribute(hConsole, FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+    cout << this->padL << "Stage: ";
+    SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+    cout << this->stageToString(task->getStage()) << endl;
 
     // print Rated Difficulty
-    cout << this->padL << "Rated Difficulty: " << setTextColor(TEXT_GREEN) << task->getDifficultyRating() << setTextColor(TEXT_WHITE) << endl;
+    SetConsoleTextAttribute(hConsole, FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+    cout << this->padL << "Rated Difficulty: ";
+    SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+    cout << task->getDifficultyRating() << endl;
 }
 
 string UI::getUserInput(const string& prompt) {
