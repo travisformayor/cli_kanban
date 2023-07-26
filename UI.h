@@ -59,6 +59,7 @@ private:
     map<string, string> screenMenus;
     list<string> userAlerts;
     int screenWidth;
+    string padL;
     int selectedIndex;
     string currScreen;
     list<Board*> loadedBoards;

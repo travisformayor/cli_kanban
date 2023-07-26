@@ -13,6 +13,8 @@ UI::UI(Database& db) : db(db) {
         {"Task View", " | t: Edit Title | d: Edit Description | s: Edit Stage | r: Edit Difficulty Rating | b: Save & Back | esc: Save & Quit |"}
     };
     this->screenWidth = 120; // length of the longest command menu
+    string padding(this->screenWidth / 4, ' ');
+    this->padL = padding;
     setTextColor(TEXT_WHITE);
 }
 
@@ -91,7 +93,7 @@ void UI::displayScreen() {
             }
         }
         else {
-            cout << "      [Create first board with 'c' command]" << endl;;
+            cout << this->padL << "[Create first board with 'c' command]" << endl;;
         }
         displayTitles(titles);
     }
@@ -100,13 +102,13 @@ void UI::displayScreen() {
         list<Task*>& tasks = getBoardById(this->activeBoardId)->getTasks();
 
         if (tasks.size() > 0) {
-            for (Task* task : tasks) {
-                // add each stage with empty list so each gets displayed
-                // prefixed numbers keep sorting correct in a map
-                titles["1. To Do"] = list<string>();
-                titles["2. In Progress"] = list<string>();
-                titles["3. Done"] = list<string>();
+            // add each stage with empty list so each gets displayed
+            // prefixed numbers keep sorting correct in a map
+            titles["1. To Do"] = list<string>();
+            titles["2. In Progress"] = list<string>();
+            titles["3. Done"] = list<string>();
 
+            for (Task* task : tasks) {
                 string stage = Task::stageToString(task->getStage());
                 if (stage == "To Do") {
                     titles["1. To Do"].push_back(task->getTitle());
@@ -120,7 +122,11 @@ void UI::displayScreen() {
             }
         }
         else {
-            cout << "      [Create first task with 'c' command]" << endl;;
+            cout << this->padL << "====== To Do ======\n" << endl;
+            cout << this->padL << "\n=== In Progress ===\n" << endl;
+            cout << this->padL << "\n====== Done =======\n" << endl;
+            cout << endl;
+            cout << this->padL << "[Create first task with 'c' command]" << endl;;
         }
         displayTitles(titles);
     }
@@ -134,7 +140,7 @@ void UI::displayScreen() {
     if (this->userAlerts.size() > 0) {
         cout << endl;
         for (const string& alert : this->userAlerts) {
-            cout << alert << endl;
+            cout << this->padL << alert << endl;
         }
         this->userAlerts.clear();
     }
@@ -152,15 +158,15 @@ void UI::displayTitles(map<string, list<string>>& titles) {
     for (const auto& [key, value] : titles) { // loop map keys
         // display stages once per presorted group of tasks with the stage
         if (key == "1. To Do" && !shownToDo) {
-            cout << "====== To Do ======\n" << endl;
+            cout << this->padL << "====== To Do ======\n" << endl;
             shownToDo = true;
         }
         else if (key == "2. In Progress" && !shownInProgress) {
-            cout << "\n=== In Progress ===\n" << endl;
+            cout << this->padL << "\n=== In Progress ===\n" << endl;
             shownInProgress = true;
         }
         else if (key == "3. Done" && !shownDone) {
-            cout << "\n====== Done =======\n" << endl;
+            cout << this->padL << "\n====== Done =======\n" << endl;
             shownDone = true;
         }
 
@@ -172,7 +178,7 @@ void UI::displayTitles(map<string, list<string>>& titles) {
                 setTextColor(TEXT_WHITE); // regular item color
             }
             // print title
-            cout << "    * " << title << endl;
+            cout << this->padL << "    * " << title << endl;
             setTextColor(TEXT_WHITE); // reset item color regular
 
             index++;
@@ -188,7 +194,7 @@ string UI::getUserInput(const string& prompt) {
     string input;
 
     try {
-        cout << prompt;
+        cout << this->padL << prompt;
         getline(cin, input);
 
         if (cin.fail()) {
