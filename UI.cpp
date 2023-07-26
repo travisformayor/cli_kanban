@@ -86,7 +86,6 @@ void UI::displayScreen() {
     if (this->currScreen == "Boards") {
         // display list of boards
         if (this->loadedBoards.size() > 0) {
-            titles["Board"] = list<string>();
             for (Board* board : this->loadedBoards) {
                 titles["Board"].push_back(board->getTitle());
             }
@@ -101,11 +100,17 @@ void UI::displayScreen() {
         list<Task*>& tasks = getBoardById(this->activeBoardId)->getTasks();
 
         if (tasks.size() > 0) {
-            titles["1. To Do"] = list<string>();
-            titles["2. In Progress"] = list<string>();
-            titles["3. Done"] = list<string>();
             for (Task* task : tasks) {
-                titles[Task::stageToString(task->getStage())].push_back(task->getTitle());
+                string stage = Task::stageToString(task->getStage());
+                if (stage == "To Do") { // add number prefixes for map sorting
+                    titles["1. To Do"].push_back(task->getTitle());
+                }
+                else if (stage == "In Progress") {
+                    titles["2. In Progress"].push_back(task->getTitle());
+                }
+                else if (stage == "Done") {
+                    titles["3. Done"].push_back(task->getTitle());
+                }
             }
         }
         else {
@@ -135,6 +140,7 @@ void UI::displayTitles(map<string, list<string>>& titles) {
     // display titles with selected title highlighted and stage name titles for tasks
     int index = 0;
     for (const auto& [key, value] : titles) { // loop map keys
+        cout << "key: " << key << endl; // debug
         if (key != "Board") {
             string stageNameHeader = key.substr(3); // remove sorting number for task stages
             cout << "\n=== " << stageNameHeader << " ===" << endl;
