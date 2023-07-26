@@ -55,7 +55,7 @@ void Task::setStage(Stage newStage, bool loading) {
 
 void Task::setDifficulty(int rating) {
     if (rating < 1 || rating > 5) {
-        throw invalid_argument("Enter a number between 1 and 5.");
+        throw invalid_argument("Enter a number 1 - 5.");
     }
     this->difficultyRating = rating;
 }
@@ -110,14 +110,10 @@ list<Task*> Task::searchTasks(list<Task*> tasks, const string& query) {
 // helper convert methods for dealing with Stages as strings
 string Task::stageToString(Stage stage) {
     switch (stage) {
-    case Stage::ToDo:
-        return "To Do";
-    case Stage::InProgress:
-        return "In Progress";
-    case Stage::Done:
-        return "Done";
-    default:
-        throw invalid_argument("Invalid stage");
+    case Stage::ToDo: return "To Do";
+    case Stage::InProgress: return "In Progress";
+    case Stage::Done: return "Done";
+    default: throw invalid_argument("Invalid stage");
     }
 }
 

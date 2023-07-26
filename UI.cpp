@@ -162,9 +162,8 @@ string UI::getUserInput(const string& prompt) {
         }
     }
     catch (const invalid_argument&) {
-        // reset input to not return bad data
+        // reset input to not return bad data & rethrow exception upward
         input = "";
-        // rethrow the exception upward
         throw;
     }
 
@@ -187,20 +186,12 @@ void UI::keyboardListen() {
             case 224: // potential arrow key
                 ch = _getch();
                 switch (ch) {
-                case 72: // up arrow
-                    moveSelector(-1); // move selector up 1
-                    break;
-                case 80: // down arrow
-                    moveSelector(1); // move selector down 1
-                    break;
+                case 72: moveSelector(-1); break; // up arrow. move selector up 1
+                case 80: moveSelector(1); break; // down arrow. move selector down 1
                 }
                 break;
-            case 13: // enter key. move to selected screen
-                changeScreen("enter");
-                break;
-            case 'b': // back to previous screen
-                changeScreen("back");
-                break;
+            case 13: changeScreen("enter"); break; // enter key. move to selected screen
+            case 'b': changeScreen("back"); break; // back to previous screen
             case 'c': // create
                 if (this->currScreen == "Boards") {
                     addNewBoard();
@@ -238,11 +229,9 @@ void UI::keyboardListen() {
                     editTaskTitle();
                 }
                 break;
-            case 27: // 'esc', quit program
-                exit(0);
+            case 27: exit(0); // 'esc', quit program
             }
         }
-
         if (keyPressed) {
             // exit while loop to allow display to react to key press
             break;
