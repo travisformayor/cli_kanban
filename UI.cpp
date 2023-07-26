@@ -482,11 +482,18 @@ void UI::editTaskTitle() {
     if (this->activeBoardId != 0 && this->activeTaskId != 0) {
         Task* activeTask = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId);
 
-        string newTitle = getUserInput("Enter a new title for the task: ");
-        activeTask->setTitle(newTitle);
-        // save task to db and reload task list
-        this->db.saveTaskData(*activeTask);
-        reloadBoardTasks();
+        try {
+            string newTitle = getUserInput("Enter a new title for the task: ");
+            activeTask->setTitle(newTitle);
+            // save task to db and reload task list
+            this->db.saveTaskData(*activeTask);
+            reloadBoardTasks();
+        }
+        catch (invalid_argument& e) {
+            // catch invalid_argument from setTitle or getUserInput
+            // note: db errors return runtime error, which is caught elsewhere
+            addAlert("Issue: " + string(e.what()));
+        }
     }
     else {
         addAlert("Missing active task.");
@@ -497,11 +504,18 @@ void UI::editTaskDescription() {
     if (this->activeBoardId != 0 && this->activeTaskId != 0) {
         Task* activeTask = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId);
 
-        string newDescription = getUserInput("Enter a new description for the task: ");
-        activeTask->setDescription(newDescription);
-        // save task to db and reload task list
-        this->db.saveTaskData(*activeTask);
-        reloadBoardTasks();
+        try {
+            string newDescription = getUserInput("Enter a new description for the task: ");
+            activeTask->setDescription(newDescription);
+            // save task to db and reload task list
+            this->db.saveTaskData(*activeTask);
+            reloadBoardTasks();
+        }
+        catch (invalid_argument& e) {
+            // catch invalid_argument from setDescription or getUserInput
+            // note: db errors return runtime error, which is caught elsewhere
+            addAlert("Issue: " + string(e.what()));
+        }
     }
     else {
         addAlert("Missing active task.");
@@ -512,11 +526,18 @@ void UI::editTaskStage() {
     if (this->activeBoardId != 0 && this->activeTaskId != 0) {
         Task* activeTask = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId);
 
-        string newStage = getUserInput("Enter a new stage for the task: ");
-        activeTask->setStage(Task::stringToStage(newStage), false);
-        // save task to db and reload task list
-        this->db.saveTaskData(*activeTask);
-        reloadBoardTasks();
+        try {
+            string newStage = getUserInput("Enter a new stage for the task: ");
+            activeTask->setStage(Task::stringToStage(newStage), false);
+            // save task to db and reload task list
+            this->db.saveTaskData(*activeTask);
+            reloadBoardTasks();
+        }
+        catch (invalid_argument& e) {
+            // catch invalid_argument from setStage, stringToStage or getUserInput
+            // note: db errors return runtime error, which is caught elsewhere
+            addAlert("Issue: " + string(e.what()));
+        }
     }
     else {
         addAlert("Missing active task.");
