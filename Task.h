@@ -32,9 +32,8 @@ public:
     string getTitle();
     string getDescription();
     Stage getStage();
-    int getDifficultyRating();
+    int getDifficulty();
     int getBoardId();
-    list<Task*> searchTasks(list<Task*> tasks, const string& query);
     static string stageToString(Stage stage);
     static Stage stringToStage(const string& stageStr);
 

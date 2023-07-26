@@ -194,7 +194,7 @@ void UI::displayTaskCard(Task* task) {
     SetConsoleTextAttribute(hConsole, FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
     cout << this->padL << "Description: " << endl;
     SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
-    wrapAndPrint(task->getDescription(), 40); // wrap to 40 characters
+    wrapAndPrint(task->getDescription(), 50); // wrap to 50 characters
 
     // print Stage
     SetConsoleTextAttribute(hConsole, FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
@@ -206,7 +206,7 @@ void UI::displayTaskCard(Task* task) {
     SetConsoleTextAttribute(hConsole, FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
     cout << this->padL << "Rated Difficulty: ";
     SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
-    cout << task->getDifficultyRating() << endl;
+    cout << task->getDifficulty() << endl;
 }
 
 void UI::wrapAndPrint(const string& text, int line_length) {

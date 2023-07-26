@@ -5,12 +5,6 @@
 
 using namespace std;
 
-// to do: code
-// - board view lists grouped stage titles
-// - char limit on titles and descriptions
-// - improve card view. padding, multiline, word wrap, election highlight, etc
-// - pre-populate edit's for title and description with current value
-
 // to do: docs
 // - add method comments in header files
 // - update classUML and other diagrams

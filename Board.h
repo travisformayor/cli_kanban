@@ -18,8 +18,6 @@ public:
     void setId(const int id);
     void setTitle(const string newTitle);
     void setTasks(const list<Task*>& tasks);
-    void addTask(Task& task);
-    void removeTask(Task& task);
     int getId();
     string getTitle();
     list<Task*>& getTasks();

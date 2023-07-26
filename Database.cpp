@@ -157,7 +157,7 @@ void Database::saveTaskData(Task& task) {
     map<string, variant<int, string>> dataMap = {
         { "title", variant<int, string>{task.getTitle()} },
         { "description", variant<int, string>{task.getDescription()} },
-        { "difficulty_rating", variant<int, string>{task.getDifficultyRating()} },
+        { "difficulty_rating", variant<int, string>{task.getDifficulty()} },
         { "stage", variant<int, string>{task.stageToString(task.getStage())} },
         { "board_id", variant<int, string>{task.getBoardId()} }
     };

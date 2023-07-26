@@ -83,23 +83,12 @@ Stage Task::getStage() {
     return this->stage;
 }
 
-int Task::getDifficultyRating() {
+int Task::getDifficulty() {
     return this->difficultyRating;
 }
 
 int Task::getBoardId() {
     return this->boardId;
-}
-
-
-list<Task*> Task::searchTasks(list<Task*> tasks, const string& query) {
-    list<Task*> foundTasks;
-    for (Task* task : tasks) {
-        if (task->getTitle().find(query) != string::npos || task->getDescription().find(query) != string::npos) {
-            foundTasks.push_back(task);
-        }
-    }
-    return foundTasks;
 }
 
 // helper convert methods for dealing with Stages as strings

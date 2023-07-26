@@ -41,14 +41,6 @@ void Board::setTasks(const list<Task*>& tasks) {
     this->tasks = tasks;
 }
 
-void Board::addTask(Task& task) {
-    this->tasks.push_back(&task);
-}
-
-void Board::removeTask(Task& task) {
-    this->tasks.remove(&task);
-}
-
 int Board::getId() {
     return this->id;
 }
