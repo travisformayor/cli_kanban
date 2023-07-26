@@ -532,11 +532,11 @@ void UI::editTaskStage() {
                 case 1: newStage = Stage::ToDo; break;
                 case 2: newStage = Stage::InProgress; break;
                 case 3: newStage = Stage::Done; break;
-                default: throw invalid_argument();
+                default: throw invalid_argument("");
                 }
             }
             catch (invalid_argument&) {
-                // catches failed stoi() convert or switch default not 1, 2, or 3
+                // catches failed stoi() convert or switch default
                 throw invalid_argument("Invalid stage selection. Enter 1, 2 or 3.");
             }
             // update task and save to db
@@ -571,7 +571,7 @@ void UI::editTaskRating() {
                 throw invalid_argument("Enter a number between 1 and 5.");
             }
             // update task and save to db
-            addAlert(string(newRating)); // to do: remove debug
+            addAlert(to_string(newRating)); // to do: remove debug
             activeTask->setDifficulty(newRating);
             this->db.saveTaskData(*activeTask);
             // reload board tasks from db
