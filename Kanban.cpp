@@ -5,9 +5,18 @@
 
 using namespace std;
 
-// to do:
-// - deleting board crashes program
-// - thrown errors end whole program. check all throws for retries
+// to do: code
+// - bug: renaming a board doesn't display it's tasks after, not till you back and reenter
+// - bug: try/catches in the rest of the ui edit methods
+// - improve card view. multiline, word wrap, election highlight, etc
+// - char limit on titles and descriptions
+// - change stage gives list of selections
+// - pre-populate edit's for title and description with current value
+
+// to do: docs
+// - add method comments in header files
+// - update classUML and other diagrams
+// - update proposal
 
 int main() {
     try {

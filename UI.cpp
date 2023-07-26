@@ -145,7 +145,6 @@ void UI::displayTitles(list<string>& titles) {
 }
 
 void UI::displayTaskCard(string taskDetails) {
-    // to do: expand on the task card view screen. multiline, word wrap, election highlight, etc
     cout << taskDetails << endl;
 }
 
@@ -463,8 +462,6 @@ void UI::deleteSelectedTask() {
 }
 
 void UI::editBoardTitle() {
-    // to do: make this have a char length limit
-    // to do: can the user entry pre-populate with the current version of desc when updating it?
     if (this->activeBoardId != 0) {
         string newTitle = getUserInput("Enter a new title for the task: ");
 
@@ -480,8 +477,6 @@ void UI::editBoardTitle() {
 }
 
 void UI::editTaskTitle() {
-    // to do: make this have a char length limit
-    // to do: can the user entry pre-populate with the current version of desc when updating it?
     if (this->activeBoardId != 0 && this->activeTaskId != 0) {
         Task* activeTask = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId);
 
@@ -497,8 +492,6 @@ void UI::editTaskTitle() {
 }
 
 void UI::editTaskDescription() {
-    // to do: display description with word wrap past certain length
-    // to do: can the user entry pre-populate with the current version of desc when updating it?
     if (this->activeBoardId != 0 && this->activeTaskId != 0) {
         Task* activeTask = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId);
 
@@ -514,8 +507,6 @@ void UI::editTaskDescription() {
 }
 
 void UI::editTaskStage() {
-    // to do: make this a hardcoded selection list, not user input
-    // to do: can the user entry pre-populate with the current version of desc when updating it?
     if (this->activeBoardId != 0 && this->activeTaskId != 0) {
         Task* activeTask = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId);
 
@@ -531,13 +522,11 @@ void UI::editTaskStage() {
 }
 
 void UI::editTaskRating() {
-    // to do: explain in the UI they need to enter a num 1 - 5
-    // to do: can the user entry pre-populate with the current version of desc when updating it?
     if (this->activeBoardId != 0 && this->activeTaskId != 0) {
         Task* activeTask = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId);
 
         try {
-            string strRating = getUserInput("Enter a new difficulty rating for the task: ");
+            string strRating = getUserInput("Enter difficulty rating for the task (a number 1 - 5): ");
             int newRating;
             try {
                 newRating = stoi(strRating);
