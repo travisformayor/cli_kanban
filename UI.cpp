@@ -463,15 +463,22 @@ void UI::deleteSelectedTask() {
 
 void UI::editBoardTitle() {
     if (this->activeBoardId != 0) {
-        string newTitle = getUserInput("Enter a new title for the task: ");
+        try {
+            string newTitle = getUserInput("Enter a new title for the board: ");
 
-        Board* activeBoard = getBoardById(this->activeBoardId);
-        activeBoard->setTitle(newTitle);
-        // save board to db and reload board list
-        this->db.saveBoardData(*activeBoard);
-        reloadBoards();
-        // reload tasks in board view (reloadBoards drops tasks lists)
-        reloadBoardTasks();
+            Board* activeBoard = getBoardById(this->activeBoardId);
+            activeBoard->setTitle(newTitle);
+            // save board to db and reload board list
+            this->db.saveBoardData(*activeBoard);
+            reloadBoards();
+            // reload tasks in board view (reloadBoards drops tasks lists)
+            reloadBoardTasks();
+        }
+        catch (invalid_argument& e) {
+            // catch invalid_argument from setTitle or getUserInput
+            // note: db errors return runtime error, which is caught elsewhere
+            addAlert("Issue: " + string(e.what()));
+        }
     }
     else {
         addAlert("Missing active board.");
