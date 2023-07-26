@@ -13,7 +13,7 @@ UI::UI(Database& db) : db(db) {
         {"Task View", " | t: Edit Title | d: Edit Description | s: Edit Stage | r: Edit Difficulty Rating | b: Save & Back | esc: Save & Quit |"}
     };
     this->screenWidth = 120; // length of the longest command menu
-    string leftPadding(this->screenWidth / 4, ' ');
+    string leftPadding(this->screenWidth / 5, ' ');
     string headerPadding(75, '=');
     this->padL = leftPadding;
     this->padHeader = headerPadding;
@@ -43,7 +43,7 @@ void UI::displayScreen() {
     '=================================== Kanban Board ====================================
     '| up/down: Navigate | enter: Select | c: Create Board | d: Delete Board | esc: Quit |
     '=========================== (Press key to make selection) ===========================
-    '                                     | Boards |
+    '     | Boards |
     '
     '     * Item one
     '     * Item two
@@ -60,28 +60,23 @@ void UI::displayScreen() {
     // center menu bottom
     string menuBottom = " (Press key to make selection) ";
     string bottomPadding((this->screenWidth - menuBottom.length()) / 2, '=');
-    // center screen name
-    string screenName = this->currScreen;
-    string namePadding((this->screenWidth - screenName.length() - 4) / 2, ' ');
 
     // output centered menu
     cout << topPadding << menuTop << topPadding << endl;
     cout << menuPadding << menu << menuPadding << endl;
     cout << bottomPadding << menuBottom << bottomPadding << endl;
     cout << endl;
-    cout << namePadding << "| " << screenName << " |" << endl;
+    cout << this->padL << "| " << screenName << " |" << endl;
     cout << endl;
 
     // Output active board or task title
     if (currScreen == "Board View" && this->activeBoardId != 0) {
         string boardTitle = getBoardById(this->activeBoardId)->getTitle();
-        string padding((this->screenWidth - boardTitle.length() - 7) / 2, ' ');
-        cout << padding << "Board: " << boardTitle << endl;
+        cout << this->padL << "Board: " << boardTitle << endl;
     }
     else if (currScreen == "Task View" && this->activeBoardId != 0 && this->activeTaskId != 0) {
         string taskTitle = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId)->getTitle();
-        string padding((this->screenWidth - taskTitle.length() - 6) / 2, ' ');
-        cout << padding << "Task: " << taskTitle << endl;
+        cout << this->padL << "Task: " << taskTitle << endl;
     }
     cout << endl;
 
@@ -125,8 +120,8 @@ void UI::displayScreen() {
         }
         else {
             cout << "    ======= To Do =======" << this->padHeader << "\n" << endl;
-            cout << "    \n======= In Progress =" << this->padHeader << "\n" << endl;
-            cout << "    \n======= Done ========" << this->padHeader << "\n" << endl;
+            cout << "\n    ======= In Progress =" << this->padHeader << "\n" << endl;
+            cout << "\n    ======= Done ========" << this->padHeader << "\n" << endl;
             cout << endl;
             cout << this->padL << "[Create first task with 'c' command]" << endl;;
         }
@@ -164,11 +159,11 @@ void UI::displayTitles(map<string, list<string>>& titles) {
             shownToDo = true;
         }
         else if (key == "2. In Progress" && !shownInProgress) {
-            cout << "    \n======= In Progress =" << this->padHeader << "\n" << endl;
+            cout << "\n    ======= In Progress =" << this->padHeader << "\n" << endl;
             shownInProgress = true;
         }
         else if (key == "3. Done" && !shownDone) {
-            cout << "    \n======= Done ========" << this->padHeader << "\n" << endl;
+            cout << "\n    ======= Done ========" << this->padHeader << "\n" << endl;
             shownDone = true;
         }
 
