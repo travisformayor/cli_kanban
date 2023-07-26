@@ -151,7 +151,7 @@ void UI::displayTitles(map<string, list<string>>& titles) {
         }
         else if (key == "2. In Progress" && !shownInProgress) {
             cout << "\n====== In Progress ======\n" << endl;
-            shownIn Progress = true;
+            shownInProgress = true;
         }
         else if (key == "3. Done" && !shownDone) {
             cout << "\n========= Done ==========\n" << endl;
