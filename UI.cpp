@@ -8,9 +8,9 @@ UI::UI(Database& db) : db(db) {
     this->activeTaskId = 0;
     this->currScreen = "Boards";
     this->screenMenus = {
-        {"Boards", "| up/down: Navigate | enter: Select | c: Create Board | d: Delete Board | esc: Quit |"},
-        {"Board View", "| up/down: Navigate | enter: Select | c: Create Task | d: Delete Task | t: Edit Board Title | b: Back | esc: Quit |"},
-        {"Task View", " | t: Edit Title | d: Edit Description | s: Edit Stage | r: Edit Difficulty Rating | b: Save & Back | esc: Save & Quit |"}
+        {"Boards", "| up/down: Select | enter: Open Board | c: Create Board | d: Delete Board | esc: Quit |"},
+        {"Board View", "| up/down: Select | enter: Open Task | c: Create Task | d: Delete Task | t: Edit Board Title | b: Back | esc: Quit |"},
+        {"Task View", " | t: Edit Title | d: Edit Description | s: Edit Stage | r: Edit Difficulty Rating | b: Back | esc: Quit |"}
     };
     this->screenWidth = 120; // length of the longest command menu
     string leftPadding(10, ' ');
