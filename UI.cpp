@@ -200,7 +200,7 @@ void UI::displayTaskCard(Task* task) {
     SetConsoleTextAttribute(hConsole, FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
     cout << this->padL << "Stage: ";
     SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
-    cout << this->stageToString(task->getStage()) << endl;
+    cout << task->stageToString(task->getStage()) << endl;
 
     // print Rated Difficulty
     SetConsoleTextAttribute(hConsole, FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
