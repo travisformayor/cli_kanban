@@ -124,9 +124,12 @@ void UI::displayScreen() {
     }
     else if (this->currScreen == "Task View" && this->activeBoardId != 0 && this->activeTaskId != 0) {
         // display selected task info
-        string taskDetails = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId)->getTaskCard();
-        cout << endl;
-        displayTaskCard(taskDetails);
+        Task* task = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId);
+        task->displayTaskCard();
+        
+        // string taskDetails = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId)->getTaskCard();
+        // cout << endl;
+        // displayTaskCard(taskDetails);
     }
 
     // Print any Alert messages to the user from the last loop

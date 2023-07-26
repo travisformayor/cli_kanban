@@ -1,6 +1,11 @@
 #ifndef TASK_H
 #define TASK_H
 
+// exclude parts of <windows.h> causing build errors
+#define WIN32_LEAN_AND_MEAN
+#define RPC_NO_WINDOWS_H
+#include <windows.h>
+
 #include "Board.h"
 #include <iostream>
 #include <stdexcept>
@@ -34,7 +39,7 @@ public:
     Stage getStage();
     int getDifficultyRating();
     int getBoardId();
-    string getTaskCard();
+    void displayTaskCard();
     list<Task*> searchTasks(list<Task*> tasks, const string& query);
     static string stageToString(Stage stage);
     static Stage stringToStage(const string& stageStr);

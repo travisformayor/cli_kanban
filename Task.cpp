@@ -88,13 +88,36 @@ int Task::getBoardId() {
     return this->boardId;
 }
 
-string Task::getTaskCard() {
-    string title = "Title: " + this->getTitle() + "\n";
-    string desc = "Description: " + this->getDescription() + "\n";
-    string stage = "Stage: " + this->stageToString(this->getStage()) + "\n";
-    string rating = "Rated Difficulty: " + to_string(this->getDifficultyRating()) + "\n";
+// string Task::getTaskCard() {
+//     string title = "Title: " + this->getTitle() + "\n";
+//     string desc = "Description: " + this->getDescription() + "\n";
+//     string stage = "Stage: " + this->stageToString(this->getStage()) + "\n";
+//     string rating = "Rated Difficulty: " + to_string(this->getDifficultyRating()) + "\n";
 
-    return title + desc + stage + rating;
+//     return title + desc + stage + rating;
+// }
+void Task::displayTaskCard() {
+    void setTextColor(WORD color) {
+        // set the console text color
+        HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+        SetConsoleTextAttribute(hConsole, color);
+    }
+
+    string leftPadding(10, ' ');
+
+    cout << endl;
+
+    // print Title
+    cout << leftPadding << "Title: " << setTextColor(TEXT_GREEN) << this->getTitle() << setTextColor(TEXT_WHITE) << "\n";
+
+    // print Description
+    cout << leftPadding << "Description: " << setTextColor(TEXT_GREEN) << this->getDescription() << setTextColor(TEXT_WHITE) << "\n";
+
+    // print Stage
+    cout << leftPadding << "Stage: " << setTextColor(TEXT_GREEN) << this->stageToString(this->getStage()) << setTextColor(TEXT_WHITE) << "\n";
+
+    // print Rated Difficulty
+    cout << leftPadding << "Rated Difficulty: " << setTextColor(TEXT_GREEN) << this->getDifficultyRating() << setTextColor(TEXT_WHITE) << "\n";
 }
 
 list<Task*> Task::searchTasks(list<Task*> tasks, const string& query) {
