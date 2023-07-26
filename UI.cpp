@@ -194,7 +194,7 @@ void UI::displayTaskCard(Task* task) {
     SetConsoleTextAttribute(hConsole, FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
     cout << this->padL << "Description: " << endl;
     SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
-    wrapAndPrintText(task->getDescription(), 40); // wrap to 40 characters
+    wrapAndPrint(task->getDescription(), 40); // wrap to 40 characters
 
     // print Stage
     SetConsoleTextAttribute(hConsole, FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
