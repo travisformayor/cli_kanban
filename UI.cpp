@@ -558,7 +558,7 @@ void UI::editTaskStage() {
         Task* activeTask = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId);
 
         try {
-            string options = this->padL + "1. To Do\n" + this->padL + "2. In Progress\n" + this->padL + "3. Done\n";
+            string options = this->padL + "1. To Do\n" + this->padL + "2. In Progress\n" + this->padL + "3. Done\n" + this->padL;
             string strStage = getUserInput("Select a new stage for the task. Enter a number 1 - 3.\n" + options);
             Stage newStage;
             try {
