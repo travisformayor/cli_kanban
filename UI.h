@@ -26,7 +26,7 @@ public:
     void setSelectIndex(int index);
     void displayScreen();
     void displayTitles(map<string, list<string>>& titles);
-    void displayTaskCard(string taskDetails);
+    void displayTaskCard(Task* task);
     string getUserInput(const string& prompt);
     void addAlert(const string& alert);
     void keyboardListen();

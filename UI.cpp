@@ -124,12 +124,8 @@ void UI::displayScreen() {
     }
     else if (this->currScreen == "Task View" && this->activeBoardId != 0 && this->activeTaskId != 0) {
         // display selected task info
-        Task* task = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId);
-        task->displayTaskCard();
-        
-        // string taskDetails = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId)->getTaskCard();
-        // cout << endl;
-        // displayTaskCard(taskDetails);
+        Task* taskPtr = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId);
+        displayTaskCard(taskPtr);
     }
 
     // Print any Alert messages to the user from the last loop
@@ -182,8 +178,20 @@ void UI::displayTitles(map<string, list<string>>& titles) {
     }
 }
 
-void UI::displayTaskCard(string taskDetails) {
-    cout << taskDetails << endl;
+void UI::displayTaskCard(Task* task) {
+    // display card of task information
+    cout << endl;
+    // print Title
+    cout << this->padL << "Title: " << setTextColor(TEXT_GREEN) << task->getTitle() << setTextColor(TEXT_WHITE) << "\n";
+
+    // print Description
+    cout << this->padL << "Description: " << setTextColor(TEXT_GREEN) << task->getDescription() << setTextColor(TEXT_WHITE) << "\n";
+
+    // print Stage
+    cout << this->padL << "Stage: " << setTextColor(TEXT_GREEN) << this->stageToString(task->getStage()) << setTextColor(TEXT_WHITE) << "\n";
+
+    // print Rated Difficulty
+    cout << this->padL << "Rated Difficulty: " << setTextColor(TEXT_GREEN) << task->getDifficultyRating() << setTextColor(TEXT_WHITE) << "\n";
 }
 
 string UI::getUserInput(const string& prompt) {
