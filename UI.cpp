@@ -466,7 +466,7 @@ void UI::editBoardTitle() {
         catch (invalid_argument& e) {
             // catch invalid_argument from setTitle or getUserInput
             // note: db errors return runtime error, which is caught elsewhere
-            addAlert("Issue: " + string(e.what()));
+            addAlert(string(e.what()) + " 't' to retry.");
         }
     }
     else {
@@ -488,7 +488,7 @@ void UI::editTaskTitle() {
         catch (invalid_argument& e) {
             // catch invalid_argument from setTitle or getUserInput
             // note: db errors return runtime error, which is caught elsewhere
-            addAlert("Issue: " + string(e.what()));
+            addAlert(string(e.what()) + " 't' to retry.");
         }
     }
     else {
@@ -510,7 +510,7 @@ void UI::editTaskDescription() {
         catch (invalid_argument& e) {
             // catch invalid_argument from setDescription or getUserInput
             // note: db errors return runtime error, which is caught elsewhere
-            addAlert("Issue: " + string(e.what()));
+            addAlert(string(e.what()) + " 'd' to retry.");
         }
     }
     else {
@@ -523,16 +523,34 @@ void UI::editTaskStage() {
         Task* activeTask = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId);
 
         try {
-            string newStage = getUserInput("Enter a new stage for the task: ");
-            activeTask->setStage(Task::stringToStage(newStage), false);
-            // save task to db and reload task list
+            string newStage = getUserInput("Select a new stage for the task. Enter a number 1 - 3.\n  1. To Do\n  2. In Progress\n  3. Completed\n  ");
+            Stage newStage;
+            try {
+                // attempt convert to int and stage selection
+                int stageNum = stoi(newStage);
+                if (stageNum < 1 || stageNum > 3) {
+                    switch (stageNum) {
+                    case 1: newStage = Stage::ToDo; break;
+                    case 2: newStage = Stage::InProgress; break;
+                    case 3: newStage = Stage::Done; break;
+                    default: throw invalid_argument("");
+                    }
+                }
+            }
+            catch (invalid_argument&) {
+                // catches invalid getUserInput, failed stoi() convert, or switch 1-3 default
+                throw invalid_argument("Invalid stage selection. Enter 1, 2 or 3.");
+            }
+            // update task and save to db
+            activeTask->setStage(newStage, false);
             this->db.saveTaskData(*activeTask);
+            // reload board tasks from db
             reloadBoardTasks();
         }
         catch (invalid_argument& e) {
-            // catch invalid_argument from setStage, stringToStage or getUserInput
+            // catch invalid_argument from above try or setStage
             // note: db errors return runtime error, which is caught elsewhere
-            addAlert("Issue: " + string(e.what()));
+            addAlert(string(e.what()) + " 's' to retry.");
         }
     }
     else {
@@ -545,7 +563,7 @@ void UI::editTaskRating() {
         Task* activeTask = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId);
 
         try {
-            string strRating = getUserInput("Enter difficulty rating for the task (a number 1 - 5): ");
+            string strRating = getUserInput("Enter difficulty rating for the task (number 1 - 5): ");
             int newRating;
             try {
                 newRating = stoi(strRating);
@@ -560,9 +578,9 @@ void UI::editTaskRating() {
             reloadBoardTasks();
         }
         catch (invalid_argument& e) {
-            // catch invalid_argument from isNumber or setDifficulty
+            // catch invalid_argument from above try or setDifficulty
             // note: db errors return runtime error, which is caught elsewhere
-            addAlert("Issue: " + string(e.what()));
+            addAlert(string(e.what()) + " 'r' to retry.");
         }
     }
     else {
