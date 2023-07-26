@@ -129,5 +129,5 @@ Stage Task::stringToStage(const string& stageStr) {
     else if (stageStr == "Done")
         return Stage::Done;
     else
-        throw invalid_argument("Invalid stage string: " + stageStr);
+        throw invalid_argument("Invalid stage. Enter To Do, In Progress, or Done.");
 }
