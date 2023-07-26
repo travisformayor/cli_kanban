@@ -432,7 +432,7 @@ void UI::deleteSelectedBoard() {
         // reload list of boards
         reloadBoards();
         // fix selected index if was at end of list
-        this->selectedIndex = max(0, static_cast<int>(this->loadedBoards.size()) - 1);
+        this->selectedIndex = min(this->selectedIndex, static_cast<int>(this->loadedBoards.size()) - 1);
     }
     else {
         addAlert("No boards to delete.");
@@ -454,7 +454,7 @@ void UI::deleteSelectedTask() {
             // reload tasks for active board
             reloadBoardTasks();
             // fix selected index if at end of list
-            this->selectedIndex = max(0, static_cast<int>(tasks.size()) - 1);
+            this->selectedIndex = min(this->selectedIndex, static_cast<int>(tasks.size()) - 1);
         }
         else {
             addAlert("No tasks to delete.");
