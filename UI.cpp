@@ -16,8 +16,8 @@ UI::UI(Database& db) : db(db) {
     string leftPadding(this->screenWidth / 4, ' ');
     string headerPadding(75, '=');
     this->padL = leftPadding;
-    this->padHeader = headerPadding
-        setTextColor(TEXT_WHITE);
+    this->padHeader = headerPadding;
+    setTextColor(TEXT_WHITE);
 }
 
 UI::~UI() {
