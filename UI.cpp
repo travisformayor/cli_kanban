@@ -82,12 +82,13 @@ void UI::displayScreen() {
     cout << endl;
 
     // the following code displays a selectable list of board or task titles
-    list<string> titles;
+    map<string, list<string>> titles;
     if (this->currScreen == "Boards") {
         // display list of boards
         if (this->loadedBoards.size() > 0) {
+            titles["Board"] = list<string>();
             for (Board* board : this->loadedBoards) {
-                titles.push_back(board->getTitle());
+                titles["Board"].push_back(board->getTitle());
             }
         }
         else {
@@ -100,8 +101,11 @@ void UI::displayScreen() {
         list<Task*>& tasks = getBoardById(this->activeBoardId)->getTasks();
 
         if (tasks.size() > 0) {
+            titles["1. To Do"] = list<string>();
+            titles["2. In Progress"] = list<string>();
+            titles["3. Done"] = list<string>();
             for (Task* task : tasks) {
-                titles.push_back(task->getTitle());
+                titles[Task::stageToString(task->getStage())].push_back(task->getTitle());
             }
         }
         else {
@@ -127,19 +131,25 @@ void UI::displayScreen() {
     cout << endl;
 }
 
-void UI::displayTitles(list<string>& titles) {
-    // display titles with selected title highlighted
+void UI::displayTitles(map<string, list<string>>& titles) {
+    // display titles with selected title highlighted and stage name titles for tasks
     int index = 0;
-    for (const string title : titles) {
-        if (index == this->selectedIndex) {
-            setTextColor(TEXT_GREEN); // highlighted item color
+    for (const string& [key, value] : titles) { // loop map keys
+        if (key != "Board") {
+            string stageNameHeader = key.substr(3); // remove sorting number for task stages
+            cout << "\n=== " << stageNameHeader << " ===" << endl;
         }
-        else {
-            setTextColor(TEXT_WHITE); // regular item color
+        for (const string& title : value) { // loop titles in list for the key
+            if (index == this->selectedIndex) {
+                setTextColor(TEXT_GREEN); // highlighted item color
+            }
+            else {
+                setTextColor(TEXT_WHITE); // regular item color
+            }
+            // print title
+            cout << "    * " << title << endl;
+            index++;
         }
-        // print title
-        cout << "    * " << title << endl;
-        index++;
     }
     setTextColor(TEXT_WHITE); // Reset color to white
 }
