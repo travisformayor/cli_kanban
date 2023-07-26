@@ -23,8 +23,8 @@ public:
     UI(Database& db);
     ~UI();
     // methods to manipulate the interface
-    void setTextColor(WORD color);
-    void setSelectIndex(int index);
+    void setTextColor(const WORD color);
+    void setSelectIndex(const int index);
     void displayScreen();
     void displayTitles(map<string, list<string>>& titles);
     void displayTaskCard(Task* task);

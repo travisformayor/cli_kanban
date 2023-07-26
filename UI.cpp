@@ -28,13 +28,13 @@ UI::~UI() {
     this->loadedBoards.clear();
 }
 
-void UI::setTextColor(WORD color) {
+void UI::setTextColor(const WORD color) {
     // set the console text color
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(hConsole, color);
 }
 
-void UI::setSelectIndex(int index) {
+void UI::setSelectIndex(const int index) {
     this->selectedIndex = index;
 }
 

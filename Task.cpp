@@ -16,11 +16,11 @@ Task::~Task() {
     // Nothing to deallocate
 }
 
-void Task::setId(int id) {
+void Task::setId(const int id) {
     this->id = id;
 }
 
-void Task::setTitle(string newTitle) {
+void Task::setTitle(const string newTitle) {
     if (newTitle.empty()) {
         throw invalid_argument("Title can't be empty.");
     }
@@ -30,11 +30,11 @@ void Task::setTitle(string newTitle) {
     this->title = newTitle;
 }
 
-void Task::setDescription(string newDesc) {
+void Task::setDescription(const string newDesc) {
     this->description = newDesc;
 }
 
-void Task::setStage(Stage newStage, bool loading) {
+void Task::setStage(const Stage newStage, const bool loading) {
     switch (newStage) {
     case Stage::ToDo:
         break;
@@ -56,14 +56,14 @@ void Task::setStage(Stage newStage, bool loading) {
     this->stage = newStage;
 }
 
-void Task::setDifficulty(int rating) {
+void Task::setDifficulty(const int rating) {
     if (rating < 1 || rating > 5) {
         throw invalid_argument("Enter a number 1 - 5.");
     }
     this->difficultyRating = rating;
 }
 
-void Task::setBoardId(int boardId) {
+void Task::setBoardId(const int boardId) {
     this->boardId = boardId;
 }
 

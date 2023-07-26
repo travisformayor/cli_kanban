@@ -22,12 +22,12 @@ class Task {
 public:
     Task(string title, Board& board);
     ~Task();
-    void setId(int id);
-    void setTitle(string newTitle);
-    void setDescription(string newDesc);
-    void setStage(Stage newStage, bool loading);
-    void setDifficulty(int rating);
-    void setBoardId(int boardId);
+    void setId(const int id);
+    void setTitle(const string newTitle);
+    void setDescription(const string newDesc);
+    void setStage(const Stage newStage, const bool loading);
+    void setDifficulty(const int rating);
+    void setBoardId(const int boardId);
     int getId();
     string getTitle();
     string getDescription();
