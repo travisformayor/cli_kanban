@@ -31,6 +31,9 @@ void Task::setTitle(const string newTitle) {
 }
 
 void Task::setDescription(const string newDesc) {
+    if (newDesc.length() > 500) { // char limit on title
+        throw invalid_argument("Description can't exceed 500 characters.");
+    }
     this->description = newDesc;
 }
 
