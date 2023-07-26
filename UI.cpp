@@ -523,11 +523,11 @@ void UI::editTaskStage() {
         Task* activeTask = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId);
 
         try {
-            string newStage = getUserInput("Select a new stage for the task. Enter a number 1 - 3.\n  1. To Do\n  2. In Progress\n  3. Completed\n  ");
+            string strStage = getUserInput("Select a new stage for the task. Enter a number 1 - 3.\n  1. To Do\n  2. In Progress\n  3. Completed\n  ");
             Stage newStage;
             try {
                 // attempt convert to int and stage selection
-                int stageNum = stoi(newStage);
+                int stageNum = stoi(strStage);
                 if (stageNum < 1 || stageNum > 3) {
                     switch (stageNum) {
                     case 1: newStage = Stage::ToDo; break;
