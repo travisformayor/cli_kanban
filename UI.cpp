@@ -134,7 +134,7 @@ void UI::displayScreen() {
 void UI::displayTitles(map<string, list<string>>& titles) {
     // display titles with selected title highlighted and stage name titles for tasks
     int index = 0;
-    for (const string& [key, value] : titles) { // loop map keys
+    for (const auto& [key, value] : titles) { // loop map keys
         if (key != "Board") {
             string stageNameHeader = key.substr(3); // remove sorting number for task stages
             cout << "\n=== " << stageNameHeader << " ===" << endl;
