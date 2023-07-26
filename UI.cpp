@@ -101,8 +101,14 @@ void UI::displayScreen() {
 
         if (tasks.size() > 0) {
             for (Task* task : tasks) {
+                // add each stage with empty list so each gets displayed
+                // prefixed numbers keep sorting correct in a map
+                titles["1. To Do"] = list<string>();
+                titles["2. In Progress"] = list<string>();
+                titles["3. Done"] = list<string>();
+
                 string stage = Task::stageToString(task->getStage());
-                if (stage == "To Do") { // add number prefixes for map sorting
+                if (stage == "To Do") {
                     titles["1. To Do"].push_back(task->getTitle());
                 }
                 else if (stage == "In Progress") {
@@ -146,15 +152,15 @@ void UI::displayTitles(map<string, list<string>>& titles) {
     for (const auto& [key, value] : titles) { // loop map keys
         // display stages once per presorted group of tasks with the stage
         if (key == "1. To Do" && !shownToDo) {
-            cout << "\n========= To Do =========\n" << endl;
+            cout << "====== To Do ======\n" << endl;
             shownToDo = true;
         }
         else if (key == "2. In Progress" && !shownInProgress) {
-            cout << "\n====== In Progress ======\n" << endl;
+            cout << "\n=== In Progress ===\n" << endl;
             shownInProgress = true;
         }
         else if (key == "3. Done" && !shownDone) {
-            cout << "\n========= Done ==========\n" << endl;
+            cout << "\n====== Done =======\n" << endl;
             shownDone = true;
         }
 
@@ -167,10 +173,11 @@ void UI::displayTitles(map<string, list<string>>& titles) {
             }
             // print title
             cout << "    * " << title << endl;
+            setTextColor(TEXT_WHITE); // reset item color regular
+
             index++;
         }
     }
-    setTextColor(TEXT_WHITE); // Reset color to white
 }
 
 void UI::displayTaskCard(string taskDetails) {
