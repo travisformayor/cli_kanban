@@ -13,8 +13,8 @@ UI::UI(Database& db) : db(db) {
         {"Task View", " | t: Edit Title | d: Edit Description | s: Edit Stage | r: Edit Difficulty Rating | b: Save & Back | esc: Save & Quit |"}
     };
     this->screenWidth = 120; // length of the longest command menu
-    string leftPadding(this->screenWidth / 5, ' ');
-    string headerPadding(75, '=');
+    string leftPadding(10, ' ');
+    string headerPadding(70, '=');
     this->padL = leftPadding;
     this->padHeader = headerPadding;
     setTextColor(TEXT_WHITE);
@@ -66,23 +66,13 @@ void UI::displayScreen() {
     cout << menuPadding << menu << menuPadding << endl;
     cout << bottomPadding << menuBottom << bottomPadding << endl;
     cout << endl;
-    cout << this->padL << "| " << this->currScreen << " |" << endl;
-    cout << endl;
-
-    // Output active board or task title
-    if (this->currScreen == "Board View" && this->activeBoardId != 0) {
-        string boardTitle = getBoardById(this->activeBoardId)->getTitle();
-        cout << this->padL << "Board: " << boardTitle << endl;
-    }
-    else if (this->currScreen == "Task View" && this->activeBoardId != 0 && this->activeTaskId != 0) {
-        string taskTitle = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId)->getTitle();
-        cout << this->padL << "Task: " << taskTitle << endl;
-    }
-    cout << endl;
 
     // the following code displays a selectable list of board or task titles
     map<string, list<string>> titles;
     if (this->currScreen == "Boards") {
+        // display title of board list view
+        cout << this->padL << "| Boards |" << endl;
+
         // display list of boards
         if (this->loadedBoards.size() > 0) {
             for (Board* board : this->loadedBoards) {
@@ -95,9 +85,12 @@ void UI::displayScreen() {
         displayTitles(titles);
     }
     else if (this->currScreen == "Board View" && this->activeBoardId != 0) {
+        // display title of board view, ie the name of the board
+        string boardTitle = getBoardById(this->activeBoardId)->getTitle();
+        cout << this->padL << "| Board: " << boardTitle << " |" << endl;
+
         // display list of tasks for active board
         list<Task*>& tasks = getBoardById(this->activeBoardId)->getTasks();
-
         if (tasks.size() > 0) {
             // add each stage with empty list so each gets displayed
             // prefixed numbers keep sorting correct in a map
@@ -106,15 +99,17 @@ void UI::displayScreen() {
             titles["3. Done"] = list<string>();
 
             for (Task* task : tasks) {
-                string stage = Task::stageToString(task->getStage());
-                if (stage == "To Do") {
+                // add task to each stage list
+                switch (task->getStage()) {
+                case Stage::ToDo:
                     titles["1. To Do"].push_back(task->getTitle());
-                }
-                else if (stage == "In Progress") {
+                    break;
+                case Stage::InProgress:
                     titles["2. In Progress"].push_back(task->getTitle());
-                }
-                else if (stage == "Done") {
+                    break;
+                case Stage::Done:
                     titles["3. Done"].push_back(task->getTitle());
+                    break;
                 }
             }
         }
@@ -133,7 +128,7 @@ void UI::displayScreen() {
         displayTaskCard(taskDetails);
     }
 
-    // Print any message to user from the last loop
+    // Print any Alert messages to the user from the last loop
     if (this->userAlerts.size() > 0) {
         cout << endl;
         for (const string& alert : this->userAlerts) {
@@ -175,7 +170,7 @@ void UI::displayTitles(map<string, list<string>>& titles) {
                 setTextColor(TEXT_WHITE); // regular item color
             }
             // print title
-            cout << this->padL << "    * " << title << endl;
+            cout << this->padL << " * " << title << endl;
             setTextColor(TEXT_WHITE); // reset item color regular
 
             index++;
