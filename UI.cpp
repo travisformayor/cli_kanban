@@ -253,8 +253,6 @@ void UI::keyboardListen() {
 
 void UI::moveSelector(int direction) {
     // move selector by 1 on Boards or Board View screens, wrapping around at end or start
-    addAlert("current active board id: " + to_string(this->activeBoardId));
-
     if (direction == 1 || direction == -1) {
         if (this->currScreen == "Boards" && this->loadedBoards.size() > 0) {
             // how to move selector on board screen
@@ -262,10 +260,7 @@ void UI::moveSelector(int direction) {
             this->selectedIndex = ((this->selectedIndex + direction + listSize) % listSize);
         }
         else if (this->currScreen == "Board View" && this->activeBoardId != 0) {
-            addAlert("boop");
             list<Task*>& tasks = getBoardById(this->activeBoardId)->getTasks();
-            addAlert("size: " + to_string(tasks.size()));
-
             if (tasks.size() > 0) {
 
                 // how to move selector on board view screen
