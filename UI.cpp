@@ -13,9 +13,11 @@ UI::UI(Database& db) : db(db) {
         {"Task View", " | t: Edit Title | d: Edit Description | s: Edit Stage | r: Edit Difficulty Rating | b: Save & Back | esc: Save & Quit |"}
     };
     this->screenWidth = 120; // length of the longest command menu
-    string padding(this->screenWidth / 4, ' ');
-    this->padL = padding;
-    setTextColor(TEXT_WHITE);
+    string leftPadding(this->screenWidth / 4, ' ');
+    string headerPadding(75, '=');
+    this->padL = leftPadding;
+    this->padHeader = headerPadding
+        setTextColor(TEXT_WHITE);
 }
 
 UI::~UI() {
@@ -122,9 +124,9 @@ void UI::displayScreen() {
             }
         }
         else {
-            cout << this->padL << "====== To Do ======\n" << endl;
-            cout << this->padL << "\n=== In Progress ===\n" << endl;
-            cout << this->padL << "\n====== Done =======\n" << endl;
+            cout << "    ======= To Do =======" << this->padHeader << "\n" << endl;
+            cout << "    \n======= In Progress =" << this->padHeader << "\n" << endl;
+            cout << "    \n======= Done ========" << this->padHeader << "\n" << endl;
             cout << endl;
             cout << this->padL << "[Create first task with 'c' command]" << endl;;
         }
@@ -158,15 +160,15 @@ void UI::displayTitles(map<string, list<string>>& titles) {
     for (const auto& [key, value] : titles) { // loop map keys
         // display stages once per presorted group of tasks with the stage
         if (key == "1. To Do" && !shownToDo) {
-            cout << this->padL << "====== To Do ======\n" << endl;
+            cout << "    ======= To Do =======" << this->padHeader << "\n" << endl;
             shownToDo = true;
         }
         else if (key == "2. In Progress" && !shownInProgress) {
-            cout << this->padL << "\n=== In Progress ===\n" << endl;
+            cout << "    \n======= In Progress =" << this->padHeader << "\n" << endl;
             shownInProgress = true;
         }
         else if (key == "3. Done" && !shownDone) {
-            cout << this->padL << "\n====== Done =======\n" << endl;
+            cout << "    \n======= Done ========" << this->padHeader << "\n" << endl;
             shownDone = true;
         }
 
@@ -565,7 +567,8 @@ void UI::editTaskStage() {
         Task* activeTask = getBoardById(this->activeBoardId)->getTaskById(this->activeTaskId);
 
         try {
-            string strStage = getUserInput("Select a new stage for the task. Enter a number 1 - 3.\n  1. To Do\n  2. In Progress\n  3. Done\n  ");
+            string options = this->padL + "1. To Do\n" + this->padL + "2. In Progress\n" + this->padL + "3. Done\n";
+            string strStage = getUserInput("Select a new stage for the task. Enter a number 1 - 3.\n" + options);
             Stage newStage;
             try {
                 // attempt convert to int and stage selection

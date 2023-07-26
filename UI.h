@@ -60,6 +60,7 @@ private:
     list<string> userAlerts;
     int screenWidth;
     string padL;
+    string padHeader;
     int selectedIndex;
     string currScreen;
     list<Board*> loadedBoards;
