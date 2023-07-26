@@ -470,6 +470,8 @@ void UI::editBoardTitle() {
         // save board to db and reload board list
         this->db.saveBoardData(*activeBoard);
         reloadBoards();
+        // reload tasks in board view (reloadBoards drops tasks lists)
+        reloadBoardTasks();
     }
     else {
         addAlert("Missing active board.");
