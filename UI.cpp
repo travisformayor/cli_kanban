@@ -138,13 +138,26 @@ void UI::displayScreen() {
 
 void UI::displayTitles(map<string, list<string>>& titles) {
     // display titles with selected title highlighted and stage name titles for tasks
+    bool shownToDo = false;
+    bool shownInProgress = false;
+    bool shownDone = false;
+
     int index = 0;
     for (const auto& [key, value] : titles) { // loop map keys
-        cout << "key: " << key << endl; // debug
-        if (key != "Board") {
-            string stageNameHeader = key.substr(3); // remove sorting number for task stages
-            cout << "\n=== " << stageNameHeader << " ===" << endl;
+        // display stages once per presorted group of tasks with the stage
+        if (key == "1. To Do" && !shownToDo) {
+            cout << "\n========= To Do =========\n" << endl;
+            shownToDo = true;
         }
+        else if (key == "2. In Progress" && !shownInProgress) {
+            cout << "\n====== In Progress ======\n" << endl;
+            shownIn Progress = true;
+        }
+        else if (key == "3. Done" && !shownDone) {
+            cout << "\n========= Done ==========\n" << endl;
+            shownDone = true;
+        }
+
         for (const string& title : value) { // loop titles in list for the key
             if (index == this->selectedIndex) {
                 setTextColor(TEXT_GREEN); // highlighted item color
