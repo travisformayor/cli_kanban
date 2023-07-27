@@ -344,18 +344,30 @@ void UI::changeScreen(string command) {
     if (command == "enter") {
         // move forward to next screen
         if (this->currScreen == "Boards") {
-            // find which board was selected, set active
-            findSelectedBoard();
-            // load active board's tasks
-            reloadBoardTasks();
-            // change screen
-            this->currScreen = "Board View";
+            // check if there are boards
+            if (this->loadedBoards.size() > 0) {
+                // find which board was selected, set active
+                findSelectedBoard();
+                // load active board's tasks
+                reloadBoardTasks();
+                // change screen
+                this->currScreen = "Board View";
+            }
+            else {
+                addAlert("No board selected.");
+            }
         }
         else if (this->currScreen == "Board View") {
-            // find which task was selected, set active
-            findSelectedTask();
-            // change screen
-            this->currScreen = "Task View";
+            // check for active board with tasks
+            if (this->activeBoardId != 0 && getBoardById(this->activeBoardId)->getTasks().size() > 0) {
+                // find which task was selected, set active
+                findSelectedTask();
+                // change screen
+                this->currScreen = "Task View";
+            }
+            else {
+                addAlert("No task selected.");
+            }
         }
     }
     else if (command == "back") {
@@ -409,40 +421,19 @@ void UI::reloadBoardTasks() {
 }
 
 void UI::findSelectedBoard() {
-    // check if there are boards
-    if (this->loadedBoards.size() > 0) {
-        // find selected board, set active
-        list<Board*>::iterator boardIter = this->loadedBoards.begin();
-        advance(boardIter, this->selectedIndex);
-        this->activeBoardId = (*boardIter)->getId(); // deref iterator returns Board*. set active board id
-    }
-    else {
-        addAlert("Missing boards.");
-    }
+    // find selected board, set active
+    list<Board*>::iterator boardIter = this->loadedBoards.begin();
+    advance(boardIter, this->selectedIndex);
+    this->activeBoardId = (*boardIter)->getId(); // deref iterator returns Board*. set active board id
+
     this->selectedIndex = 0;
 }
 
 void UI::findSelectedTask() {
-    // find selected task. access tasks from the active board
-    // check for active board with tasks
-    if (this->activeBoardId != 0) {
-        list<Task*>& tasks = getBoardById(this->activeBoardId)->getTasks();
-        if (tasks.size() > 0) {
-            // set selected task as active task
-            list<Task*>::iterator taskIter = tasks.begin();
-            advance(taskIter, this->selectedIndex);
-
-            if (taskIter != tasks.end()) { // a result was found
-                this->activeTaskId = (*taskIter)->getId(); // deref iterator returns Task*, get id.
-            }
-            else {
-                addAlert("Missing task.");
-            }
-        }
-        else {
-            addAlert("No tasks.");
-        }
-    }
+    // find selected task, set active. access tasks from the active board
+    list<Task*>::iterator taskIter = getBoardById(this->activeBoardId)->getTasks().begin();
+    advance(taskIter, this->selectedIndex);
+    this->activeTaskId = (*taskIter)->getId(); // deref iterator returns Task*, get id.
 
     this->selectedIndex = 0;
 }
