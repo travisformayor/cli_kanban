@@ -351,14 +351,13 @@ void UI::changeScreen(string command) {
             // change screen
             this->currScreen = "Board View";
         }
+        else if (this->currScreen == "Board View") {
+            // find which task was selected, set active
+            findSelectedTask();
+            // change screen
+            this->currScreen = "Task View";
+        }
     }
-    else if (this->currScreen == "Board View") {
-        // find which task was selected, set active
-        findSelectedTask();
-        // change screen
-        this->currScreen = "Task View";
-    }
-}
     else if (command == "back") {
         // move back to previous screen
         if (this->currScreen == "Task View") {
