@@ -344,31 +344,21 @@ void UI::changeScreen(string command) {
     if (command == "enter") {
         // move forward to next screen
         if (this->currScreen == "Boards") {
-            // are there boards listed?
-            if (this->loadedBoards.size() > 0) {
-                // find which board was selected and load its tasks
-                findSelectedBoard();
-                reloadBoardTasks();
-                // change screen
-                this->currScreen = "Board View";
-            }
-            else {
-                addAlert("No board selected.");
-            }
-        }
-        else if (this->currScreen == "Board View" && this->activeBoardId != 0) {
-            // does the board have tasks?
-            if (getBoardById(this->activeBoardId)->getTasks().size() > 0) {
-                // find which task was selected
-                findSelectedTask();
-                // change screen
-                this->currScreen = "Task View";
-            }
-            else {
-                addAlert("No task selected.");
-            }
+            // find which board was selected, set active
+            findSelectedBoard();
+            // load active board's tasks
+            reloadBoardTasks();
+            // change screen
+            this->currScreen = "Board View";
         }
     }
+    else if (this->currScreen == "Board View") {
+        // find which task was selected, set active
+        findSelectedTask();
+        // change screen
+        this->currScreen = "Task View";
+    }
+}
     else if (command == "back") {
         // move back to previous screen
         if (this->currScreen == "Task View") {
