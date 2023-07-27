@@ -10,7 +10,7 @@ participant "Database" as DB
 
 'Initial load Boards list
 note over User, DB: Display all Boards
-User -> UI: loadBoards()
+User -> UI: reloadBoards()
 activate UI
 UI -> DB: loadBoardsList()
 activate DB
@@ -24,14 +24,13 @@ note over User, DB: Add Board
 alt User creates a new Board
   User -> UI: addNewBoard()
   activate UI
-  UI -> B: createBoard()
+  UI -> B: addNewBoard()
   activate B
   B -> DB: saveBoardData()
   activate DB
-  DB --> B: confirm
-  deactivate DB
   deactivate B
-  UI -> DB: loadBoards()
+  deactivate DB
+  UI -> DB: reloadBoards()
   activate DB
   DB -> UI: loadedBoards
   deactivate DB
@@ -47,10 +46,9 @@ UI -> B: setTitle()
 activate B
 B -> DB: saveBoardData()
 activate DB
-DB --> B: confirm
-deactivate DB
 deactivate B
-UI -> DB: loadBoardsList()
+deactivate DB
+UI -> DB: reloadBoards()
 activate DB
 DB -> UI: loadedBoards
 deactivate DB
@@ -61,10 +59,13 @@ deactivate UI
 note over User, DB: Open Board
 User -> UI: changeScreen() "Board View"
 activate UI
-UI -> DB: loadTasks()
+UI -> B: reloadBoardTasks()
+activate B
+B -> DB: loadTaskData()
 activate DB
-DB -> UI: loadedTasks
+DB -> B: setTasks()
 deactivate DB
+deactivate B
 UI --> User: displayScreen()
 deactivate UI
 
@@ -73,16 +74,17 @@ note over User, DB: Add Task
 alt User creates a new Task
   User -> UI: addNewTask()
   activate UI
-  UI -> T: createTask()
+  UI -> T: Task()
   activate T
   T -> DB: saveTaskData()
   activate DB
-  DB --> T: confirm
-  deactivate DB
   deactivate T
-  UI -> DB: loadTaskData()
+  deactivate DB
+  UI -> DB: reloadBoardTasks()
+  activate B
   activate DB
-  DB -> UI: loadedTasks
+  DB -> B: setTasks()
+  deactivate B
   deactivate DB
   UI --> User: displayScreen()
   deactivate UI
@@ -92,11 +94,20 @@ end
 note over User, DB: Delete Task
 User -> UI: deleteSelectedTask()
 activate UI
+UI -> B: getBoardById()
+activate B
+B -> T: getTasks()
+deactivate B
+activate T
+T -> DB: deleteTask()
 activate DB
+deactivate T
 deactivate DB
-UI -> DB: loadTaskData()
+UI -> DB: reloadBoardTasks()
+activate B
 activate DB
-DB -> UI: loadedTasks
+DB -> B: setTasks()
+deactivate B
 deactivate DB
 UI --> User: displayScreen()
 deactivate UI
@@ -105,7 +116,13 @@ deactivate UI
 note over User, DB: Open Task
 User -> UI: changeScreen() "Task View"
 activate UI
-UI -> UI: loadedTasks
+UI -> B: findSelectedTask();
+activate B
+B -> T: getTasks()
+deactivate B
+activate T
+T -> UI: activeTaskId
+deactivate T
 UI --> User: displayScreen()
 deactivate UI
 
@@ -114,9 +131,9 @@ note over User, DB: Edit Task
 User -> UI: editTaskStage() "In Progress"
 activate UI
 alt Task has description and difficulty
-  UI -> T: saveTaskData()
+  UI -> T: editTaskStage()
   activate T
-  T -> DB:
+  T -> DB: saveTaskData()
   activate DB
   DB --> T: confirm
   deactivate DB
@@ -139,33 +156,38 @@ else Task missing description or difficulty
   DB --> T: confirm
   deactivate T
   deactivate DB
-  UI -> T: saveTaskData()
+  UI -> T: editTaskStage()
   activate T
-  T -> DB:
+  T -> DB: saveTaskData()
   activate DB
   DB --> T: confirm
   deactivate DB
   deactivate T
 end
-UI -> DB: loadTaskData()
+
+UI -> DB: reloadBoardTasks()
 activate DB
-DB -> UI: loadedTasks
+DB -> B: setTasks()
+activate B
+deactivate B
 deactivate DB
 UI --> User: displayScreen()
 deactivate UI
 
 User -> UI: editTaskStage() "Done"
 activate UI
-UI -> T: saveTaskData()
+UI -> T: editTaskStage()
 activate T
-T -> DB:
+T -> DB: saveTaskData()
 activate DB
 DB --> T: confirm
 deactivate T
 deactivate DB
-UI -> DB: loadTaskData()
+UI -> DB: reloadBoardTasks()
 activate DB
-DB -> UI: loadedTasks
+DB -> B: setTasks()
+activate B
+deactivate B
 deactivate DB
 UI --> User: displayScreen()
 deactivate UI
@@ -174,13 +196,13 @@ deactivate UI
 note over User, DB: Delete Board
 User -> UI: deleteSelectedBoard()
 activate UI
-UI -> DB: deleteBoard()
+UI -> DB: deleteSelectedBoard()
 activate DB
 activate T
-T-> DB: delete associated Tasks
+T -> DB: delete associated Tasks
 deactivate T
 deactivate DB
-UI -> DB: loadBoardsList()
+UI -> DB: reloadBoards()
 activate DB
 DB -> UI: loadedBoards
 deactivate DB
