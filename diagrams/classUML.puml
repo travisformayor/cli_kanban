@@ -27,7 +27,7 @@ class Task {
   +setId(id: int): void
   +setTitle(newTitle: string): void
   +setDescription(newDesc: string): void
-  +setStage(newStage: Stage): void
+  +setStage(newStage: Stage, loading: bool): void
   +setDifficulty(rating: int): void
   +setBoardId(boardId: int): void
   +getId(): int
@@ -36,8 +36,6 @@ class Task {
   +getStage(): Stage
   +getDifficultyRating(): int
   +getBoardId(): int
-  +getTaskCard(): string
-  +searchTasks(tasks: list<Task*>, query: string): list<Task*>
   +stageToString(stage: Stage): string
   +stringToStage(stageStr: string): Stage
 }
@@ -51,45 +49,51 @@ class Board {
   +setId(id: int): void
   +setTitle(newTitle: string): void
   +setTasks(tasks: list<Task*>&): void
-  +addTask(task: Task&): void
-  +removeTask(task: Task&): void
   +getId(): int
   +getTitle(): string
   +getTasks(): list<Task*>
-  +findById(boards: list<Board*>, id: int): Board*
+  +getTaskById(id: int): Task*
 }
 
 class UI {
   -TEXT_WHITE: WORD
   -TEXT_GREEN: WORD
   -db: Database
-  -loadedBoards: list<Board*>
-  -activeBoardPtr: Board*
-  -activeTaskPtr: Task*
+  -screenMenus: map<string, string>
+  -userAlerts: list<string>
+  -screenWidth: int
+  -padL: string
+  -padHeader: string
   -selectedIndex: int
   -currScreen: string
-  -screenMenus: map<string, string>
+  -loadedBoards: list<Board*>
+  -activeBoardId: int
+  -activeTaskId: int
   +UI(db: Database&)
+  +~UI()
   +setTextColor(color: WORD): void
   +setSelectIndex(index: int): void
+  +displayScreen(): void
+  +displayTitles(titles: map<string, list<string>>&): void
+  +displayTaskCard(task: Task*): void
+  +wrapAndPrint(text: string, line_length: int): void
+  +getUserInput(prompt: string): string
+  +addAlert(alert: string): void
+  +keyboardListen(): void
+  +moveSelector(direction: int): void
+  +changeScreen(command: string): void
+  +getBoardById(id: int): Board*
   +reloadBoards(): void
   +reloadBoardTasks(): void
   +findSelectedBoard(): void
   +findSelectedTask(): void
-  +displayScreen(): void
-  +displayTitles(titles: list<string>&): void
-  +displayTaskCard(taskDetails: string): void
   +addNewBoard(): void
   +addNewTask(): void
   +deleteSelectedBoard(): void
   +deleteSelectedTask(): void
-  +getUserInput(prompt: string): string
-  +keyboardListen(): void
-  +moveSelector(direction: int): void
-  +changeScreen(command: string): void
   +editBoardTitle(): void
-  +editTaskDescription(): void
   +editTaskTitle(): void
+  +editTaskDescription(): void
   +editTaskStage(): void
   +editTaskRating(): void
 }

@@ -7,7 +7,6 @@ using namespace std;
 
 // to do: docs
 // - add method comments in header files
-// - update classUML and other diagrams
 // - update proposal
 
 int main() {
