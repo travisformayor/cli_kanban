@@ -13,7 +13,7 @@ Task::Task(string title, Board& board) : title(title) {
 }
 
 Task::~Task() {
-    // Nothing to deallocate
+    // no lists or pointers to deallocate
 }
 
 void Task::setId(const int id) {
