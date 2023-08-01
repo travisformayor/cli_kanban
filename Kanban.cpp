@@ -5,10 +5,6 @@
 
 using namespace std;
 
-// to do: docs
-// - add method comments in header files
-// - update proposal
-
 int main() {
     try {
         // open DB
